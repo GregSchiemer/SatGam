@@ -1,0 +1,1 @@
+Couldn't find the requested file /dist/csound.worklet.js in @csound/browser.

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Csound ES6 Modules</title>
+</head>
+<body>
+    <h1>🎧 Csound-ES6 Test</h1>
+    <button id="startButton">Start Audio</button>
+
+    <script type="module">
+        import { CsoundObj } from './js/csound-ES6/CsoundObj.js';
+
+        let csound;
+
+//        document.getElementById('startButton').addEventListener('click', async () => {
+//            csound = new CsoundObj();
+
+		document.getElementById('startButton').addEventListener('click', async () => {
+    		const context = new (window.AudioContext || window.webkitAudioContext)();
+    		await context.resume();
+    		console.log("🔊 AudioContext resumed:", context.state);
+
+    		csound = new CsoundObj();
+    
+            await csound.compileOrc(`
+                instr 1
+                    a1 oscili p4, 440*p5
+                    out a1
+                endin
+            `);
+
+            await csound.start();
+
+            csound.evalCode("i1 0 1 0.5 1");
+            console.log("✅ Test tone started with Csound-ES6");
+        });
+    </script>
+</body>
+</html>
