@@ -10,10 +10,8 @@ This project renders a synchronised 25-phone interface using ES6 canvas animatio
 
 - 🎨 Canvas-based layout and animation in pure ES6 modules
 - 🎵 Csound audio synthesis via dynamic gesture-triggered loading
-- ✅ Mobile-friendly, autoplay-policy compliant
+- ✅ Mobile-friendly, multi-player, autoplay-policy compliant
 - 🔁 Identical GUI for conductor and players
-
-## 📁 Project Structure
 
 ## 📁 Project Structure
 
@@ -48,6 +46,14 @@ This project renders a synchronised 25-phone interface using ES6 canvas animatio
 ├── sg-es6-cs.html
 ├── sg-es6-go.html
 └── sg-es6-gui.html
+
+---
+
+## ✅ Result
+
+This will render beautifully as a block of indented tree structure in your GitHub `README.md`, exactly as it appears in Terminal.
+
+Let me know if you'd like a shell script that runs `tree` and auto-updates this section in your `README.md`.
 
 ## Getting Started
 
