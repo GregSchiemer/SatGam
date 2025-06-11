@@ -21,6 +21,7 @@ This project renders a synchronised 25-phone interface using ES6 canvas animatio
 │       └── generate_qr.py
 ├── css
 │   └── bootstrap.min.css
+├── favicon.ico
 ├── js
 │   ├── ES6-GUI
 │   │   ├── animation.js
@@ -28,7 +29,6 @@ This project renders a synchronised 25-phone interface using ES6 canvas animatio
 │   │   ├── canvasUtils.js
 │   │   ├── color.js
 │   │   ├── enableKeys.js
-│   │   ├── favicon.ico
 │   │   ├── helpers.js
 │   │   ├── henge.js
 │   │   ├── main.js
@@ -45,8 +45,6 @@ This project renders a synchronised 25-phone interface using ES6 canvas animatio
 ├── sg-es6-cs.html
 ├── sg-es6-go.html
 └── sg-es6-gui.html
-
-
 ```
 
 
