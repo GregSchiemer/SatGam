@@ -1,6 +1,7 @@
-# QR Code Integration
+# Phonehenge ES6
 
-This folder contains tools and outputs related to QR code generation for launching or syncing devices.
+This project displays an interactive 25-phone interface in portrait layout using ES6 modules. The conductor (`index.html`) initiates the animation and audio via Csound after a gesture.
 
-- `generate_qr.py`: Script to generate QR PNG files
-- `QR_images/`: Output directory for generated QR codes
+- ES6 canvas animation
+- Gesture-controlled AudioContext
+- Compatible with modern browser autoplay policies
