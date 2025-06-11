@@ -15,7 +15,39 @@ This project renders a synchronised 25-phone interface using ES6 canvas animatio
 
 ## 📁 Project Structure
 
-<pre> ```text . ├── assets │   └── python │   └── generate_qr.py ├── css │   └── bootstrap.min.css ├── js │   ├── ES6-GUI │   │   ├── animation.js │   │   ├── canvasExtensions.js │   │   ├── canvasUtils.js │   │   ├── color.js │   │   ├── enableKeys.js │   │   ├── favicon.ico │   │   ├── helpers.js │   │   ├── henge.js │   │   ├── main.js │   │   ├── runTime.js │   │   ├── sequence.js │   │   └── text.js │   └── Synth │   ├── csound-init.js │   ├── csound.js │   ├── csound.wasm │   └── csound.worklet.js ├── LICENSE ├── README.md ├── sg-es6-cs.html ├── sg-es6-go.html └── sg-es6-gui.html ``` </pre>
+## 📁 Project Structure
+
+```text
+.
+├── assets
+│   └── python
+│       └── generate_qr.py
+├── css
+│   └── bootstrap.min.css
+├── js
+│   ├── ES6-GUI
+│   │   ├── animation.js
+│   │   ├── canvasExtensions.js
+│   │   ├── canvasUtils.js
+│   │   ├── color.js
+│   │   ├── enableKeys.js
+│   │   ├── favicon.ico
+│   │   ├── helpers.js
+│   │   ├── henge.js
+│   │   ├── main.js
+│   │   ├── runTime.js
+│   │   ├── sequence.js
+│   │   └── text.js
+│   └── Synth
+│       ├── csound-init.js
+│       ├── csound.js
+│       ├── csound.wasm
+│       └── csound.worklet.js
+├── LICENSE
+├── README.md
+├── sg-es6-cs.html
+├── sg-es6-go.html
+└── sg-es6-gui.html
 
 ## Getting Started
 
