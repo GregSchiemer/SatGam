@@ -49,12 +49,6 @@ This project renders a synchronised 25-phone interface using ES6 canvas animatio
 
 ```.
 
-## ✅ Result
-
-This will render beautifully as a block of indented tree structure in your GitHub `README.md`, exactly as it appears in Terminal.
-
-Let me know if you'd like a shell script that runs `tree` and auto-updates this section in your `README.md`.
-
 ## Getting Started
 
 1. Serve the files using a local HTTP server:
