@@ -1,7 +1,20 @@
 # Phonehenge ES6
 
-This project displays an interactive 25-phone interface in portrait layout using ES6 modules. The conductor (`index.html`) initiates the animation and audio via Csound after a gesture.
+This project renders a synchronised 25-phone interface using ES6 canvas animation and gesture-triggered audio via Csound WebAssembly. The UI is designed for a portrait-mode mobile screen (`390×844`) and shared between:
 
-- ES6 canvas animation
-- Gesture-controlled AudioContext
-- Compatible with modern browser autoplay policies
+- **Conductor** (`sg-es6-go.html`) — initiates animation via tap
+- **Players** (`sg-es6-cs.html`) — passively follow the clock
+- Both versions display the same 25-phone layout and interactive clock
+
+## Features
+
+- 🎨 Canvas-based layout and animation in pure ES6 modules
+- 🎵 Csound audio synthesis via dynamic gesture-triggered loading
+- ✅ Mobile-friendly, autoplay-policy compliant
+- 🔁 Identical GUI for conductor and players
+
+## Getting Started
+
+1. Serve the files using a local HTTP server:
+   ```bash
+   python3 -m http.server
