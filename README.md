@@ -14,7 +14,6 @@ This project renders a synchronised 25-phone interface using ES6 canvas animatio
 - 🔁 Identical GUI for conductor and players
 
 ## 📁 Project Structure
-
 ```text
 .
 ├── assets
@@ -47,7 +46,9 @@ This project renders a synchronised 25-phone interface using ES6 canvas animatio
 ├── sg-es6-go.html
 └── sg-es6-gui.html
 
-```.
+
+```
+
 
 ## Getting Started
 
