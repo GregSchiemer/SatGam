@@ -11,5 +11,6 @@ export function initApp() {
   initCanvas();               				// Setup base canvas + store in arrU
   saveCanvasBackground(ColorFamily.NONE);	// Setup background (arrB)
   savePhoneHenge25();						// Setup button geometry (arrA)
+  console.log("✅ GUI initialised");
   runTimeStart();         				
 }

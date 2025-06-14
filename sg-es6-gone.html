@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>sg-es6-go.html – ES6 GUI + Csound Audio</title>
+  <link rel="stylesheet" href="./css/bootstrap.min.css" />
+  <style>
+    body {
+      background: #000;
+      color: white;
+      margin: 0;
+      font-family: sans-serif;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      background: #222;
+      border: 1px solid #666;
+    }
+  </style>
+</head>
+<body>
+  <!-- ✅ Use correct canvas ID expected by ES6 GUI modules -->
+  <canvas id="mobile" width="390" height="844"></canvas>
+
+  <script type="module">
+    // ✅ Treat Csound as an async factory, not a constructor
+//    import { Csound } from './js/Synth/csound.js';
+    import { initApp } from './js/ES6-GUI/main.js';
+
+    window.addEventListener("DOMContentLoaded", async () => {
+/*   try {
+        // 🔧 Await the async Csound factory and assign globally
+        window.csound = await Csound();
+        console.log("🔊 Csound engine initialized");
+      } catch (err) {
+        console.error("❌ Csound init failed:", err);
+      }
+*/
+      console.log("🎡 DOM ready → launching GUI");
+      initApp();
+    });
+  </script>
+</body>
+</html>

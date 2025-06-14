@@ -13,6 +13,7 @@ export function initCanvas() {
   ctx.h = cnv.height;
   ctx.mid = { x: ctx.w / 2, y: ctx.h / 2 };
   ctx.pi2 = parseFloat((2 * Math.PI).toFixed(2));
+  ctx.tapRadius = 50;
   ctx.cornerRadius = 25;
 
   arrU.push({ cnv, ctx });
