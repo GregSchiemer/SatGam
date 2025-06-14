@@ -2,44 +2,35 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>sg-es6-go.html – ES6 GUI + Csound Audio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Phonehenge ES6 (Conductor)</title>
   <link rel="stylesheet" href="./css/bootstrap.min.css" />
+  <link rel="icon" href="./js/ES6-GUI/favicon.ico" type="image/x-icon" />
   <style>
     body {
-      background: #000;
-      color: white;
       margin: 0;
-      font-family: sans-serif;
+      background-color: black;
     }
     canvas {
       display: block;
       margin: 0 auto;
-      background: #222;
-      border: 1px solid #666;
+      touch-action: manipulation;
     }
   </style>
 </head>
 <body>
-  <!-- ✅ Use correct canvas ID expected by ES6 GUI modules -->
+
+  <!-- ✅ Portrait-mode canvas (390x844) -->
   <canvas id="mobile" width="390" height="844"></canvas>
 
   <script type="module">
-    // ✅ Treat Csound as an async factory, not a constructor
-    import { Csound } from './js/Synth/csound.js';
     import { initApp } from './js/ES6-GUI/main.js';
 
-    window.addEventListener("DOMContentLoaded", async () => {
-      try {
-        // 🔧 Await the async Csound factory and assign globally
-        window.csound = await Csound();
-        console.log("🔊 Csound engine initialized");
-      } catch (err) {
-        console.error("❌ Csound init failed:", err);
-      }
-
+    window.addEventListener('DOMContentLoaded', () => {
       console.log("🎡 DOM ready → launching GUI");
-      initApp();
+      initApp();  // This cascades into runTimeStart() after UI setup
     });
   </script>
+
 </body>
 </html>
