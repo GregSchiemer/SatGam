@@ -2,28 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>SG GUI ES6</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Phonehenge ES6 (Consort)</title>
   <link rel="stylesheet" href="./css/bootstrap.min.css">
+  <link rel="icon" href="./favicon.ico" type="image/x-icon" />
   <style>
-    .canvas-wrapper {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+    body {
+      margin: 0;
+      background-color: black;
     }
     canvas {
-      border: 1px solid #ccc;
       display: block;
+      margin: 0 auto;
+      touch-action: manipulation;
     }
   </style>
 </head>
 <body>
   <div class="container text-center">
-    <h2 class="mt-2">ES6 GUI only</h2>
+    <h2 class="mt-2">ES6 GUI (consort)</h2>
   </div>
-  <div class="canvas-wrapper">
-    <canvas id="mobile" width="390" height="844"></canvas>
-  </div>
+  <canvas id="mobile" width="390" height="844"></canvas>
   <!-- GUI entrypoint -->
   <script type="module">
     import { initApp } from './js/ES6-GUI/main.js';

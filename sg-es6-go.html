@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Phonehenge ES6 (Conductor)</title>
   <link rel="stylesheet" href="./css/bootstrap.min.css" />
-  <link rel="icon" href="./js/ES6-GUI/favicon.ico" type="image/x-icon" />
+  <link rel="icon" href="./favicon.ico" type="image/x-icon" />
   <style>
     body {
       margin: 0;
@@ -18,7 +18,11 @@
     }
   </style>
 </head>
+
 <body>
+  <div class="container text-center">
+    <h2 class="mt-2">ES6 GUI (Conductor)</h2>
+  </div>
 
   <!-- ✅ Portrait-mode canvas (390x844) -->
   <canvas id="mobile" width="390" height="844"></canvas>
@@ -27,10 +31,9 @@
     import { initApp } from './js/ES6-GUI/main.js';
 
     window.addEventListener('DOMContentLoaded', () => {
-      console.log("🎡 DOM ready → launching GUI");
-      initApp();  // This cascades into runTimeStart() after UI setup
+      console.log("✅ DOM ready → initialising GUI");
+      initApp();
     });
   </script>
-
 </body>
 </html>
