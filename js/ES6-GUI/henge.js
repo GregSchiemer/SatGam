@@ -1,9 +1,9 @@
 // henge.js
 // Contains phone henge generator and drawing logic.
 
-export const arrK = []; // array for keys
+//export const arrK = []; // array for keys
 
-import { arrU } from './canvasUtils.js';
+import { arrU, arrK } from './canvasUtils.js';
 import { setArcStart, set2Pi, hide } from './helpers.js';
 import { sequence } from './sequence.js';
 import { setLinearGradient } from './color.js';

@@ -1,6 +1,46 @@
-// enableKeys.js
+// js/ES6-GUI/enableKeys.js
 // Enables key scanning
 
+import { csound } from './csoundInit.js';
+import { arrK } from './canvasUtils.js';
+import { isInsideCircle } from './helpers.js'; // geometric hit test
+
+export function scanKeys() {
+  const { cnv } = arrK;
+  const ctx = arrK; // for consistent access to arrK.x, arrK.y, etc.
+
+  cnv.addEventListener('click', (e) => {
+    const mX = e.clientX - cnv.getBoundingClientRect().left;
+    const mY = e.clientY - cnv.getBoundingClientRect().top;
+
+    for (let i = 0; i < ctx.max; i++) {
+      const x = ctx.X[i];
+      const y = ctx.Y[i];
+      const r = ctx.radius;
+
+      if (isInsideCircle(mX, mY, x, y, r)) {
+        console.log(`✅ Key ${i + 1}: (${x}, ${y})`);
+        playSoundHandler(i); // index passed directly
+        return;
+      }
+    }
+
+    console.log("⚠️ No key hit");
+  });
+}
+
+function playSoundHandler(index) {
+  if (csound) {
+    // index = 0..24 → up to you how this is interpreted by the instrument
+    csound.evalCode(`i1 0 1 ${index}`);
+    console.log(`🎵 Triggered key ${index + 1} → i1 0 1 ${index}`);
+  } else {
+    console.warn("⚠️ Csound not initialized — tap center to start");
+  }
+}
+
+/////////////////////////
+/*
 import { arrK } from './henge.js';
 import { arrU } from './canvasUtils.js';
 import { isInsideCircle } from './helpers.js';
@@ -42,3 +82,4 @@ cnv.addEventListener('click', function playSoundHandler(e){
   }
 });
 }
+*/
