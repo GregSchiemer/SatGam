@@ -2,8 +2,9 @@
 // Custom canvas drawing methods.
 
 import { ColorFamily, setLinearGradient } from './color.js';
-export const arrU = [];
-const arrB = [];
+export const arrU = []; // array for universal properties
+export const arrK = []; // array for keys
+       const arrB = []; // array for background
 
 export function initCanvas() {
   const cnv = document.getElementById('mobile');
