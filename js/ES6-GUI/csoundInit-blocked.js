@@ -1,5 +1,6 @@
 // csoundInit.js
 
+/*
 import initCsound from "../Synth/csound.js";
 
 let csound = null;
@@ -49,7 +50,7 @@ export async function enableCsound() {
 export function getCsound() {
   return csound;
 }
-
+*/
 
 /*
 // Don't import csound.js — just assume it's globally available

@@ -5,6 +5,8 @@ import { initCanvas, saveCanvasBackground } from './canvasUtils.js';
 import { ColorFamily } from './color.js';
 import { savePhoneHenge25 } from './henge.js';
 import { runTimeStart } from './runTime.js';
+//import { enableCsound } from "./csoundInit.js"; // Scenario 1
+
 
 export function initApp() {
   installHengePrototype();
@@ -12,5 +14,6 @@ export function initApp() {
   saveCanvasBackground(ColorFamily.NONE);	// Setup background (arrB)
   savePhoneHenge25();						// Setup button geometry (arrA)
   console.log("✅ GUI initialised");
+//  enableCsound();	// Scenario 1 
   runTimeStart();         				
 }

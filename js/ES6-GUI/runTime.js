@@ -9,9 +9,7 @@ import { arrU } from './canvasUtils.js';
 import { initApp } from './main.js';
 import { scanKeys } from './enableKeys.js';
 import { isInsideCircle } from './helpers.js';
-import { enableCsound } from './csoundInit.js'; // ✅ NEW
-
-
+import { enableCsound } from './csoundInit.js'; // Scenario 2
 
 export function runTimeStart() {
   let animationStopped = false;
@@ -24,6 +22,7 @@ export function runTimeStart() {
 //const allowTaps = !previewMode;
 
 renderStartView();
+enableCsound();
 
 // disable for the time being 
 //scanKeys(); // enable 25 keys
