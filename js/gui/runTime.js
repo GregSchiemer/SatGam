@@ -7,9 +7,9 @@ import { drawTopText, drawSubText, drawMidText } from './text.js';
 import { runConcert } from './animation.js';
 import { arrU } from './canvasUtils.js';
 import { initApp } from './main.js';
-import { scanKeys } from './enableKeys.js';
+//import { scanKeys } from './enableKeys.js';
 import { isInsideCircle } from './helpers.js';
-import { enableCsound } from './csoundInit.js'; // Scenario 2
+//import { enableCsound } from './csoundInit.js'; // Scenario 2
 
 export function runTimeStart() {
   let animationStopped = false;
@@ -22,7 +22,7 @@ export function runTimeStart() {
 //const allowTaps = !previewMode;
 
 renderStartView();
-enableCsound();
+//enableCsound();
 
 // disable for the time being 
 //scanKeys(); // enable 25 keys
@@ -42,6 +42,7 @@ enableCsound();
       console.log(`✅ tap x: ${mX}, tap y: ${mY}`);
       animationStopped = true; // ✅ Prevent double-taps
 
+/*
       const started = await enableCsound(); // ✅ Await proper init
 
       if (started) {
@@ -50,6 +51,10 @@ enableCsound();
       } else {
         console.warn("⚠️ Csound init failed");
       }
+*/
+        console.log("✅ animation running");
+        runConcert(ctx);
+
     } else {
       console.warn("⚠️ Off centre. Try again");
     }

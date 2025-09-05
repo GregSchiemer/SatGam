@@ -1,7 +1,7 @@
 // js/ES6-GUI/enableKeys.js
 // Enables key scanning
 
-import { csound } from './csoundInit.js';
+//import { csound } from './csoundInit.js';
 import { arrK } from './canvasUtils.js';
 import { isInsideCircle } from './helpers.js'; // geometric hit test
 
@@ -20,7 +20,7 @@ export function scanKeys() {
 
       if (isInsideCircle(mX, mY, x, y, r)) {
         console.log(`✅ Key ${i + 1}: (${x}, ${y})`);
-        playSoundHandler(i); // index passed directly
+//        playSoundHandler(i); // index passed directly
         return;
       }
     }
@@ -29,6 +29,7 @@ export function scanKeys() {
   });
 }
 
+/*
 function playSoundHandler(index) {
   if (csound) {
     // index = 0..24 → up to you how this is interpreted by the instrument
@@ -38,6 +39,7 @@ function playSoundHandler(index) {
     console.warn("⚠️ Csound not initialized — tap center to start");
   }
 }
+*/
 
 /////////////////////////
 /*

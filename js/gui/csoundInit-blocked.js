@@ -1,7 +1,7 @@
 // csoundInit.js
 
 /*
-import initCsound from "../Synth/csound.js";
+import initCsound from "../synth/csound.js";
 
 let csound = null;
 
@@ -101,7 +101,7 @@ nd() {
 
 
 /*
-import { default as csModule } from "../Synth/csound.js";
+import { default as csModule } from "../synth/csound.js";
 
 let csoundObj = null;
 
