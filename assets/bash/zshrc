@@ -1,0 +1,20 @@
+mkdir -p "$HOME/assets/bash"
+
+cat > "$HOME/assets/bash/zshrc" <<'EOF'
+# allow inline # comments at the prompt
+setopt interactivecomments
+
+# Quiet grep over code
+gcode() {
+  grep -R -nE --exclude-dir=.git --exclude-dir=node_modules --exclude=dist \
+    --exclude=build --exclude=README.md "$@" .
+}
+
+# Leftover path detector for old paths
+gleftovers() { gcode '(ES6-GUI|sg-ES6|js/Synth/|\.\./Synth/)'; }
+
+# SatGam server helper (optional)
+sgserve() {
+  python3 "$HOME/Developer/SG/SatGam/assets/python/server.py" -p "${1:-8000}" -r "$HOME/Developer/SG/SatGam"
+}
+EOF

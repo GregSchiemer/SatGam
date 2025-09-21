@@ -15,5 +15,5 @@ export function initApp() {
   savePhoneHenge25();						// Setup button geometry (arrA)
   console.log("✅ GUI initialised");
 //  enableCsound();	// Scenario 1 
-  runTimeStart();         				
+//  runTimeStart();         				
 }

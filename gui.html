@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SG ES6 GUI</title>
+  <title>GUI</title>
   <link rel="stylesheet" href="./css/bootstrap.min.css">
   <link rel="icon" href="./favicon.ico" type="image/x-icon" />
   <style>
@@ -20,13 +20,9 @@
 </head>
 
 <body>
-  <div class="container text-center">
-    <h2 class="mt-2">PhoneHenge GUI</h2>
-  </div>
   <canvas id="mobile" width="390" height="844"></canvas>
-  <!-- GUI entrypoint -->
   <script type="module">
-    import { initApp } from './js/sg-ES6/main.js';
+    import { initApp } from './js/gui/main.js';
 
     window.addEventListener("DOMContentLoaded", () => {
       console.log("✅ DOM ready → initialising GUI");

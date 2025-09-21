@@ -1,4 +1,4 @@
-// js/ES6-GUI/enableKeys.js
+// js/gui/enableKeys.js
 // Enables key scanning
 
 //import { csound } from './csoundInit.js';
