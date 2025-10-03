@@ -20,41 +20,15 @@
 </head>
 
 <body>
-  <canvas id="mobile" width="390" height="844"></canvas><script type="module">
+  <canvas id="mobile" width="390" height="844"></canvas>
+
+<script>window.role = 'leader';</script>
+
+<script type="module">
   import { initApp } from './js/gui/main.js';
-  import { arrU } from './js/gui/canvasUtils.js';
-  import { runConcert } from './js/gui/animation.js';
-  import { connectClock } from './js/gui/clockTransport.js';
-  import { enableCsound } from './js/gui/csoundInit.js';
-
-  window.addEventListener('DOMContentLoaded', () => {
-    console.log("✅ DOM ready → leader initialising GUI");
-    initApp();
-
-    const clock = connectClock({ role: 'leader' });
-
-    async function startAll() {
-      const ok = await enableCsound();        // user gesture (Space) unlocks audio
-      if (!ok) return;
-      const { ctx } = arrU[0];
-      runConcert(ctx);                        // start local animation
-      clock.start({ bpm: 60 });               // broadcast start
-      clock.startTickLoop(1);                 // 1 Hz ticks
-      console.log('Leader: START (broadcast + local)');
-    }
-
-    function stopAll() {
-      clock.stopTickLoop();
-      clock.stop();
-      console.log('Leader: STOP (broadcast)');
-    }
-
-    window.addEventListener('keydown', async (e) => {
-      if (e.code === 'Space') { e.preventDefault(); await startAll(); }
-      else if (e.key.toLowerCase() === 's') { e.preventDefault(); stopAll(); }
-    });
-  });
+  window.addEventListener('DOMContentLoaded', initApp);
 </script>
+
 </body>
 </html>
 

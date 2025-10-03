@@ -20,51 +20,15 @@
 </head>
 
 <body>
-  <canvas id="mobile" width="390" height="844"></canvas><script type="module">
+  <canvas id="mobile" width="390" height="844"></canvas>
+
+<script>window.role = 'leader';</script>
+
+<script type="module">
   import { initApp } from './js/gui/main.js';
-  import { arrU } from './js/gui/canvasUtils.js';
-  import { runConcert } from './js/gui/animation.js';
-  import { connectClock } from './js/gui/clockTransport.js';
-  import { enableCsound } from './js/gui/csoundInit.js';
-
-  window.addEventListener('DOMContentLoaded', () => {
-    console.log("✅ DOM ready → consort initialising GUI");
-    initApp();
-
-    // one-time tap to enable audio on this device
-    let audioReady = false;
-    const cnv = document.getElementById('mobile');
-    const onFirstTap = async () => {
-      if (!audioReady) {
-        const ok = await enableCsound();
-        if (ok) {
-          audioReady = true;
-          console.log('Consort: audio unlocked');
-          cnv.removeEventListener('click', onFirstTap);
-        }
-      }
-    };
-    cnv.addEventListener('click', onFirstTap);
-
-    let running = false;
-    connectClock({
-      role: 'consort',
-      onStart: () => {
-        if (!running) {
-          const { ctx } = arrU[0];
-          runConcert(ctx);
-          running = true;
-          console.log('Consort: START (from leader)');
-        }
-      },
-      onStop: () => {
-        running = false;
-        console.log('Consort: STOP (from leader)');
-        // TODO: call your animation stop when you add one
-      }
-    });
-  });
+  window.addEventListener('DOMContentLoaded', initApp);
 </script>
+  
 </body>
 </html>
 
