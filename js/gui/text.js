@@ -26,6 +26,18 @@ export function drawLowText(text) {
   drawText(ctx, text, x, y, 18);
 }
 
+export function drawLeftText(text) {
+  const { ctx } = arrU[0];
+  const x = ctx.l, y = ctx.h * 0.50;
+  drawText(ctx, text, x, y, 24);
+}
+
+export function drawRightText(text) {
+  const { ctx } = arrU[0];
+  const x = ctx.r, y = ctx.h * 0.50;
+  drawText(ctx, text, x, y, 24);
+}
+
 function drawText(ctx, text, x, y, size) {
   ctx.font = `${size}px Helvetica Neue, Helvetica, Arial, sans-serif`;
   ctx.fillStyle = 'white';
