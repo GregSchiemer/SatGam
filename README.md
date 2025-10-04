@@ -23,7 +23,7 @@ This project renders a synchronised 25-phone interface using ES6 canvas animatio
 │   └── bootstrap.min.css
 ├── favicon.ico
 ├── js
-│   ├── ES6-GUI
+│   ├── gui
 │   │   ├── animation.js
 │   │   ├── canvasExtensions.js
 │   │   ├── canvasUtils.js
