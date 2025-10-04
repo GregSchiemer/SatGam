@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SG ES6 GO</title>
-  <link rel="stylesheet" href="./css/bootstrap.min.css" />
+  <title>GUI</title>
+  <link rel="stylesheet" href="./css/bootstrap.min.css">
   <link rel="icon" href="./favicon.ico" type="image/x-icon" />
   <style>
     body {
@@ -20,20 +20,14 @@
 </head>
 
 <body>
-  <div class="container text-center">
-    <h2 class="mt-2">PhoneHenge GO (Conductor)</h2>
-  </div>
-
-  <!-- ✅ Portrait-mode canvas (390x844) -->
   <canvas id="mobile" width="390" height="844"></canvas>
-
   <script type="module">
-    import { initApp } from './js/ES6-GUI/main.js';
+    import { initApp } from './js/gui/main.js';
 
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener("DOMContentLoaded", () => {
       console.log("✅ DOM ready → initialising GUI");
       initApp();
     });
-  </script>
+  </script>  
 </body>
 </html>

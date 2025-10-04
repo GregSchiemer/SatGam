@@ -1,6 +1,7 @@
 // csoundInit.js
 
-import initCsound from "../Synth/csound.js";
+/*
+import initCsound from "../synth/csound.js";
 
 let csound = null;
 
@@ -49,7 +50,7 @@ export async function enableCsound() {
 export function getCsound() {
   return csound;
 }
-
+*/
 
 /*
 // Don't import csound.js — just assume it's globally available
@@ -100,7 +101,7 @@ nd() {
 
 
 /*
-import { default as csModule } from "../Synth/csound.js";
+import { default as csModule } from "../synth/csound.js";
 
 let csoundObj = null;
 

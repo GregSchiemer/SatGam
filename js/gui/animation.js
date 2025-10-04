@@ -1,12 +1,16 @@
 /* animation.js*/
 
-import { clockify } from './helpers.js';
+import { clearCanvas, redrawCanvas } from './canvasUtils.js';  // define
+import { clockify } from './runTime.js';
 import { drawTopText, drawMidText, drawLowText } from './text.js';
 import { sequence } from './sequence.js';
 import { drawState } from './henge.js';
 
-/*53 preview states*/
-export function runConcert(ctxA, timePeriod = 1000){
+/* concert animation */
+export function runConcert(ctxA){
+  // Use selected rate
+
+const playRate = ctxA.playRate;
 const totalStates = 31;
 const stateDuration = 24;
 
@@ -22,7 +26,7 @@ if (state >= totalStates) {/*rerun player configuration*/
 	   
 const frame = timestamp - now;
 
-if (frame >= timePeriod) {
+if (frame >= playRate) {
 	seconds++;
 	now = timestamp;
 if ((seconds % stateDuration) == 0) {
@@ -61,16 +65,3 @@ drawState(stateBits);
 function getStateBits(state){ /*5-bit code*/
 	return sequence[state % sequence.length];
 }
-
-function clearCanvas(ctx) {
-	ctx.clearRect(0, 0, ctx.w, ctx.h);
-	}
-
-function redrawCanvas(ctx){
-	  ctx.fillStyle  = 'grey';
-	  ctx.beginPath();
-	  ctx.roundRect(0, 0, ctx.w, ctx.h, 25);
-	  ctx.fill();
-	  ctx.stroke();
-	  ctx.closePath();
-	}
