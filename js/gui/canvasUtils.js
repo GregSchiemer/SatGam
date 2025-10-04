@@ -29,29 +29,34 @@ export function initCanvas() {
   arrU.push({ cnv, ctx });
 }
 
-export function saveCanvasBackground(f) {
-  const { ctx } = arrU[0];
-  const ctxB = ctx;
+// Keep your existing arrU/arrB declarations as they were before
+// and DO NOT redeclare them elsewhere.
 
+export function saveCanvasBackground(family = 0) {
+  const { ctx } = arrU[0];
+  // Store just the spec, not the state stack
+  arrB[0] = { ctxB: ctx, family: (typeof family === 'number' ? family : 0) };
+}
+
+export function drawCanvas(fOverride) {
+  const { ctxB, family } = arrB[0];
+  const f = (typeof fOverride === 'number') ? fOverride : family;
+
+  ctxB.save();                         // save NOW
   ctxB.cornerRadius = 25;
   ctxB.shadowColor = 'lightgrey';
   ctxB.shadowOffsetX = 0;
   ctxB.shadowOffsetY = -2.5;
   ctxB.strokeStyle = 'grey';
   ctxB.fillStyle = pickBackground(ctxB, f);
-  ctxB.save();
 
-  arrB.push({ ctxB });
-}
-
-export function drawCanvas() {
-  const { ctxB } = arrB[0];
-  ctxB.restore();
   ctxB.beginPath();
   ctxB.roundRect(0, 0, ctxB.w, ctxB.h, ctxB.cornerRadius);
   ctxB.fill();
   ctxB.stroke();
   ctxB.closePath();
+
+  ctxB.restore();                      // restore AFTER drawing
 }
 
 /*23 pick background colour*/
