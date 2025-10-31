@@ -46,3 +46,66 @@ function drawText(ctx, text, x, y, size) {
   ctx.shadowColor = 'transparent'; // no text shadow
   ctx.fillText(text, x, y);
 }
+
+// Start view (both leader & consort)
+export function renderStartBoth({ mode = 'preview' } = {}) {
+  drawTopText('Phonehenge');
+  drawSubText('tap clock to start');
+  drawMidText('00:00');
+  drawLowText(`${mode.toUpperCase()} MODE`);
+}
+
+// Start view (leader only)
+export function renderStartLeader({ mode = 'preview' } = {}) {
+  drawSubText('select MODE');
+  drawLeftText('PREVIEW');
+  drawRightText('CONCERT');
+  drawLowText(`${mode.toUpperCase()} MODE`);
+}
+
+// Running view
+export function renderRunning({ stateIndex, mins, secs }) {
+  drawTopText(String(stateIndex));
+  drawMidText(`${mins}:${secs}`);
+}
+
+// End view
+export function renderEnd({ duration }) {
+  drawTopText('Phonehenge');
+  drawMidText(`duration : ${duration}`);
+  drawLowText('G. Schiemer © 2025');
+}
+
+
+/*
+
+// Start view (both leader & consort)
+export function renderStartBoth( { mode = 'preview' } = {} ) {
+  drawTopText('Phonehenge');
+  drawSubText('tap clock to start');
+  drawMidText('00:00');
+  drawLowText(`${mode.toUpperCase()} MODE`);
+}
+
+// Start view (leader only)
+export function renderStartLeader({ mode = 'preview' } = {} ) {
+  drawSubText('select MODE');
+  drawLeftText('PREVIEW');
+  drawRightText('CONCERT');
+  drawLowText(`${mode.toUpperCase()} MODE`);
+}
+
+// Running view
+export function renderRunning({ stateIndex, mins, secs }) {
+  drawTopText(String(stateIndex));
+  drawMidText(`${mins}:${secs}`);
+}
+
+// End view
+export function renderEnd({ duration }) {
+  drawTopText('Phonehenge');
+  drawMidText(`duration : ${duration}`);
+  drawLowText('G. Schiemer © 2025');
+}
+
+*/
