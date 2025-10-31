@@ -1,137 +1,153 @@
-// henge.js
-// Contains phone henge generator and drawing logic.
+// js/gui/henge.js
 
-//export const arrK = []; // array for keys
-
-import { arrU, arrK } from './canvasUtils.js';
-import { setArcStart, set2Pi, hide } from './helpers.js';
+import { arrU } from './canvasUtils.js';
 import { sequence } from './sequence.js';
-import { setLinearGradient } from './color.js';
-export const arrA = [];
 
-export function savePhoneHenge25() {
-const{ctx}=arrU[0];
-const h=henge25(ctx);
-const H={size:h.size,border:h.border,width:h.width,height:h.height,radius:h.cR,arrs:h.all7};
-arrA.push({H});
+// Accept radians or a fraction of a turn (0..1)
+export function setArcStart(a) {
+  return Math.abs(a) > 2 ? a : a * Math.PI * 2;
 }
 
-/*22 Henge25*/
-function henge25(ctx){
-const spec={
-    numberOf:25,  //16  //80,
-   arcRadius:158, //145 //180,
-    arcStart:setArcStart(0.45),
-     originX:ctx.mid.x,
-     originY:ctx.mid.y,
-	  corner:1.5,
-	 hFactor:42,
-	 wFactor:21,
-      border:0.2
-};
-let h25=hGen(spec);
-return h25;
+/** Deterministic slots: radial (sprocket) orientation; first phone at angleStart. */
+// henge.js
+export function makeHenge(spec = {}) {
+  const { ctx } = arrU[0];
+  const W = ctx.cssW ?? ctx.w ?? ctx.canvas.width;
+  const H = ctx.cssH ?? ctx.h ?? ctx.canvas.height;
+
+  const cx = ctx.mid?.x ?? (W / 2);
+  const cy = ctx.mid?.y ?? (H / 2);
+
+  const count      = spec.numberOf ?? 25;
+  const angleStart = spec.angleStart ?? 0;
+  const angleStep  = (Math.PI * 2) / count;
+  const radius     = spec.arcRadius ?? Math.min(W, H) * 0.25;
+
+  // NEW: explicit long/short controls (fractions of canvas)
+  const phoneLongFrac  = spec.phoneLongFrac  ?? 0.11; // long side (radial)
+  const phoneShortFrac = spec.phoneShortFrac ?? 0.14; // short side (tangential)
+
+  // For a tall mobile canvas, tie long to W and short to H (looks nicer)
+  const phoneW = Math.round(W * phoneLongFrac);  // long side (radial)
+  const phoneH = Math.round(H * phoneShortFrac); // short side (tangential)
+
+  const slots = new Array(count);
+  for (let i = 0; i < count; i++) {
+    const a = angleStart + i * angleStep;
+    const x = cx + radius * Math.cos(a);
+    const y = cy + radius * Math.sin(a);
+	const angle = a + Math.PI / 2;  // ← +90° clockwise
+    slots[i] = { x, y, w: phoneW, h: phoneH, angle };
+  }
+  return slots;
 }
 
-/*23 Generate henge*/
-function hGen(spec){let h={
-		size:spec.numberOf,
-	      aR:spec.arcRadius,
-	      sA:spec.arcStart,
-	     pi2:set2Pi(),
-	      oX:spec.originX,
-	      oY:spec.originY,
-		  cR:spec.corner,
-	   width:spec.wFactor * spec.corner,
-	  height:spec.hFactor * spec.corner,
-	  border:spec.border,
-	       R:[],
-	       X:[],
-	       Y:[],
-	      X1:[],
-	      Y1:[],
-	      X2:[],
-	      Y2:[],
-	    all7:[],
-  loadArrays:function(){
-        
-		/*how many touch points and how big*/        
-        let max=this.size;
-        let radius=this.width/2;
-		arrK.push(max, radius);
+import { initPhoneAtlas, isPhoneAtlasReady } from './sprites.js';
 
-		for(let i=0;i<max;i++){
-		/*rotation angles*/
-			let angle=this.sA+i*this.pi2/max;
-			if(angle>this.pi2){
-				angle=angle-this.pi2;
-			}
-			this.R.push(parseFloat(angle.toFixed(2))
-		);/*centre coordinates*/
-		const x=this.oX+this.aR*Math.cos(angle);
-		const y=this.oY+this.aR*Math.sin(angle);
-		this.X.push(parseFloat(x.toFixed(2)));
-		this.Y.push(parseFloat(y.toFixed(2)));
-		/*corner coordinates*/
-		const x1=x-this.width/2;
-		const y1=y-this.height/2;
-		const x2=x1+this.width;
-		const y2=y1+this.height;
-		this.X1.push(parseFloat(x1.toFixed(2)));
-		this.Y1.push(parseFloat(y1.toFixed(2)));
-		this.X2.push(parseFloat(x2.toFixed(2)));
-		this.Y2.push(parseFloat(y2.toFixed(2)));}
-		
-		/*Pack 7 arrays*/
-		this.all7.push(this.X,this.Y,this.R,this.X1,this.Y1,this.X2,this.Y2);
-		/*Pack key touch points*/
-		arrK.push(this.X,this.Y)}
-		};
-	h.loadArrays();
-	return h;
+
+export async function makeHengeN(ctx, numberOf, opts = {}) {
+  const slots = makeHenge({
+    numberOf,
+    arcStart: setArcStart(opts.angleStart ?? ctx.pi2 / 6), // 3 o’clock default
+    arcRadius: opts.arcRadius ?? Math.min(ctx.cssW ?? ctx.w, ctx.cssH ?? ctx.h) * 0.4,
+    phoneLongFrac: opts.phoneLongFrac ?? 0.07,
+    phoneShortFrac: opts.phoneShortFrac ?? 0.07,
+  });
+  const { w, h } = slots[0];
+  if (!isPhoneAtlasReady()) await initPhoneAtlas({ w, h });
+  return slots;
 }
 
-export function drawPhoneHenge25(state) {
-const stateBits = getStateBits(state);
-drawState(stateBits);
+	
+// Optional convenience wrappers (if you want legacy names)
+export function henge5 (ctx, overrides = {}) { return makeHenge({ numberOf: 5,  ...overrides }); }
+export function henge15(ctx, overrides = {}) { return makeHenge({ numberOf: 15, ...overrides }); }
+export function henge25(ctx, overrides = {}) { return makeHenge({ numberOf: 25, ...overrides }); }
+
+
+/**
+ * Generate N slots evenly spaced on a circle, landscape-oriented tangent to the ring.
+ * - numberOf: how many phones
+ * - arcRadius: ring radius in CSS px (or auto from canvas size if omitted)
+ * - angleStart: radians (first phone at 3 o'clock = 0; at top = -PI/2)
+ * - hFactor,wFactor: scale factors (roughly pixels relative to canvas height/width)
+ * - border: additional outer padding factor (kept for legacy parity, used lightly here)
+ */
+
+const FAMILIES = ['A','B','C','D','E'];
+
+export function getHengeLayout25(overrides = {}) {
+  const u = arrU[0] || {};
+  const ctx = u.ctx || {};
+  const cx  = (ctx.mid && ctx.mid.x) ? ctx.mid.x : (u.cssW ? u.cssW/2 : 195);
+  const cy  = (ctx.mid && ctx.mid.y) ? ctx.mid.y : (u.cssH ? u.cssH/2 : 422);
+
+  const radius = Number.isFinite(u.ringRadius) ? u.ringRadius
+                 : Math.min(u.cssW || 390, u.cssH || 844) / 2 - 120;
+
+  const rotateMode = overrides.rotate || u.hengeRotate || 'radial';
+
+  // Phone size: prefer ctx.phoneW/H if set; else conservative defaults
+  const w = overrides.w || ctx.phoneW || 78;
+  const h = overrides.h || ctx.phoneH || 168;
+
+  const count = overrides.count || 25; //25;
+//  const angleStart = overrides.angleStart ?? (0.0);
+  const angleStart = overrides.angleStart ?? (-Math.PI / 2);
+  const direction  = overrides.direction  ?? 1;
+
+  const slots = [];
+  const step = (2 * Math.PI) / count;
+
+  for (let i = 0; i < count; i++) {
+    const theta = angleStart + direction * i * step;
+    const px = cx + radius * Math.cos(theta);
+    const py = cy + radius * Math.sin(theta);
+    const x  = px - w/2;
+    const y  = py - h/2;
+    const family = FAMILIES[i % 5];
+
+    let rot = 0;
+    switch (rotateMode) {
+      case 'tangent': rot = theta + Math.PI/2; break;
+      case 'radial':  rot = theta;            break;
+      case 'fixed':   rot = overrides.fixedAngle || 0; break;
+      case 'none':
+      default:        rot = 0;
+    }
+    slots.push({ id: i, x, y, w, h, family, rot });
+  }
+  return slots;
 }
 
-function getStateBits(state){ /*5-bit code*/
-	return sequence[state % sequence.length];
+export function getHengeStateBits(stateIndex = 0) {
+  const s5 = sequence[stateIndex % sequence.length];
+  let mask = 0;
+  for (let i = 0; i < 25; i++) {
+    if (s5[i % 5]) mask |= (1 << i);
+  }
+  return mask;
 }
 
-export function drawState(sB) {
-const{ ctx } = arrU[0];
-const ctxA = ctx;
-const{H} = arrA[0];
-/*Unpack H.arrs*/
-const[X, Y, R, X1, Y1, X2, Y2] = H.arrs;
-const max = H.size, w = H.width, h = H.height, r = H.radius;
-ctxA.strokeStyle = 'white';
-ctxA.lineWidth = H.border;
+// henge.js (TOP OF FILE — add this import)
+//import { initPhoneAtlas, isPhoneAtlasReady } from './sprites.js';
 
-for(let i = 0; i < max; i++){
-const family = (i % 5) + 1; const mask = sB[i % 5]; const bit = mask * family; 
-const x = X[i]; const y = Y[i]; const angle = R[i]; 
-const g = ctxA.createLinearGradient(X1[i], Y1[i], X2[i], Y2[i]);
+// … your existing exports: makeHenge, setArcStart, etc.
 
-/*Draw retrieved objects*/
-ctxA.beginPath();
-ctxA.save();
-ctxA.translate(x, y);
-ctxA.rotate(angle);
-ctxA.translate(-x, -y);
-ctxA.roundedRect(x, y, w, h, r);
- switch (bit){/*hide or show*/
-	case 0:
-		ctxA.fillStyle = hide();
-	break;
-	default:
-		ctxA.fillStyle = setLinearGradient(family, g);
-	break;
-	}
-ctxA.fill();
-ctxA.stroke();
-ctxA.closePath();
-ctxA.restore();}
+// henge.js (ADD THIS FUNCTION near the bottom)
+export async function makeHenge25(ctx) {
+  const slots = makeHenge({
+    numberOf: 25,
+    arcStart: setArcStart(ctx.pi2 / 6), // start at 3 o’clock
+    arcRadius: Math.min(ctx.cssW ?? ctx.w, ctx.cssH ?? ctx.h) * 0.4,
+    phoneLongFrac: 0.07,
+    phoneShortFrac: 0.07,
+  });
+
+  // Size the atlas to the first slot
+  const { w, h } = slots[0];
+  if (!isPhoneAtlasReady()) {
+    await initPhoneAtlas({ w, h });
+  }
+  return slots;
 }

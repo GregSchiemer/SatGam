@@ -1,13 +1,20 @@
 // color.js
 
-// Optional enum for clarity and maintainability
 export const ColorFamily = Object.freeze({
   NONE: 0,
-  YELLOW: 1,
-  RED: 2,
-  GREEN: 3,
-  BLUE: 4,
-  MAGENTA: 5,
+  YELLOW: 1, RED: 2, GREEN: 3, BLUE: 4, MAGENTA: 5,
+});
+
+// Masks use this left→right order:
+export const FamilyOrder = [ColorFamily.YELLOW, ColorFamily.RED, ColorFamily.GREEN, ColorFamily.BLUE, ColorFamily.MAGENTA];
+
+// Reverse index (ColorFamily.* → 0..4)
+export const FamilyIndex = Object.freeze({
+  [ColorFamily.YELLOW]: 0,
+  [ColorFamily.RED]:    1,
+  [ColorFamily.GREEN]:  2,
+  [ColorFamily.BLUE]:   3,
+  [ColorFamily.MAGENTA]:4,
 });
 
 // Central color dictionary (RGBA format)
