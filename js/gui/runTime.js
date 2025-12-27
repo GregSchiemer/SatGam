@@ -1,137 +1,180 @@
 // js/gui/runTime.js
-// Lean render scheduler — wall-clock lives in main.js
 
-let renderFn = null;
 
-const rt = {
-  mode: 'stopped',
-  ticking: false,   // maintained by animation.js
-  rafId: 0,         // maintained by animation.js
-  frame: 0,         // maintained by animation.js
+// Internal runtime state (shared across the app)
+export const rt = {
+  // Who is this page for? (set from main.js)
+  role: 'consort',   // 'leader' or 'consort'
+  mode: 'concert',   // 'concert' or 'preview'
+  ticking: false,    // true when RAF loop is running
+  rafId: 0,          // last requestAnimationFrame id
+  frame: 0,          // how many frames we've rendered (if you use it)
+  render: null,      // (fauxClock) => void
 };
 
-export function setRender(fn) { renderFn = fn; }
-export function stepOnce() {
-  if (!renderFn) return;
-  try { renderFn(rt); } catch (e) { console.error('[runTime.stepOnce]', e); }
+// called from main.js
+export function setRole(role) {
+  if (role !== 'leader' && role !== 'consort') {
+    console.warn('[runTime] invalid role:', role);
+    return;
+  }
+  rt.role = role;
 }
-export function setMode(mode) { rt.mode = mode; }
-export function getRuntime() { return { ...rt }; }
 
-// This is what animation.js will call every frame:
+// called from main.js
+export function getRole() {
+  return rt.role;
+}
+
+// gets from the main.js module
+export function getMode() {
+  return rt.mode;
+}
+
+export function setRender(fn) {
+  rt.render = (typeof fn === 'function') ? fn : null;
+}
+
 export function renderFrame() {
-  if (!renderFn) return;
-  try { renderFn(rt); } catch (e) { console.error('[runTime.renderFrame]', e); }
+  if (!rt.render) return;
+
+  const nowMs = performance.now();
+  const fauxClock = nowMs * 0.001; // seconds since page load
+
+  rt.render(fauxClock);
 }
 
-// Export rt so the scheduler can bump counters and store rafId/ticking.
-export { rt };
+export function refresh() {
+  renderFrame();
+}
+
+// local only and unused, possibly redundant
+export function setMode(mode) {
+  rt.mode = mode;
+}
+
+// local only and unused, possibly redundant
+export function setTicking(isOn) {
+  rt.ticking = !!isOn;
+}
+
+// local only and unused, possibly redundant
+export function isTicking() {
+  return rt.ticking;
+}
+
+// optional debug frame counter (unused at present)
+export function getFrame() {
+  return rt.frame;
+}
+
+// optional debug frame counter (unused at present)
+export function bumpFrame() {
+  rt.frame += 1;
+}
 
 
-// Factory: build a wall-clock–driven render function.
-// It stays decoupled: all scene helpers are injected from main.js.
-export function makeWallClockRenderer({
-  ctx,
-  slots,
-  role,
-  f,                        // background theme index (0 = neutral)
-  TOTAL_STATES,
-  STATE_DUR_SEC,
-  state,                    // { running, PRE_INDEX, startWall, msPerBeat }
-  prepareAndRenderBackground,
-  getFamilyMask,
-  familyForIndex,
-  FamilyIndex,
-  drawPhoneAt,
-  renderStartBoth,
-  renderRunning,
-  renderEnd,
-}) {
-  const TOTAL_DURATION_S = TOTAL_STATES * STATE_DUR_SEC;
+// js/gui/runTime.js
 
-  return function renderFrame(rt) {
-    try {
-      // 1) background first (prevents white fills if fillStyle drifted)
+export function makeWallClockRenderer(config) {
+  const {
+    ctx,
+    slots = [],
+    role = 'consort',
+    f = 0,
+    status,
+
+    prepareAndRenderBackground,
+    renderSavedBackground,
+    getFamilyMask,
+    familyForIndex,
+    drawPhoneAt,
+
+    renderStartBoth,
+    renderRunning,
+    renderStartLeader,
+    renderEnd,
+  } = config;
+
+  if (!ctx || !Array.isArray(slots) || !drawPhoneAt || !familyForIndex) {
+    console.warn('[runTime] makeWallClockRenderer: missing ctx/slots/drawPhoneAt/familyForIndex');
+    return () => {};
+  }
+
+  const RADIAL_OFFSET = Math.PI / 2;
+
+  return function frameRenderer(fauxClock) {
+    // 1) Background
+    if (typeof renderSavedBackground === 'function') {
+      renderSavedBackground(ctx);
+    } else if (typeof prepareAndRenderBackground === 'function') {
       prepareAndRenderBackground(f);
-
-      // 2) wall-clock → simulated seconds
-      const clockMs = state.running
-        ? Math.floor((performance.now() - state.startWall) / state.msPerBeat)
-        : 0;
-
-      // 3) end screen + stop when duration reached
-     // if (state.running && clockMs >= TOTAL_DURATION_S) {
-     //   const mm = Math.floor(TOTAL_DURATION_S / 60);
-     //   const ss = String(TOTAL_DURATION_S % 60).padStart(2, '0');
-     //   renderEnd({ duration: `${mm}:${ss}` });
-     //   stopAnimation();           // uses this module's lean stop
-     //   state.running = false;     // prevent re-entry
-     //   return;
-     // }
-
-	  // 3) end screen + stop when duration reached
-		if (state.running && clockMs >= TOTAL_DURATION_S) {
-		  const { label } = clockify(TOTAL_DURATION_S);
-		  renderEnd({ duration: label });
-		  stopAnimation();
-		  state.running = false;
-		  return;
-		}
-
-      // 4) pick current state (pre-start holds PRE_INDEX)
-      const curIndex = state.running
-        ? Math.min(TOTAL_STATES, 1 + Math.floor(clockMs / STATE_DUR_SEC))
-        : state.PRE_INDEX;
-
-      // 5) ring draw
-      const mask = getFamilyMask(curIndex);
-      slots.forEach((slot, i) => {
-        const fam    = familyForIndex(i);     // Y/R/G/B/M cycling
-        const idx    = FamilyIndex[fam];      // 0..4
-        const active = !!mask[idx];           // filled vs outline
-        drawPhoneAt(ctx, { ...slot, family: fam, active, shadow: true, angle: slot.angle });
-      });
-
-      // 6) overlays
-//      if (!state.running) {
-//        const intendedMode = (role === 'leader' ? 'preview' : 'concert');
-//        renderStartBoth({ mode: intendedMode });
-//      } else {
-//        const mm = Math.floor(clockMs / 60);
-//        const ss = String(clockMs % 60).padStart(2, '0');
-//        renderRunning({ stateIndex: curIndex, mins: mm, secs: ss });
-//      }
-      
-      // 6) overlays
-	  if (!state.running) {
-  		const intendedMode = (role === 'leader' ? 'preview' : 'concert');
-  		renderStartBoth({ mode: intendedMode });
-	  } else {
-  		const { m, s } = clockify(clockMs);
-  		renderRunning({ stateIndex: curIndex, mins: m, secs: s });
-	  }
-
-      
-    } catch (err) {
-      // Keep RAF alive even if scene code throws
-      console.error('[renderer] frame error:', err);
     }
+
+    // If we don't have a status object, just draw phones + bail
+    if (!status || typeof status !== 'object') {
+      // (phones-only fallback)
+      let mask = null;
+      if (typeof getFamilyMask === 'function') {
+        mask = getFamilyMask(fauxClock);
+      }
+      for (let i = 0; i < slots.length; i++) {
+        const slot = slots[i];
+        const family = (mask != null) ? familyForIndex(i, mask) : familyForIndex(i);
+        const baseAngle = slot.angle ?? 0;
+        const angle = baseAngle + RADIAL_OFFSET;
+        drawPhoneAt(ctx, { ...slot, angle, family, active: true, shadow: true });
+      }
+      return;
+    }
+
+    const isLeader  = (role === 'leader');
+    const isRunning = !!status.running;
+
+    // --- LEADER MODE-SELECT VIEW: text only, NO phones ---
+    if (!isRunning && isLeader) {
+      if (typeof renderStartLeader === 'function') {
+        renderStartLeader(ctx, status);
+      } else if (typeof renderStartBoth === 'function') {
+        renderStartBoth(ctx, status);
+      }
+      return; // ← important: skip phone drawing
+    }
+
+    // 2) Phones (for consort pre-view, and for running on both)
+    let mask = null;
+    if (typeof getFamilyMask === 'function') {
+      mask = getFamilyMask(fauxClock);
+    }
+
+    for (let i = 0; i < slots.length; i++) {
+      const slot = slots[i];
+      const family = (mask != null) ? familyForIndex(i, mask) : familyForIndex(i);
+      const baseAngle = slot.angle ?? 0;
+      const angle = baseAngle + RADIAL_OFFSET;
+
+      drawPhoneAt(ctx, {
+        ...slot,
+        angle,
+        family,
+        active: true,
+        shadow: true,
+      });
+    }
+
+    // 3) Text overlays for other cases
+    if (!isRunning) {
+      // CONSORT pre-view (leader case already handled above)
+      if (typeof renderStartBoth === 'function') {
+        renderStartBoth(ctx, status);
+      }
+      return;
+    }
+
+    // RUNNING view (both leader and consort)
+    if (typeof renderRunning === 'function') {
+      renderRunning(ctx, status);
+    }
+    // Later you can call renderEnd(ctx, status) when the show finishes.
   };
 }
-
-function clockify(totalSec) {
-  const m = Math.floor(totalSec / 60);
-  const s = String(totalSec % 60).padStart(2, '0');
-  return { m, s, label: `${m}:${s}` };
-}
-
-// Handy mm:ss formatter
-/*
-
-export function clockify(totalSec) {
-  const m = Math.floor(totalSec / 60);
-  const s = String(totalSec % 60).padStart(2, '0');
-  return { m, s, label: `${m}:${s}` };
-}
-
-*/

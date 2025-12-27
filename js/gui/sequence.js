@@ -33,7 +33,6 @@ export const sequence = [
   [1,1,0,0,1],  // s29:3
   [0,1,0,0,1],  // s30:2
   [0,1,0,0,0],  // s31:1
-  [0,0,0,0,0]   // s32:0
 ];
 
 export const MLS_STATES = sequence.length;

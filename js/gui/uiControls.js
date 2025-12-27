@@ -1,151 +1,249 @@
 // js/gui/uiControls.js
-// All UI event listeners live here (buttons, selects, canvas/touch).
 
-import { getSlots, arrU } from './canvasUtils.js';
+import { 
+  prepareAndRenderBackground, 
+  eventToCtxPoint, 
+  getSlots
+} from './canvasUtils.js';
 
-//import { arrU } from './canvasUtils.js';
-//import { startAnimation, stopAnimation, setMode, setStateIndex, getSlots } from './runTime.js';
-//import { startAnimation, stopAnimation, setMode, getSlots } from './runTime.js';
+import { 
+  drawPhoneAt,
+  downloadFamilyRingPNG,
+  familyForIndex, 
+} from './sprites.js';
 
-//import { getSlots } from './runTime.js';
+import { 
+  renderStartLeader, 
+  renderStartBoth 
+} from './text.js';
 
-// ---- Public API -------------------------------------------------------------
+import { 
+  startAnimation, 
+  stopAnimation 
+} from './animation.js';
 
-/**
- * Bind UI controls to runtime + interaction.
- * Pass selectors OR elements. Everything optional—bind what exists on the page.
- */
-export function bindUI({
-  btnStart = '#btnStart',
-  btnStop  = '#btnStop',
-  selMode  = '#selMode',   // 'preview' | 'concert'
-  selState = '#selState',  // 0..30
-  canvasEl = '#mobile',    // interactive surface for 25 keys
-} = {}) {
-  const qs = (s) => (typeof s === 'string' ? document.querySelector(s) : s);
+import { isInsideCircle } from './helpers.js';
+import { drawHenge } from './henge.js';
+import { refresh } from './runTime.js';
 
-  const refs = {
-    btnStart: qs(btnStart),
-    btnStop:  qs(btnStop),
-    selMode:  qs(selMode),
-    selState: qs(selState),
-    canvas:   qs(canvasEl),
-  };
 
-  // --- Controls → runtime
-  refs.btnStart?.addEventListener('click', onStartClick);
-  refs.btnStop?.addEventListener('click', onStopClick);
-  refs.selState?.addEventListener('change', onStateChange);
-  // Mode is read on start; if you want instant apply, listen to change:
-  refs.selMode?.addEventListener('change', onModeChange);
-
-  // --- Canvas → 25-key hit testing
-  if (refs.canvas) {
-    refs.canvas.addEventListener('pointerdown', onPointerDown);
-    refs.canvas.addEventListener('pointerup', onPointerUp);
-    refs.canvas.addEventListener('pointercancel', onPointerUp);
-    refs.canvas.addEventListener('pointerleave', onPointerUp);
-  }
-
-  // Store refs in a neutral place (not on ctx)
-  const u = arrU[0] || (arrU[0] = {});
-  u.ui = refs;
-  return refs;
+function isLeader(status) {
+  return status.role === 'leader';
 }
 
-/** Optional: remove listeners (useful when swapping UIs/pages) */
-export function unbindUI() {
-  const { ui } = arrU[0] || {};
-  if (!ui) return;
-
-  ui.btnStart?.removeEventListener('click', onStartClick);
-  ui.btnStop?.removeEventListener('click', onStopClick);
-  ui.selState?.removeEventListener('change', onStateChange);
-  ui.selMode?.removeEventListener('change', onModeChange);
-
-  if (ui.canvas) {
-    ui.canvas.removeEventListener('pointerdown', onPointerDown);
-    ui.canvas.removeEventListener('pointerup', onPointerUp);
-    ui.canvas.removeEventListener('pointercancel', onPointerUp);
-    ui.canvas.removeEventListener('pointerleave', onPointerUp);
-  }
-  delete (arrU[0].ui);
+// ---------------------------------------------
+//  PUBLIC ENTRY POINT
+// ---------------------------------------------
+export function installUIHandlers(ctx, canvas, status) {
+  installLeaderModeSelectHandler(ctx, canvas, status);
+  installLeaderModeConfirmHandler(ctx, canvas, status);
+  installLeaderStopHandler(ctx, canvas, status);
+  installClockStartHandler(ctx, canvas, status);
+  installEndScreenTapHandler(ctx, canvas, status);
 }
 
-// ---- Handlers ---------------------------------------------------------------
-
-function onStartClick() {
-  const { ui } = arrU[0] || {};
-  const mode = ui?.selMode?.value === 'concert' ? 'concert' : 'preview';
-  setMode(mode);
-  startAnimation();
-}
-
-function onStopClick() {
-  stopAnimation();
-}
-
-function onModeChange(e) {
-  // Optional: apply mode immediately
-  const next = e?.target?.value === 'concert' ? 'concert' : 'preview';
-  setMode(next);
-}
-
-function onStateChange(e) {
-  const idx = Number(e?.target?.value) || 0;
-  setStateIndex(idx);
-}
-
-// ---- 25-key hit testing -----------------------------------------------------
-
-function onPointerDown(e) {
-  const slot = pickSlotFromEvent(e);
-  if (!slot) return;
-
-  // Step 4/5 hooks go here later:
-  // - background color change per selected key
-  // - Csound trigger (noteOnSlot(slot))
-}
-
-function onPointerUp(e) {
-  const slot = pickSlotFromEvent(e);
-  if (!slot) return;
-
-  // Step 5 hook:
-  // - Csound release (noteOffSlot(slot))
-}
-
-function pickSlotFromEvent(e) {
-  const { ui } = arrU[0] || {};
-  const canvas = ui?.canvas;
-  if (!canvas) return null;
-
+// --- helper: PointerEvent -> DESIGN coords (works for fixed and fit) ---
+function eventToDesignPoint(ev, canvas, ctx) {
   const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
+  const cssX = ev.clientX - rect.left;
+  const cssY = ev.clientY - rect.top;
 
-  return hitTestSlot(getSlots(), x, y);
+  // Map CSS pixels to DESIGN units.
+  // In 'fixed' mode rect.width === ctx.w, so scaleX/Y === 1.
+  const scaleX = ctx.w / rect.width;
+  const scaleY = ctx.h / rect.height;
+
+  return { x: cssX * scaleX, y: cssY * scaleY };
 }
 
-/** hit-test with rotation support (slot.rot) */
-function hitTestSlot(slots, x, y) {
-  if (!Array.isArray(slots)) return null;
-  for (const s of slots) {
-    const { w, h } = s;
-    const cx = s.x + w / 2;
-    const cy = s.y + h / 2;
+// ---------------------------------------------------------------------------
+//  Leader: choose PREVIEW/CONCERT by tapping left/right hot spots
+// ---------------------------------------------------------------------------
+export function installLeaderModeSelectHandler(ctx, canvas, status) {
+  canvas.addEventListener('pointerup', (ev) => {
+    if (status.role !== 'leader') return;
+    if (status.modeConfirmed) return;
 
-    // transform point into slot's local space
-    const dx = x - cx;
-    const dy = y - cy;
-    const rot = s.rot || 0;
-    const cos = Math.cos(-rot), sin = Math.sin(-rot);
-    const lx = dx * cos - dy * sin;
-    const ly = dx * sin + dy * cos;
+    const { x, y } = eventToDesignPoint(ev, canvas, ctx);
 
-    if (Math.abs(lx) <= w / 2 && Math.abs(ly) <= h / 2) {
-      return s;
+    console.log('[select] pointer', {
+      x, y,
+      left: ctx.left,
+      right: ctx.right,
+      y1: ctx.mid.y,
+      r: ctx.tapRadius
+    });
+
+    const hitLeft  = isInsideCircle(x, y, ctx.left.x,  ctx.left.y,  ctx.tapRadius);
+    const hitRight = isInsideCircle(x, y, ctx.right.x, ctx.right.y, ctx.tapRadius);
+
+    if (!hitLeft && !hitRight) return;
+
+    if (hitLeft) {
+      status.modeChosen = 'preview';
+      status.msPerBeat  = status.previewClock;
+      console.log('[mode] PREVIEW selected, msPerBeat =', status.msPerBeat);
+    } else {
+      status.modeChosen = 'concert';
+      status.msPerBeat  = status.concertClock;
+      console.log('[mode] CONCERT selected, msPerBeat =', status.msPerBeat);
     }
-  }
-  return null;
+
+    console.log('[select] state after mode tap:', {
+      modeChosen: status.modeChosen,
+      msPerBeat: status.msPerBeat
+    });
+
+    refresh();
+  });
 }
+
+// ---------------------------------------------------------------------------
+//  Leader: confirm by tapping bottom text hot spot (ctx.low)
+// ---------------------------------------------------------------------------
+export function installLeaderModeConfirmHandler(ctx, canvas, status) {
+  canvas.addEventListener('pointerup', (ev) => {
+    if (status.role !== 'leader') return;
+    if (status.modeConfirmed) return;
+
+    const { x, y } = eventToDesignPoint(ev, canvas, ctx);
+
+    const x1 = ctx.low.x;
+    const y1 = ctx.low.y;
+    const r  = ctx.tapRadius;
+
+    console.log('[confirm] pointer', { x, y, x1, y1, r });
+
+    const hitConfirm = isInsideCircle(x, y, x1, y1, r);
+    if (!hitConfirm) return;
+
+    status.modeConfirmed = true;
+    status.running = false;
+    status.isEndScreen = false;
+
+    // Lock tempo to chosen mode
+    if (status.modeChosen === 'preview') {
+      status.msPerBeat = status.previewClock;
+      console.log('[confirm] using mode for start view preview');
+    } else {
+      status.msPerBeat = status.concertClock;
+      console.log('[confirm] using mode for start view concert');
+    }
+
+    console.log('[confirm] mode confirmed via bottom text tap');
+    console.log('[confirm] state at confirm tap', {
+      modeChosen: status.modeChosen,
+      msPerBeat: status.msPerBeat
+    });
+
+	if (!status._dumpedFamilyRing) {
+	  status._dumpedFamilyRing = true;   // one-shot
+	  downloadFamilyRingPNG({ 
+	    family: null, 
+	    active: true, 
+	    filename: 'family1-ring.png' 
+	    });
+	}
+
+    refresh();
+  });
+}
+
+// ---------------------------------------------------------------------------
+//  Leader: stop while running (tap TOP text hot spot)
+//  (Adjust hotspot if you want it elsewhere; this keeps it away from the clock.)
+// ---------------------------------------------------------------------------
+export function installLeaderStopHandler(ctx, canvas, status) {
+  canvas.addEventListener('pointerup', (ev) => {
+    if (status.role !== 'leader') return;
+    if (!status.running) return;
+
+    const { x, y } = eventToDesignPoint(ev, canvas, ctx);
+
+    // Use top text position as STOP hotspot
+    const x1 = ctx.top.x;
+    const y1 = ctx.top.y;
+    const r  = ctx.tapRadius;
+
+    const hitStop = isInsideCircle(x, y, x1, y1, r);
+    if (!hitStop) return;
+
+    console.log('[stop] leader stop via top text tap');
+
+    stopAnimation();
+    status.running = false;
+    status.startWall = 0;
+
+    refresh();
+  });
+}
+
+// ---------------------------------------------------------------------------
+//  Clock tap: start animation (center clock hot spot at ctx.mid)
+// ---------------------------------------------------------------------------
+export function installClockStartHandler(ctx, canvas, status) {
+  canvas.addEventListener('pointerup', (ev) => {
+    // Leaders must confirm mode before clock can start.
+    if (status.role === 'leader' && !status.modeConfirmed) {
+      console.log('[clock] ignored: mode not confirmed');
+      return;
+    }
+    // End screen has its own handler
+    if (status.isEndScreen) return;
+
+    const { x, y } = eventToDesignPoint(ev, canvas, ctx);
+
+    const hitClock = isInsideCircle(x, y, ctx.mid.x, ctx.mid.y, ctx.tapRadius);
+    if (!hitClock) {
+      console.log('[clock] ignored: outside clock');
+      return;
+    }
+
+    if (status.running) {
+      console.log('[clock] ignored: already running');
+      return;
+    }
+
+    status.running = true;
+    status.startWall = performance.now();
+    status.isEndScreen = false;
+
+    console.log('[mode] START animation via clock tap');
+
+    startAnimation();
+    refresh(); // immediate feedback; animation loop will take over
+  });
+}
+
+// ---------------------------------------------------------------------------
+//  End screen: leader can tap clock to reselect mode (back to mode-select)
+// ---------------------------------------------------------------------------
+export function installEndScreenTapHandler(ctx, canvas, status) {
+  canvas.addEventListener('pointerup', (ev) => {
+    if (status.role !== 'leader') return;
+    if (!status.isEndScreen) return;
+
+    const { x, y } = eventToDesignPoint(ev, canvas, ctx);
+
+    const reSelect = isInsideCircle(x, y, ctx.mid.x, ctx.mid.y, ctx.tapRadius);
+    if (!reSelect) {
+      console.log('[end] ignored: outside end screen hot spot');
+      return;
+    }
+
+    console.log('[end] reselect: returning to mode select');
+
+    // Stop anything still ticking (safe even if already stopped)
+    stopAnimation();
+
+    status.running = false;
+    status.startWall = 0;
+    status.isEndScreen = false;
+
+    // Return leader to mode-select phase
+    status.modeConfirmed = false;
+
+    refresh();
+  });
+}
+

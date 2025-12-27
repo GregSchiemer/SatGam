@@ -1,153 +1,103 @@
 // js/gui/henge.js
+// Geometry and rendering helpers for the phone henge.
+// Geometry: build center-anchored slots with RADIAL orientation baked in.
+// Rendering: drawHenge() consumes slots + a family/mask to paint phones.
 
-import { arrU } from './canvasUtils.js';
-import { sequence } from './sequence.js';
+const DEFAULTS = {
+  angleStartDeg: -90,   // first phone at 12 o’clock
+  arcRadiusFrac: 0.78,  // ring radius as fraction of min(canvas.cx, canvas.cy)
+  phoneLongFrac: 0.36,  // along the radius (tall side)
+  phoneShortFrac: null, // if null, auto from aspect (≈ long/1.75, min 16px)
+};
 
-// Accept radians or a fraction of a turn (0..1)
-export function setArcStart(a) {
-  return Math.abs(a) > 2 ? a : a * Math.PI * 2;
-}
-
-/** Deterministic slots: radial (sprocket) orientation; first phone at angleStart. */
-// henge.js
-export function makeHenge(spec = {}) {
-  const { ctx } = arrU[0];
-  const W = ctx.cssW ?? ctx.w ?? ctx.canvas.width;
-  const H = ctx.cssH ?? ctx.h ?? ctx.canvas.height;
-
-  const cx = ctx.mid?.x ?? (W / 2);
-  const cy = ctx.mid?.y ?? (H / 2);
-
-  const count      = spec.numberOf ?? 25;
-  const angleStart = spec.angleStart ?? 0;
-  const angleStep  = (Math.PI * 2) / count;
-  const radius     = spec.arcRadius ?? Math.min(W, H) * 0.25;
-
-  // NEW: explicit long/short controls (fractions of canvas)
-  const phoneLongFrac  = spec.phoneLongFrac  ?? 0.11; // long side (radial)
-  const phoneShortFrac = spec.phoneShortFrac ?? 0.14; // short side (tangential)
-
-  // For a tall mobile canvas, tie long to W and short to H (looks nicer)
-  const phoneW = Math.round(W * phoneLongFrac);  // long side (radial)
-  const phoneH = Math.round(H * phoneShortFrac); // short side (tangential)
-
-  const slots = new Array(count);
-  for (let i = 0; i < count; i++) {
-    const a = angleStart + i * angleStep;
-    const x = cx + radius * Math.cos(a);
-    const y = cy + radius * Math.sin(a);
-	const angle = a + Math.PI / 2;  // ← +90° clockwise
-    slots[i] = { x, y, w: phoneW, h: phoneH, angle };
-  }
-  return slots;
-}
-
-import { initPhoneAtlas, isPhoneAtlasReady } from './sprites.js';
-
-
-export async function makeHengeN(ctx, numberOf, opts = {}) {
-  const slots = makeHenge({
-    numberOf,
-    arcStart: setArcStart(opts.angleStart ?? ctx.pi2 / 6), // 3 o’clock default
-    arcRadius: opts.arcRadius ?? Math.min(ctx.cssW ?? ctx.w, ctx.cssH ?? ctx.h) * 0.4,
-    phoneLongFrac: opts.phoneLongFrac ?? 0.07,
-    phoneShortFrac: opts.phoneShortFrac ?? 0.07,
-  });
-  const { w, h } = slots[0];
-  if (!isPhoneAtlasReady()) await initPhoneAtlas({ w, h });
-  return slots;
-}
-
-	
-// Optional convenience wrappers (if you want legacy names)
-export function henge5 (ctx, overrides = {}) { return makeHenge({ numberOf: 5,  ...overrides }); }
-export function henge15(ctx, overrides = {}) { return makeHenge({ numberOf: 15, ...overrides }); }
-export function henge25(ctx, overrides = {}) { return makeHenge({ numberOf: 25, ...overrides }); }
-
+function deg2rad(d) { return d * Math.PI / 180; }
 
 /**
- * Generate N slots evenly spaced on a circle, landscape-oriented tangent to the ring.
- * - numberOf: how many phones
- * - arcRadius: ring radius in CSS px (or auto from canvas size if omitted)
- * - angleStart: radians (first phone at 3 o'clock = 0; at top = -PI/2)
- * - hFactor,wFactor: scale factors (roughly pixels relative to canvas height/width)
- * - border: additional outer padding factor (kept for legacy parity, used lightly here)
+ * Build N evenly spaced slots around a circle with RADIAL-OUT orientation.
+ * Returns an array of { i, x, y, w, h, angle, arcRadius }.
  */
+export function makeHengeOf(ctx, numberOf, overrides = {}) {
+  if (!ctx || !ctx.canvas) {
+    throw new Error('makeHengeOf: ctx with canvas is required');
+  }
+  if (!Number.isFinite(numberOf) || numberOf <= 0) {
+    throw new Error('makeHengeOf: numberOf must be > 0');
+  }
 
-const FAMILIES = ['A','B','C','D','E'];
+  const spec = { ...DEFAULTS, ...overrides, numberOf };
 
-export function getHengeLayout25(overrides = {}) {
-  const u = arrU[0] || {};
-  const ctx = u.ctx || {};
-  const cx  = (ctx.mid && ctx.mid.x) ? ctx.mid.x : (u.cssW ? u.cssW/2 : 195);
-  const cy  = (ctx.mid && ctx.mid.y) ? ctx.mid.y : (u.cssH ? u.cssH/2 : 422);
+  // Use CSS pixels (initCanvas typically scales device pixels by DPR)
+  const dpr = window.devicePixelRatio || 1;
+  const W   = ctx.canvas.width  / dpr;
+  const H   = ctx.canvas.height / dpr;
+  const cx  = W / 2;
+  const cy  = H / 2;
 
-  const radius = Number.isFinite(u.ringRadius) ? u.ringRadius
-                 : Math.min(u.cssW || 390, u.cssH || 844) / 2 - 120;
+  const baseR = Math.min(cx, cy);
+  const arcR  = Math.max(40, baseR * spec.arcRadiusFrac);
 
-  const rotateMode = overrides.rotate || u.hengeRotate || 'radial';
+  const longPx  = Math.round(arcR * spec.phoneLongFrac); // radial (tall side)
+  const shortPx = Math.round(
+    spec.phoneShortFrac != null
+      ? arcR * spec.phoneShortFrac
+      : Math.max(16, longPx / 1.75)
+  );
 
-  // Phone size: prefer ctx.phoneW/H if set; else conservative defaults
-  const w = overrides.w || ctx.phoneW || 78;
-  const h = overrides.h || ctx.phoneH || 168;
+  // Slot box size (center-anchored downstream)
+  const w = shortPx;   // tangential (short side)
+  const h = longPx;    // radial (long side)
 
-  const count = overrides.count || 25; //25;
-//  const angleStart = overrides.angleStart ?? (0.0);
-  const angleStart = overrides.angleStart ?? (-Math.PI / 2);
-  const direction  = overrides.direction  ?? 1;
+  const a0   = deg2rad(spec.angleStartDeg);
+  const step = (Math.PI * 2) / numberOf;
 
-  const slots = [];
-  const step = (2 * Math.PI) / count;
-
-  for (let i = 0; i < count; i++) {
-    const theta = angleStart + direction * i * step;
-    const px = cx + radius * Math.cos(theta);
-    const py = cy + radius * Math.sin(theta);
-    const x  = px - w/2;
-    const y  = py - h/2;
-    const family = FAMILIES[i % 5];
-
-    let rot = 0;
-    switch (rotateMode) {
-      case 'tangent': rot = theta + Math.PI/2; break;
-      case 'radial':  rot = theta;            break;
-      case 'fixed':   rot = overrides.fixedAngle || 0; break;
-      case 'none':
-      default:        rot = 0;
-    }
-    slots.push({ id: i, x, y, w, h, family, rot });
+  const slots = new Array(numberOf);
+  for (let i = 0; i < numberOf; i++) {
+    const theta = a0 + i * step;            // theta is RADIAL (outward)
+    slots[i] = {
+      i,
+      x: cx + arcR * Math.cos(theta),       // CENTER coords
+      y: cy + arcR * Math.sin(theta),       // CENTER coords
+      w,
+      h,
+      angle: theta,                         // baked radial-out
+      arcRadius: arcR,
+    };
   }
   return slots;
 }
 
-export function getHengeStateBits(stateIndex = 0) {
-  const s5 = sequence[stateIndex % sequence.length];
-  let mask = 0;
-  for (let i = 0; i < 25; i++) {
-    if (s5[i % 5]) mask |= (1 << i);
+// --- Rendering helper: draw phones for a given mask ---
+
+const RADIAL_OFFSET = Math.PI / 2;
+
+export function drawHenge({
+  ctx,
+  slots,
+  drawPhoneAt,
+  familyForIndex,
+  mask = null,      // optional: mask per index, or null for “all phones”
+}) {
+  if (!ctx || !Array.isArray(slots) || !drawPhoneAt || !familyForIndex) {
+    console.warn('[henge] drawHenge: missing ctx/slots/drawPhoneAt/familyForIndex');
+    return;
   }
-  return mask;
-}
 
-// henge.js (TOP OF FILE — add this import)
-//import { initPhoneAtlas, isPhoneAtlasReady } from './sprites.js';
+  for (let i = 0; i < slots.length; i++) {
+    const slot = slots[i];
+    const baseAngle = slot.angle ?? 0;
+    const angle     = baseAngle + RADIAL_OFFSET;
 
-// … your existing exports: makeHenge, setArcStart, etc.
+    const family =
+      (mask != null)
+        ? familyForIndex(i, mask)
+        : familyForIndex(i);
 
-// henge.js (ADD THIS FUNCTION near the bottom)
-export async function makeHenge25(ctx) {
-  const slots = makeHenge({
-    numberOf: 25,
-    arcStart: setArcStart(ctx.pi2 / 6), // start at 3 o’clock
-    arcRadius: Math.min(ctx.cssW ?? ctx.w, ctx.cssH ?? ctx.h) * 0.4,
-    phoneLongFrac: 0.07,
-    phoneShortFrac: 0.07,
-  });
-
-  // Size the atlas to the first slot
-  const { w, h } = slots[0];
-  if (!isPhoneAtlasReady()) {
-    await initPhoneAtlas({ w, h });
+    drawPhoneAt(ctx, {
+      ...slot,
+      angle,
+      family,
+      active: true,
+      shadow: true,
+    });
   }
-  return slots;
 }
