@@ -20,14 +20,18 @@
 </head>
 
 <body>
-  <canvas id="mobile" width="390" height="844"></canvas>
+  <!--canvas id="mobile" width="390" height="844"></canvas-->
+  <canvas id="mobile" data-design-w="390" data-design-h="844" data-mode="fixed"
+></canvas>
 
-<script>window.role = 'leader';</script>
+  <script>window.role = 'leader';</script>
 
-<script type="module">
-  import { initApp } from './js/gui/main.js';
-  window.addEventListener('DOMContentLoaded', initApp);
-</script>
+  <script type="module">
+    import { initApp } from './js/gui/main.js';
+    window.addEventListener('DOMContentLoaded', () => {
+      initApp().catch(err => console.error('[main] init failed:', err));
+    });
+  </script>
 
 </body>
 </html>

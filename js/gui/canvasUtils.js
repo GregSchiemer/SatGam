@@ -1,150 +1,251 @@
 // js/gui/canvasUtils.js
+//
+// Canvas + geometry utilities for the Phonehenge GUI.
+
 import { ColorFamily, setLinearGradient } from './color.js';
 
-// Canonical shared state
-export const U = {};
+export const arrPane = []; // visible compositor: #mobile
+export const arrB    = []; // offscreen background layer
+export const arrF    = []; // offscreen foreground/phones layer
+export const arrT    = []; // offscreen text layer
+export const arrS 	 = []; // offscreen slots
 
-export function getUniversal() {
-  return U;
+function stampGeometry(ctx, designW, designH, dpr, fit) {
+  ctx.w = designW;
+  ctx.h = designH;
+
+  ctx.mid = { x: designW * 0.5, y: designH * 0.5 };
+  ctx.top = { x: ctx.mid.x,     y: designH * 0.10 };
+  ctx.low = { x: ctx.mid.x,     y: designH * 0.90 };
+
+  const lateralOffset = 80;
+  ctx.left  = { x: ctx.mid.x - lateralOffset, y: ctx.mid.y };
+  ctx.right = { x: ctx.mid.x + lateralOffset, y: ctx.mid.y };
+
+  ctx.pi2 = 2 * Math.PI;
+  ctx.tapRadius = 50;
+  ctx.cornerRadius = 25;
+
+  ctx.dpr = dpr;
+  ctx.fit = fit; // design-units → CSS pixels (before DPR)
 }
 
+function configureCanvas(canvas, cssW, cssH, dpr, fit, designW, designH, isVisible) {
+  if (isVisible) {
+    canvas.style.width = `${cssW}px`;
+    canvas.style.height = `${cssH}px`;
+    canvas.style.display = 'block';
+  }
+
+  // Backing store (device pixels)
+  canvas.width  = Math.ceil(cssW * dpr);
+  canvas.height = Math.ceil(cssH * dpr);
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('configureCanvas: 2D context not available');
+
+  // Draw in DESIGN units; transform handles DPR + fit
+  ctx.setTransform(dpr * fit, 0, 0, dpr * fit, 0, 0);
+
+  stampGeometry(ctx, designW, designH, dpr, fit);
+  return ctx;
+}
+
+/**
+ * initSurfaces(): creates 4 contexts with identical geometry.
+ * - ctxPane: visible compositor on #mobile
+ * - ctxB: offscreen background layer
+ * - ctxF: offscreen foreground/phones layer
+ * - ctxT: offscreen text layer
+ *
+ * mode:
+ * - 'fixed': CSS size = designW x designH (good for “hypothetical phone” on laptop)
+ * - 'fit'  : scales down to fit window (no upscaling; see fit clamp)
+ */
+export function initSurfaces({ paneId = 'mobile', designW = 390, designH = 844, mode = 'fixed' } = {}) {
+  const cnvPane = document.getElementById(paneId);
+  if (!cnvPane) throw new Error(`initSurfaces: no <canvas id="${paneId}"> found in DOM`);
+
+  const dpr = window.devicePixelRatio || 1;
+
+  let cssW, cssH, fit;
+
+  if (mode === 'fixed') {
+    fit  = 1;
+    cssW = designW;
+    cssH = designH;
+  } else {
+    // Scale DOWN to fit window, but never scale UP (keeps “actual size” on desktop)
+    fit = Math.min(window.innerWidth / designW, window.innerHeight / designH, 1);
+    cssW = Math.round(designW * fit);
+    cssH = Math.round(designH * fit);
+  }
+
+  // Visible compositor (“window pane”)
+  const ctxPane = configureCanvas(cnvPane, cssW, cssH, dpr, fit, designW, designH, true);
+
+  // Offscreen layers
+  const cnvB = document.createElement('canvas');
+  const ctxB = configureCanvas(cnvB, cssW, cssH, dpr, fit, designW, designH, false);
+
+  const cnvF = document.createElement('canvas');
+  const ctxF = configureCanvas(cnvF, cssW, cssH, dpr, fit, designW, designH, false);
+
+  const cnvT = document.createElement('canvas');
+  const ctxT = configureCanvas(cnvT, cssW, cssH, dpr, fit, designW, designH, false);
+
+  // Singleton assignment contract
+  arrPane[0] = { canvas: cnvPane, ctx: ctxPane, cssW, cssH };
+  arrB[0]    = { canvas: cnvB,    ctx: ctxB,    cssW, cssH };
+  arrF[0]    = { canvas: cnvF,    ctx: ctxF,    cssW, cssH };
+  arrT[0]    = { canvas: cnvT,    ctx: ctxT,    cssW, cssH };
+
+  console.log('[pairing check @initSurfaces]', {
+    pane: ctxPane.canvas === cnvPane,
+    bg:   ctxB.canvas    === cnvB,
+    fg:   ctxF.canvas    === cnvF,
+    text: ctxT.canvas    === cnvT,
+    paneSize: [cnvPane.width, cnvPane.height],
+    bgSize:   [cnvB.width, cnvB.height],
+    fgSize:   [cnvF.width, cnvF.height],
+    textSize: [cnvT.width, cnvT.height],
+  });
+
+  return { ctxPane, ctxB, ctxF, ctxT };
+}
+
+
+// ---- tiny compositor helper ----
+
+function blit(ctxPane, srcCanvas) {
+  // IMPORTANT: map source pixels → destination design units
+  ctxPane.drawImage(
+    srcCanvas,
+    0, 0, srcCanvas.width, srcCanvas.height,
+    0, 0, ctxPane.w, ctxPane.h
+  );
+}
+
+/**
+ * composeFrame(): clears the visible pane and composites layers in order.
+ * Call once per frame AFTER you've rendered into ctxB/ctxF/ctxT as needed.
+ */
+export function composeFrame({ drawB = true, drawF = true, drawT = true } = {}) {
+  const { canvas: cnvPane, ctx: ctxPane } = arrPane[0];
+  const { canvas: cnvB } = arrB[0];
+  const { canvas: cnvF } = arrF[0];
+  const { canvas: cnvS } = arrS[0];
+  const { canvas: cnvT } = arrT[0];
+
+  ctxPane.clearRect(0, 0, ctxPane.w, ctxPane.h);
+
+  if (drawB) blit(ctxPane, cnvB);
+  if (drawF) blit(ctxPane, cnvF);
+  if (drawT) blit(ctxPane, cnvT);
+
+  // (cnvPane unused here, but kept for symmetry/debugging)
+}
+
+// ---------------------------------------------------------------------------
+//  Slots (henge geometry) – one entry per phone around the ring
+// ---------------------------------------------------------------------------
+
 export function setSlots(slots) {
-  U.slots = Array.isArray(slots) ? slots : [];
+  arrS.length = 0;
+  if (Array.isArray(slots)) {
+    for (const s of slots) {
+      arrS.push(s);
+    }
+  }
 }
 
 export function getSlots() {
-  return U.slots ?? [];
+  return arrS;
 }
 
-// back-compat shim for old `import { arrU }`
-export const arrU = [U];
+// ---------------------------------------------------------------------------
+//  Background rendering - color.js configures a neutral gradient
+// ---------------------------------------------------------------------------
 
-//export const arrU = []; // universal store
-export const arrK = []; // keys
-const arrB = [];        // background (unchanged)
+export function prepareAndRenderBackground(ctx) {
+
+  ctx.save();
+
+  ctx.clearRect(0, 0, ctx.w, ctx.h);
+
+  const gradientFill = ctx.createLinearGradient(0, ctx.h, 0, 0);
+  setLinearGradient(ColorFamily.NONE, gradientFill);
+
+  ctx.fillStyle = gradientFill;
+  ctx.fillRect(0, 0, ctx.w, ctx.h);
+
+  ctx.restore();
+}
+
+
+// ---------------------------------------------------------------------------
+//  Pointer → canvas coordinate helper
+// ---------------------------------------------------------------------------
 
 /**
- * Initialize the canvas and populate universal properties.
+ * Convert a PointerEvent / MouseEvent into canvas-space coordinates.
  */
  
-export function initCanvas(id = 'mobile', opts = {}) {
-  const canvas = document.getElementById(id);
-  const ctx = canvas.getContext('2d');
-  const {
-    cssW: cssWOverride,
-    cssH: cssHOverride,
-    dpr: dprOverride,
-    clear = true,
-
-    // universal knobs (override as needed)
-    lateralOffset = 80,
-    cornerRadius  = 25,
-    tapRadius     = 50,
-    concertClock  = 1000,  // ms
-    previewClock  = 1,     // ms
-    playRate      = concertClock, // default runtime rate
-    hengeRotate   = 'radial',     // default ring orientation
-    ringMargin    = 120,          // canvas edge margin for ring radius
-    phoneW,                       // optionally override phone sprite W
-    phoneH,                       // optionally override phone sprite H
-  } = opts;
-
-  const dpr  = Number.isFinite(dprOverride) ? dprOverride : (window.devicePixelRatio || 1);
-  const cssW = Number.isFinite(cssWOverride) ? cssWOverride : (canvas.clientWidth  || 390);
-  const cssH = Number.isFinite(cssHOverride) ? cssHOverride : (canvas.clientHeight || 844);
-
-  // Backing store size + CSS px transform
-  canvas.width  = Math.max(1, Math.round(cssW * dpr));
-  canvas.height = Math.max(1, Math.round(cssH * dpr));
-
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  if (clear) ctx.clearRect(0, 0, cssW, cssH);
-
-  // ------- universal geometry/timing on ctx (legacy-friendly) -------
-  ctx.w  = cssW;                 // CSS px
-  ctx.h  = cssH;
-  ctx.t  = ctx.h * 0.10;         // top band (legacy)
-  ctx.mid = { x: ctx.w / 2, y: ctx.h / 2 };
-  ctx.l   = ctx.mid.x - lateralOffset;
-  ctx.r   = ctx.mid.x + lateralOffset;
-  ctx.pi2          = parseFloat((2 * Math.PI).toFixed(2));
-  ctx.concertClock = concertClock;
-  ctx.previewClock = previewClock;
-  ctx.playRate     = playRate;
-  ctx.tapRadius    = tapRadius;
-  ctx.cornerRadius = cornerRadius;
-
-  // henge/ring defaults derived from canvas
-  const radius = Math.min(cssW, cssH) / 2 - ringMargin;
-
-  ctx.phoneW = phoneW || ctx.phoneW; // leave undefined if not provided
-  ctx.phoneH = phoneH || ctx.phoneH;
-
-  arrU[0] = {
-    canvas, ctx, dpr, cssW, cssH,
-    ringRadius: radius,
-    hengeRotate,
-    ringMargin,
-  };
-
-  return { canvas, ctx, cssW, cssH, dpr };
+export function eventToCtxPoint(ev, canvas) {
+  const rect = canvas.getBoundingClientRect();
+  const x = ev.clientX - rect.left;
+  const y = ev.clientY - rect.top;
+  return { x, y };
 }
 
-/* save background canvas */
-export function saveCanvasBackground(f) {
-  const { ctx } = arrU[0];
-  const ctxB = ctx;
-
-  ctxB.cornerRadius = 25;
-  ctxB.shadowColor = 'lightgrey';
-  ctxB.shadowOffsetX = 0;
-  ctxB.shadowOffsetY = -2.5;
-  ctxB.strokeStyle = 'grey';
-  ctxB.fillStyle = pickBackground(ctxB, f);
-
-  arrB.push({ ctxB });
+export function renderSavedBackground(ctx, canvas) {
+  prepareAndRenderBackground(ctx, canvas);
 }
 
-function pickBackground(ctxB, f) {
-  const gradient = ctxB.createLinearGradient(0, ctxB.h, 0, 0);
-  return setLinearGradient(f, gradient);
-}
 
-export function renderSavedBackground() {
-  const u = arrU?.[0];
-  const ctx = u?.ctx;
-  if (!ctx) return false;
+// ---------------------------------------------------------------------------
+//  Shape helpers (used by sprites.js)
+// ---------------------------------------------------------------------------
 
-  const { canvas } = ctx;
-  ctx.save();
-  // ensure a clean fill regardless of any transforms set elsewhere
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+/**
+ * Draw the outline path of a rounded-rectangle "phone body".
+ *
+ * drawPhonePath(ctx, { x, y, w, h, r })
+ *
+ * It only defines the path; the caller is responsible for fill/stroke.
+ */
+export function drawPhonePath(ctx, { x, y, w, h, r }) {
+  if (!ctx) return;
 
-  // use the gradient (or color) that saveCanvasBackground() stored
-  if (u.ctx.fillStyle) ctx.fillStyle = u.ctx.fillStyle;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.restore();
-  return true;
-}
+  const radius = Number.isFinite(r) ? r : Math.min(w, h) * 0.12;
 
-// --- OPTIONAL: one-shot convenience to rebuild + paint ---
-export function prepareAndRenderBackground(f = 0) {
-  saveCanvasBackground(f);
-  return renderSavedBackground();
-}
+  const right  = x + w;
+  const bottom = y + h;
 
-export function drawPhonePath(ctx, w, h, r = 0.065) {
-  const radius = Math.min(w, h) * r;
   ctx.beginPath();
-  ctx.moveTo(radius, 0);
-  ctx.lineTo(w - radius, 0);
-  ctx.quadraticCurveTo(w, 0, w, radius);
-  ctx.lineTo(w, h - radius);
-  ctx.quadraticCurveTo(w, h, w - radius, h);
-  ctx.lineTo(radius, h);
-  ctx.quadraticCurveTo(0, h, 0, h - radius);
-  ctx.lineTo(0, radius);
-  ctx.quadraticCurveTo(0, 0, radius, 0);
+
+  // top edge
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(right - radius, y);
+  ctx.quadraticCurveTo(right, y, right, y + radius);
+
+  // right edge
+  ctx.lineTo(right, bottom - radius);
+  ctx.quadraticCurveTo(right, bottom, right - radius, bottom);
+
+  // bottom edge
+  ctx.lineTo(x + radius, bottom);
+  ctx.quadraticCurveTo(x, bottom, x, bottom - radius);
+
+  // left edge
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+
   ctx.closePath();
 }
+
+
+
+
+
+

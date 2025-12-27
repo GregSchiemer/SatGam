@@ -1,40 +1,35 @@
 /* text.js */
 
-import { arrU } from './canvasUtils.js';
+//import { arrT } from './main.js';
+import { arrT } from './canvasUtils.js';
 
-export function drawTopText(text) {
-  const { ctx } = arrU[0];
+export function drawTopText(ctx, text) {
   const x = ctx.mid.x, y = ctx.h * 0.10;
   drawText(ctx, text, x, y, 30);
 }
 
-export function drawSubText(text) {
-  const { ctx } = arrU[0];
+export function drawSubText(ctx, text) {
   const x = ctx.mid.x, y = ctx.h * 0.17;
   drawText(ctx, text, x, y, 24);
 }
 
-export function drawMidText(text) {
-  const { ctx } = arrU[0];
-  const x = ctx.mid.x, y = ctx.h * 0.50;
-  drawText(ctx, text, x, y, 24);
+export function drawMidText(ctx, text) {
+  const x = ctx.mid.x, y = ctx.mid.y;
+  drawText(ctx, text, x, y, 30);
 }
 
-export function drawLowText(text) {
-  const { ctx } = arrU[0];
+export function drawLowText(ctx, text) {
   const x = ctx.mid.x, y = ctx.h * 0.90;
   drawText(ctx, text, x, y, 18);
 }
 
-export function drawLeftText(text) {
-  const { ctx } = arrU[0];
-  const x = ctx.l, y = ctx.h * 0.50;
+export function drawLeftText(ctx, text) {
+  const x = ctx.left.x, y = ctx.h * 0.50;
   drawText(ctx, text, x, y, 24);
 }
 
-export function drawRightText(text) {
-  const { ctx } = arrU[0];
-  const x = ctx.r, y = ctx.h * 0.50;
+export function drawRightText(ctx, text) {
+  const x = ctx.right.x, y = ctx.h * 0.50;
   drawText(ctx, text, x, y, 24);
 }
 
@@ -47,65 +42,32 @@ function drawText(ctx, text, x, y, size) {
   ctx.fillText(text, x, y);
 }
 
-// Start view (both leader & consort)
-export function renderStartBoth({ mode = 'preview' } = {}) {
-  drawTopText('Phonehenge');
-  drawSubText('tap clock to start');
-  drawMidText('00:00');
-  drawLowText(`${mode.toUpperCase()} MODE`);
+//  drawLowText(`${mode.toUpperCase()} MODE`);
+
+export function renderStartBoth(ctx, status) {
+  drawTopText(ctx, 'Phonehenge');
+  drawSubText(ctx, 'tap clock to start');
+  drawMidText(ctx, '00:00');
+  drawLowText(ctx, `${status.modeChosen.toUpperCase()} MODE`);
 }
 
-// Start view (leader only)
-export function renderStartLeader({ mode = 'preview' } = {}) {
-  drawSubText('select MODE');
-  drawLeftText('PREVIEW');
-  drawRightText('CONCERT');
-  drawLowText(`${mode.toUpperCase()} MODE`);
+export function renderStartLeader(ctx, status) {
+//  drawTopText(ctx, 'Phonehenge');
+  drawSubText(ctx, 'select MODE');
+  drawLeftText(ctx, 'PREVIEW');
+  drawRightText(ctx, 'CONCERT');
+  drawLowText(ctx, `${status.modeChosen.toUpperCase()} MODE`);
 }
 
-// Running view
-export function renderRunning({ stateIndex, mins, secs }) {
-  drawTopText(String(stateIndex));
-  drawMidText(`${mins}:${secs}`);
-}
-
-// End view
-export function renderEnd({ duration }) {
-  drawTopText('Phonehenge');
-  drawMidText(`duration : ${duration}`);
-  drawLowText('G. Schiemer © 2025');
-}
-
-
-/*
-
-// Start view (both leader & consort)
-export function renderStartBoth( { mode = 'preview' } = {} ) {
-  drawTopText('Phonehenge');
-  drawSubText('tap clock to start');
-  drawMidText('00:00');
-  drawLowText(`${mode.toUpperCase()} MODE`);
-}
-
-// Start view (leader only)
-export function renderStartLeader({ mode = 'preview' } = {} ) {
-  drawSubText('select MODE');
-  drawLeftText('PREVIEW');
-  drawRightText('CONCERT');
-  drawLowText(`${mode.toUpperCase()} MODE`);
-}
-
-// Running view
-export function renderRunning({ stateIndex, mins, secs }) {
-  drawTopText(String(stateIndex));
-  drawMidText(`${mins}:${secs}`);
+// Running view (both leader & consort)
+export function renderRunning(ctx, { status, mins, secs }) {
+  drawTopText(ctx, String(status.index + 1));
+  drawMidText(ctx, `${mins}:${secs}`);
 }
 
 // End view
-export function renderEnd({ duration }) {
-  drawTopText('Phonehenge');
-  drawMidText(`duration : ${duration}`);
-  drawLowText('G. Schiemer © 2025');
+export function renderEnd(ctx, status) {
+  drawTopText(ctx, 'Phonehenge');
+  drawMidText(ctx, 'Duration : 12:24');
+  drawLowText(ctx, 'G. Schiemer © 2025');
 }
-
-*/
