@@ -4,7 +4,7 @@
 
 import { ColorFamily, setLinearGradient } from './color.js';
 
-export const arrPane = []; // visible compositor: #mobile
+export const arrP = []; // visible compositor: #mobile
 export const arrB    = []; // offscreen background layer
 export const arrF    = []; // offscreen foreground/phones layer
 export const arrT    = []; // offscreen text layer
@@ -13,6 +13,8 @@ export const arrS 	 = []; // offscreen slots
 function stampGeometry(ctx, designW, designH, dpr, fit) {
   ctx.w = designW;
   ctx.h = designH;
+  ctx.designW = designW;
+  ctx.designH = designH;
 
   ctx.mid = { x: designW * 0.5, y: designH * 0.5 };
   ctx.top = { x: ctx.mid.x,     y: designH * 0.10 };
@@ -23,7 +25,9 @@ function stampGeometry(ctx, designW, designH, dpr, fit) {
   ctx.right = { x: ctx.mid.x + lateralOffset, y: ctx.mid.y };
 
   ctx.pi2 = 2 * Math.PI;
+//  ctx.orientBias = Math.PI;  // single source of truth
   ctx.tapRadius = 50;
+  ctx.keyRadius = designW; //20;
   ctx.cornerRadius = 25;
 
   ctx.dpr = dpr;
@@ -53,7 +57,7 @@ function configureCanvas(canvas, cssW, cssH, dpr, fit, designW, designH, isVisib
 
 /**
  * initSurfaces(): creates 4 contexts with identical geometry.
- * - ctxPane: visible compositor on #mobile
+ * - ctxP: visible compositor on #mobile
  * - ctxB: offscreen background layer
  * - ctxF: offscreen foreground/phones layer
  * - ctxT: offscreen text layer
@@ -63,8 +67,8 @@ function configureCanvas(canvas, cssW, cssH, dpr, fit, designW, designH, isVisib
  * - 'fit'  : scales down to fit window (no upscaling; see fit clamp)
  */
 export function initSurfaces({ paneId = 'mobile', designW = 390, designH = 844, mode = 'fixed' } = {}) {
-  const cnvPane = document.getElementById(paneId);
-  if (!cnvPane) throw new Error(`initSurfaces: no <canvas id="${paneId}"> found in DOM`);
+  const cnvP = document.getElementById(paneId);
+  if (!cnvP) throw new Error(`initSurfaces: no <canvas id="${paneId}"> found in DOM`);
 
   const dpr = window.devicePixelRatio || 1;
 
@@ -82,7 +86,7 @@ export function initSurfaces({ paneId = 'mobile', designW = 390, designH = 844, 
   }
 
   // Visible compositor (“window pane”)
-  const ctxPane = configureCanvas(cnvPane, cssW, cssH, dpr, fit, designW, designH, true);
+  const ctxP = configureCanvas(cnvP, cssW, cssH, dpr, fit, designW, designH, true);
 
   // Offscreen layers
   const cnvB = document.createElement('canvas');
@@ -91,38 +95,41 @@ export function initSurfaces({ paneId = 'mobile', designW = 390, designH = 844, 
   const cnvF = document.createElement('canvas');
   const ctxF = configureCanvas(cnvF, cssW, cssH, dpr, fit, designW, designH, false);
 
+  const cnvS = document.createElement('canvas');
+  const ctxS = configureCanvas(cnvS, cssW, cssH, dpr, fit, designW, designH, false);
+
   const cnvT = document.createElement('canvas');
   const ctxT = configureCanvas(cnvT, cssW, cssH, dpr, fit, designW, designH, false);
 
   // Singleton assignment contract
-  arrPane[0] = { canvas: cnvPane, ctx: ctxPane, cssW, cssH };
+  arrP[0] = { canvas: cnvP, ctx: ctxP, cssW, cssH };
   arrB[0]    = { canvas: cnvB,    ctx: ctxB,    cssW, cssH };
   arrF[0]    = { canvas: cnvF,    ctx: ctxF,    cssW, cssH };
   arrT[0]    = { canvas: cnvT,    ctx: ctxT,    cssW, cssH };
 
   console.log('[pairing check @initSurfaces]', {
-    pane: ctxPane.canvas === cnvPane,
+    pane: ctxP.canvas === cnvP,
     bg:   ctxB.canvas    === cnvB,
     fg:   ctxF.canvas    === cnvF,
     text: ctxT.canvas    === cnvT,
-    paneSize: [cnvPane.width, cnvPane.height],
+    paneSize: [cnvP.width, cnvP.height],
     bgSize:   [cnvB.width, cnvB.height],
     fgSize:   [cnvF.width, cnvF.height],
     textSize: [cnvT.width, cnvT.height],
   });
 
-  return { ctxPane, ctxB, ctxF, ctxT };
+  return { ctxP, ctxB, ctxF, ctxT };
 }
 
 
 // ---- tiny compositor helper ----
 
-function blit(ctxPane, srcCanvas) {
+function blit(ctxP, srcCanvas) {
   // IMPORTANT: map source pixels → destination design units
-  ctxPane.drawImage(
+  ctxP.drawImage(
     srcCanvas,
     0, 0, srcCanvas.width, srcCanvas.height,
-    0, 0, ctxPane.w, ctxPane.h
+    0, 0, ctxP.w, ctxP.h
   );
 }
 
@@ -131,19 +138,19 @@ function blit(ctxPane, srcCanvas) {
  * Call once per frame AFTER you've rendered into ctxB/ctxF/ctxT as needed.
  */
 export function composeFrame({ drawB = true, drawF = true, drawT = true } = {}) {
-  const { canvas: cnvPane, ctx: ctxPane } = arrPane[0];
+  const { canvas: cnvP, ctx: ctxP } = arrP[0];
   const { canvas: cnvB } = arrB[0];
   const { canvas: cnvF } = arrF[0];
   const { canvas: cnvS } = arrS[0];
   const { canvas: cnvT } = arrT[0];
 
-  ctxPane.clearRect(0, 0, ctxPane.w, ctxPane.h);
+  ctxP.clearRect(0, 0, ctxP.w, ctxP.h);
 
-  if (drawB) blit(ctxPane, cnvB);
-  if (drawF) blit(ctxPane, cnvF);
-  if (drawT) blit(ctxPane, cnvT);
+  if (drawB) blit(ctxP, cnvB);
+  if (drawF) blit(ctxP, cnvF);
+  if (drawT) blit(ctxP, cnvT);
 
-  // (cnvPane unused here, but kept for symmetry/debugging)
+  // (cnvP unused here, but kept for symmetry/debugging)
 }
 
 // ---------------------------------------------------------------------------
@@ -167,21 +174,50 @@ export function getSlots() {
 //  Background rendering - color.js configures a neutral gradient
 // ---------------------------------------------------------------------------
 
-export function prepareAndRenderBackground(ctx) {
+export function prepareAndRenderBackground(ctxB) {
 
-  ctx.save();
+  ctxB.save();
 
-  ctx.clearRect(0, 0, ctx.w, ctx.h);
+  ctxB.clearRect(0, 0, ctxB.w, ctxB.h);
 
-  const gradientFill = ctx.createLinearGradient(0, ctx.h, 0, 0);
+  const gradientFill = ctxB.createLinearGradient(0, ctxB.h, 0, 0);
   setLinearGradient(ColorFamily.NONE, gradientFill);
 
-  ctx.fillStyle = gradientFill;
-  ctx.fillRect(0, 0, ctx.w, ctx.h);
+  ctxB.fillStyle = gradientFill;
+  ctxB.fillRect(0, 0, ctxB.w, ctxB.h);
 
-  ctx.restore();
+  ctxB.restore();
 }
 
+
+export function selectAndRenderBackground(ctxB, status) {
+  const fam = status?.bgFamily ?? ColorFamily.NONE;
+  
+  const g = ctxB.createLinearGradient(0, ctxB.h, 0, 0);
+  const gradient = setLinearGradient(fam, g);          // mutate g; ignore return value
+
+  console.log('[UI selected background] fam :', fam, 'g :', g);
+  
+  ctxB.clearRect(0, 0, ctxB.w, ctxB.h);
+  ctxB.save();
+  ctxB.fillStyle = gradient;                 // use gradient
+  ctxB.fillRect(0, 0, ctxB.w, ctxB.h);
+  ctxB.restore();
+}
+
+// Copy the current background layer (arrB) onto the visible pane (arrP).
+export function blitBackgroundToPane() {
+  const ctxP = arrP?.[0]?.ctx;
+  const cnvB    = arrB?.[0]?.canvas;
+
+  if (!ctxP || !cnvB) return;
+
+  ctxP.save();
+  ctxP.setTransform(1, 0, 0, 1, 0, 0);         // avoid inherited transforms
+  ctxP.clearRect(0, 0, ctxP.w, ctxP.h);
+  ctxP.drawImage(cnvB, 0, 0, ctxP.w, ctxP.h);
+  ctxP.restore();
+}
 
 // ---------------------------------------------------------------------------
 //  Pointer → canvas coordinate helper
@@ -198,22 +234,19 @@ export function eventToCtxPoint(ev, canvas) {
   return { x, y };
 }
 
-export function renderSavedBackground(ctx, canvas) {
-  prepareAndRenderBackground(ctx, canvas);
-}
 
+export function renderSavedBackground(ctxP) {
+  const cnvB = arrB?.[0]?.canvas;
+  if (!ctxP || !cnvB) return;
+
+  ctxP.clearRect(0, 0, ctxP.w, ctxP.h);
+  ctxP.drawImage(cnvB, 0, 0, ctxP.w, ctxP.h);
+}
 
 // ---------------------------------------------------------------------------
 //  Shape helpers (used by sprites.js)
 // ---------------------------------------------------------------------------
 
-/**
- * Draw the outline path of a rounded-rectangle "phone body".
- *
- * drawPhonePath(ctx, { x, y, w, h, r })
- *
- * It only defines the path; the caller is responsible for fill/stroke.
- */
 export function drawPhonePath(ctx, { x, y, w, h, r }) {
   if (!ctx) return;
 
@@ -244,6 +277,43 @@ export function drawPhonePath(ctx, { x, y, w, h, r }) {
   ctx.closePath();
 }
 
+function isRadiusValid(r) {
+  return Number.isFinite(r) && r > 0;
+}
+
+function firstValid(pred, ...vals) {
+  for (const v of vals) if (pred(v)) return v;
+  return null;
+}
+
+export function radializeSlots(ctx, baseSlots) {
+  const cx = ctx.mid.x;
+  const cy = ctx.mid.y;
+
+  if (!Array.isArray(baseSlots) || baseSlots.length === 0) return [];
+
+  const DEFAULT_W = 31;
+  const DEFAULT_H = 55;
+
+  return baseSlots.map((s, idx) => {
+    const angle =
+      Number.isFinite(s.angle)
+        ? s.angle
+        : (ctx.pi2 || (2 * Math.PI)) * (idx / baseSlots.length) - Math.PI / 2;
+
+    const radial =
+      firstValid(isRadiusValid, s.arcRadius, s.radius, s.r) ??
+      (Math.min(ctx.w, ctx.h) * 0.33);
+
+    const x = cx + Math.cos(angle) * radial;
+    const y = cy + Math.sin(angle) * radial;
+
+    const w = Number.isFinite(s.w) ? s.w : DEFAULT_W;
+    const h = Number.isFinite(s.h) ? s.h : DEFAULT_H;
+
+    return { ...s, angle, radial, x, y, w, h };
+  });
+}
 
 
 

@@ -1,14 +1,18 @@
 // js/gui/uiControls.js
 
 import { 
-  prepareAndRenderBackground, 
+  prepareAndRenderBackground,
+  selectAndRenderBackground,
+  blitBackgroundToPane, 
   eventToCtxPoint, 
-  getSlots
+  getSlots, 
+  radializeSlots,
+  arrB
 } from './canvasUtils.js';
 
 import { 
   drawPhoneAt,
-  downloadFamilyRingPNG,
+//  downloadFamilyRingPNG,
   familyForIndex, 
 } from './sprites.js';
 
@@ -23,9 +27,9 @@ import {
 } from './animation.js';
 
 import { isInsideCircle } from './helpers.js';
+import { getFamilyMask } from './sequence.js';
 import { drawHenge } from './henge.js';
 import { refresh } from './runTime.js';
-
 
 function isLeader(status) {
   return status.role === 'leader';
@@ -40,6 +44,7 @@ export function installUIHandlers(ctx, canvas, status) {
   installLeaderStopHandler(ctx, canvas, status);
   installClockStartHandler(ctx, canvas, status);
   installEndScreenTapHandler(ctx, canvas, status);
+  installHengeHandler(ctx, canvas, status);
 }
 
 // --- helper: PointerEvent -> DESIGN coords (works for fixed and fit) ---
@@ -136,6 +141,7 @@ export function installLeaderModeConfirmHandler(ctx, canvas, status) {
       msPerBeat: status.msPerBeat
     });
 
+/*
 	if (!status._dumpedFamilyRing) {
 	  status._dumpedFamilyRing = true;   // one-shot
 	  downloadFamilyRingPNG({ 
@@ -144,7 +150,7 @@ export function installLeaderModeConfirmHandler(ctx, canvas, status) {
 	    filename: 'family1-ring.png' 
 	    });
 	}
-
+*/
     refresh();
   });
 }
@@ -247,3 +253,106 @@ export function installEndScreenTapHandler(ctx, canvas, status) {
   });
 }
 
+// ---------------------------------------------------------------------------
+//  Leader & Consort: trigger sound by tapping henge hot spots
+// ---------------------------------------------------------------------------
+
+function installHengeHandler(ctx, canvas, status) {
+  canvas.addEventListener('pointerup', (ev) => {
+    if (status.role === 'leader' && !status.modeConfirmed) return;
+    if (status.modeChosen === 'preview') return;
+    if (status.isEndScreen) return;
+
+    const slots = getSlots();
+    if (!slots?.length) return;
+
+    const { x, y } = eventToCtxPoint(ev, canvas, ctx);
+
+    // Hit test
+    const hit = pickSlotFromPoint(slots, x, y, ctx); // uses ctx.keyRadius
+    const hitI = hit ? (hit.i ?? hit.index ?? null) : null;
+    const hitFamily = (hitI != null) ? familyForIndex(hitI) : null;
+
+    // Always remember last pointer-up for debug overlay
+    status.debugTap = { x, y, hitI, hitFamily };
+
+    if (!hit) {
+      refresh();
+      return;
+    }
+
+    // Block taps on “off” phones only while running — but pass family too
+    if (status.running && !isSlotVisibleInState({ i: hitI, family: hitFamily }, status.index)) {
+      refresh();
+      return;
+    }
+
+    ev.preventDefault();
+    ev.stopImmediatePropagation();
+
+    console.log('[henge tap]', {
+      i: hitI,
+      family: hitFamily,
+      x: Math.round(x),
+      y: Math.round(y),
+      r: ctx.keyRadius ?? 34,
+      modeChosen: status.modeChosen,
+      running: status.running,
+    });
+
+    // Update background selection FIRST
+    status.bgFamily = hitFamily;
+    status.bgIndex  = hitI;
+
+    // Render to the BG layer (adjust this to your actual background ctx)
+    const ctxB = arrB?.[0]?.ctx;        
+if (ctxB) {
+  selectAndRenderBackground(ctxB, status);
+  blitBackgroundToPane();   // <-- immediate visible update
+}
+//refresh();                  // keep, because you also want hotspots/text/phones updated
+  }, { capture: true });
+}
+
+
+
+// returns true if this slot is "on" in the current state
+function isSlotVisibleInState(slot, stateIndex) {
+  const mask = getFamilyMask(stateIndex);
+  if (!mask) return true; // if no mask available, don't block taps
+
+  // Case A: per-slot mask: length == number of phones (e.g. 25)
+  if (Array.isArray(mask) && mask.length >= 25) {
+    return !!mask[slot.i];
+  }
+
+  // Case B: per-family mask: length == number of families (e.g. 5)
+  if (Array.isArray(mask) && mask.length <= 8) {
+    const f = slot.family;                 // you now stamp this in makeHengeOf()
+    const fi = (f >= 1) ? (f - 1) : f;     // if families are 1..5, shift to 0..4
+    return !!mask[fi];
+  }
+
+  // Case C: numeric bitmask by family
+  if (typeof mask === 'number') {
+    const f = slot.family;
+    const fi = (f >= 1) ? (f - 1) : f;
+    return ((mask >> fi) & 1) === 1;
+  }
+
+  return true;
+}
+
+
+export function pickSlotFromPoint(henge, x, y, ctx) {
+  if (!Array.isArray(henge) || henge.length === 0) return null;
+
+  const r = (ctx?.keyRadius ?? 34);
+
+  // If your draw order makes later slots appear "on top", iterate backwards.
+  for (let i = henge.length - 1; i >= 0; i--) {
+    const s = henge[i];
+    if (isInsideCircle(x, y, s.x, s.y, r)) return s;
+  }
+  return null;
+}

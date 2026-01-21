@@ -7,14 +7,14 @@ import {
   prepareAndRenderBackground,
   getSlots,
   setSlots,
+  radializeSlots,
   composeFrame,
-  arrPane,
+  arrP,
   arrB,
   arrF,
+  arrS,
   arrT,
 } from './canvasUtils.js';
-
-//import { arrPane, arrB, arrF, arrT, composeFrame, getSlots } from './canvasUtils.js';
 
 import {
   renderStartLeader,
@@ -34,14 +34,17 @@ import {
 
 import {
   ensurePhoneAtlasForSlots,
-  downloadFamilyRingPNG,
+//  downloadFamilyRingPNG,
   drawPhoneAt,
   familyForIndex,
-  radializeSlots,
+//  radializeSlots,
 } from './sprites.js';
 
-import { clockify } from './helpers.js';
-import { makeHengeOf } from './henge.js';
+import { clockify, set2Pi } from './helpers.js';
+import { makeHenge25, makeHenge, arcRadiusForHotspotTouch  } from './henge.js';
+
+//import { makeHengeOf, makeHenge25 } from './henge.js';
+
 
 import { sequence } from './sequence.js';
 import { installUIHandlers } from './uiControls.js';
@@ -64,7 +67,6 @@ let _lastPhonesKey = null;
 
 export async function initApp() {
   console.log('✅ GUI initialised');
-  console.log('🧪 main.js pairing-check build 2025-12-24 A');
 
   // 1) Surfaces from <canvas data-*> contract
   const canvasPane = document.getElementById('mobile');
@@ -72,15 +74,15 @@ export async function initApp() {
   const designH	   = parseInt(canvasPane.dataset.designH, 10);
   const mode       = canvasPane.dataset.mode;
 
-  const { ctxPane, ctxB, ctxF, ctxT } = initSurfaces({
-    paneId: canvasPane.id,
+  const { ctxP, ctxB, ctxF, ctxT } = initSurfaces({
+//    paneId: canvasPane.id,
     designW,
     designH,
     mode,
   });
 
 console.log('[pairing check @main]', {
-  pane: ctxPane.canvas === canvasPane,
+  pane: ctxP.canvas === canvasPane,
   bg:   ctxB.canvas    === arrB[0].canvas,
   fg:   ctxF.canvas    === arrF[0].canvas,
   text: ctxT.canvas    === arrT[0].canvas,
@@ -92,29 +94,54 @@ console.log('[pairing check @main]', {
 
   // Keep your existing variable names if you want
   const canvas = canvasPane;
-  const ctx    = ctxPane;
+  const ctx    = ctxP;
 
   // 2) status uses pane geometry
   const status = createInitialStatus(ctx);
 
-  // 3) background draws into offscreen background layer
+  status.debugKeys = true;
+  
+  // 3) draw background layer offscreen 
   prepareAndRenderBackground(ctxB);
 
-  // 5) slots are geometry; use pane ctx for sizing reference
-  const slots = makeHengeOf(ctx, 25);
-  setSlots(slots);
+  // 4) slots uses pane geometry
 
+	const N = 25;
+	const phoneW = 30; //40;
+	const phoneH = 56; //70;
+	const keyRadius = 18; // can be whatever; it doesn't affect foot-touch
+	
+	const arcRadius = (phoneW / (2 * Math.tan(Math.PI / N))); // feet-touch
+	
+	const { slots, ctxS } = makeHenge(ctx, {
+	  N,
+	  arcRadiusMode: 'feet',
+	  arcRadius, //: 105,
+	  phoneW,
+	  phoneH,
+	  keyRadius,
+	});
+
+	ctx.keyRadius = ctxS.keyRadius;     // or ctxP.keyRadius, whichever you use consistently
+
+	setSlots(slots);
+
+    console.log('[main] ctxS entries:', Object.entries(ctxS));		
+
+
+  // 5) build slot atlas
   await ensurePhoneAtlasForSlots(slots);
 
-  // 6) re-initialise after physically rotating phone
+
+  // 6) re-initialise geometry when user rotates phone
   installResizeHandler();
   
-  // 7) UI attaches to the visible pane canvas
-  installUIHandlers(ctxPane, canvasPane, status);
+  // 7) attach UI to visible pane canvas
+  installUIHandlers(ctxP, canvasPane, status);
 
-  // 8) renderer should NOT be passed ctx/canvas that represent an offscreen layer
+  // 8) render arrB/arrF/arrT to composite layer arrP
   setRender(() => {
-    frameRender(status); // preferred if frameRender reads arrPane/arrB/arrF/arrT
+    frameRender(status);
   });
 
   // 9) initial paint
@@ -175,94 +202,92 @@ function installResizeHandler() {
   );
 }
 
-//import { arrPane, arrB, arrF, arrT, composeFrame, getSlots } from './canvasUtils.js';
-// also uses: prepareAndRenderBackground, renderStartLeader, renderStartBoth, renderRunning, renderEnd,
-// radializeSlots, drawPhoneAt, familyForIndex, sequence, clockify, stopAnimation
+// Phones-layer renderer.
+// - End screen: NO phones (leave ctxF cleared).
+// - Mode-select leader view: NO phones.
+// - Running: render current animated frame.
+// - Start view: render full henge.
+function renderPhonesLayer(ctxF, status) {
+  // Ensure phones layer is blank unless we explicitly draw phones below.
+  // (frameRender already clears ctxF, but this makes the helper self-contained.)
+  ctxF.clearRect(0, 0, ctxF.w, ctxF.h);
+
+  // 1) Leader mode select: text-only
+  if (status.role === 'leader' && !status.modeConfirmed) return;
+
+  // 2) End screen: intentionally no phones
+  if (status.isEndScreen) return;
+
+  // 3) Otherwise draw phones
+  const idx = status.running ? status.index : status.fullHenge;
+  syncPhonesToForeground(idx);
+}
+
 function frameRender(status) {
-  const ctxPane = arrPane[0].ctx;
+  const ctxP = arrP[0].ctx;
   const ctxB    = arrB[0].ctx;
   const ctxF    = arrF[0].ctx;
   const ctxT    = arrT[0].ctx;
 
-  // 1) Background layer (brute force for now)
   prepareAndRenderBackground(ctxB);
-
-  // 2) Clear dynamic layers
-  ctxF.clearRect(0, 0, ctxF.w, ctxF.h);
   ctxT.clearRect(0, 0, ctxT.w, ctxT.h);
 
-  // 3) Leader mode-select: TEXT ONLY (no phones)
   if (status.role === 'leader' && !status.modeConfirmed) {
-    // Show preview tempo as the candidate during mode select
     status.msPerBeat = status.previewClock;
-
     renderStartLeader(ctxT, status);
+    renderPhonesLayer(ctxF, status);
     composeFrame({ drawB: true, drawF: true, drawT: true });
     return;
   }
 
-  // 4) Slots (needed for both static and animated phones)
   const baseSlots = getSlots();
   if (!baseSlots?.length) {
-    // Nothing to draw except background/text (text will be empty here)
+    renderPhonesLayer(ctxF, status);
     composeFrame({ drawB: true, drawF: true, drawT: true });
     return;
   }
 
-  const slots = radializeSlots(ctxPane, baseSlots);
-
-  // 5) Compute MLS state index (STATIC when not running, ANIMATED when running)
   let elapsedMs = 0;
-  let ended = false;
 
   if (status.running) {
     elapsedMs = performance.now() - status.startWall;
-
     const stateDurationMs = STATE_DUR * status.msPerBeat;
     const idx = Math.floor(elapsedMs / stateDurationMs);
 
     if (idx >= MAX_STATES) {
-      status.index   = MAX_STATES - 1;
-      status.running = false;
-      ended          = true;
+      status.index       = MAX_STATES - 1;
+      status.running     = false;
+      status.isEndScreen = true;
+      stopAnimation();
     } else {
       status.index = idx;
     }
   } else {
-    // Start view: fixed "full henge" look (same for concert + preview)
-    status.index = status.fullHenge;
+    if (!status.isEndScreen) status.index = status.fullHenge;
   }
 
-  // Clamp (belt-and-braces)
   if (status.index < 0) status.index = 0;
   if (status.index >= MAX_STATES) status.index = MAX_STATES - 1;
 
-  // 6) Phones layer (static in start view; animated when running)
+  renderPhonesLayer(ctxF, status);
 
-  syncPhonesToForeground(status.index);
-  composeFrame({ drawB: true, drawF: true, drawT: true });
-
-  // 7) Text overlay (START / RUNNING / END)
-  if (ended) {
-//    refresh();
+  if (status.isEndScreen) {
     renderEnd(ctxT, status);
-    status.isEndScreen = true;
-    stopAnimation();
-//    refresh();
   } else {
     const clockMs = computeClockMs(status, elapsedMs);
     const { mins, secs } = clockify(clockMs);
 
-    if (!status.running) {
-      renderStartBoth(ctxT, status);           // start screen over static henge
-    } else {
-      renderRunning(ctxT, { status, mins, secs }); // running overlay over animated henge
-    }
+    if (status.running) renderRunning(ctxT, { status, mins, secs });
+    else renderStartBoth(ctxT, status);
   }
 
-  // 8) Composite layers onto the visible pane
-  composeFrame({ drawB: true, drawF: true, drawT: true });
+	// DEBUG overlay drawn on top of text
+	drawKeyDebugOverlay(ctxF, ctxP, status);
+
+	// 8) Composite
+	composeFrame({ drawB: true, drawF: true, drawT: true });
 }
+
 
 // - CONCERT: 00:00 to 12:24 real time
 // - PREVIEW: 00:00 to 12:24 fast-forward
@@ -283,46 +308,68 @@ function computeClockMs(status, elapsedMs) {
 
 // Paint one MLS state into the FOREGROUND layer (ctxF), using sequence[stateIndex].
 function syncPhonesToForeground(stateIndex) {
-  const ctxPane = arrPane[0].ctx;
-  const ctxF    = arrF[0].ctx;
 
-  const baseSlots = getSlots();
-  const slots     = radializeSlots(ctxPane, baseSlots);
+const slots = getSlots();
+const bits = sequence[stateIndex]; // expected: [5] values (0/1)
+const ctxP = arrP[0].ctx;
+const ctxF    = arrF[0].ctx;
+  
+for (let i = 0; i < slots.length; i++) {
+  const slot = slots[i];
+  const family = familyForIndex(i);
+  const active = (bits[i % 5] !== 0);
 
-  // clear foreground layer
-  ctxF.clearRect(0, 0, ctxF.w, ctxF.h);
+  const theta = slot.theta ?? slot.angle ?? 0;               // position angle
+//  const angle = theta + (ctxP.orientBias ?? ctxP.pi2); // draw rotation
+  const angle = theta + (ctxP.orientBias ?? Math.PI / 2); // draw rotation
 
-  const bits = sequence[stateIndex]; // expected: [5] values (0/1)
+  drawPhoneAt(ctxF, { ...slot, angle, family, active, shadow: true });
+  }
+}
 
-  // ---- ONE log per function call (not per phone) ----
-  // persistent call counter (survives across frames)
-  syncPhonesToForeground._calls = (syncPhonesToForeground._calls || 0) + 1;
-  const callId = syncPhonesToForeground._calls;
+function drawKeyDebugOverlay(ctxF, ctxP, status) {
+  if (!status.debugKeys) return;
 
-  console.log('[syncPhonesToForeground] BEGIN', {
-    callId,
-    stateIndex,
-    bits,
-    baseLen: Array.isArray(baseSlots) ? baseSlots.length : null,
-    slotsLen: Array.isArray(slots) ? slots.length : null,
-    ctxF_wh: [ctxF.w, ctxF.h],
-  });
+  const slots = getSlots();
 
-  // draw phones
-  for (let i = 0; i < slots.length; i++) {
-    const slot   = slots[i];
-    const family = familyForIndex(i);
-    const active = (bits[i % 5] !== 0);
+  if (!slots?.length) return;
 
-    // sample a few only
-    if (i < 3) {
-      console.log('[syncPhonesToForeground] slot sample', i, {
-        x: slot.x, y: slot.y, w: slot.w, h: slot.h, family, active
-      });
-    }
+  // Prefer per-slot hotspot radius; fallback to ctxP.keyRadius
+  const r = (slots[0]?.hot?.r ?? ctxP.keyRadius ?? 16);
+  const pi2 = ctxP.pi2 ?? (Math.PI * 2);
 
-    drawPhoneAt(ctxF, { ...slot, family, active, shadow: true });
+  ctxF.save();
+
+  // --- Blue circles for ALL keys ---
+  ctxF.lineWidth = 1;
+  ctxF.strokeStyle = 'rgba(0, 0, 255, 0.6)';
+  for (const s of slots) {
+    const x = s.hot?.x ?? s.x;
+    const y = s.hot?.y ?? s.y;
+
+    ctxF.beginPath();
+    ctxF.arc(x, y, r, 0, pi2);
+    ctxF.stroke();
   }
 
-  console.log('[syncPhonesToForeground] END', { callId, drawn: slots.length });
+  // --- Red circle at last tap point ---
+  const t = status.debugTap;
+  if (t) {
+    ctxF.lineWidth = 2;
+    ctxF.strokeStyle = 'rgba(255, 0, 0, 0.85)';
+    ctxF.beginPath();
+    ctxF.arc(t.x, t.y, r, 0, pi2);
+    ctxF.stroke();
+
+    // centre dot
+    ctxF.fillStyle = 'rgba(255, 0, 0, 0.85)';
+    ctxF.beginPath();
+    ctxF.arc(t.x, t.y, 3, 0, pi2);
+    ctxF.fill();
+  }
+
+  ctxF.restore();
 }
+
+
+
