@@ -1,6 +1,5 @@
 // js/gui/runTime.js
 
-
 // Internal runtime state (shared across the app)
 export const rt = {
   // Who is this page for? (set from main.js)
@@ -73,12 +72,9 @@ export function bumpFrame() {
   rt.frame += 1;
 }
 
-
-// js/gui/runTime.js
-
 export function makeWallClockRenderer(config) {
   const {
-    ctx,
+    ctxP,
     slots = [],
     role = 'consort',
     f = 0,
@@ -96,20 +92,22 @@ export function makeWallClockRenderer(config) {
     renderEnd,
   } = config;
 
-  if (!ctx || !Array.isArray(slots) || !drawPhoneAt || !familyForIndex) {
-    console.warn('[runTime] makeWallClockRenderer: missing ctx/slots/drawPhoneAt/familyForIndex');
+if (!ctxP || !Array.isArray(slots) || !drawPhoneAt || !familyForIndex) {
+    console.warn('[runTime] makeWallClockRenderer: missing ctxP/slots/drawPhoneAt/familyForIndex');
     return () => {};
   }
-
-  const RADIAL_OFFSET = Math.PI / 2;
 
   return function frameRenderer(fauxClock) {
     // 1) Background
     if (typeof renderSavedBackground === 'function') {
-      renderSavedBackground(ctx);
+      renderSavedBackground(ctxP);
     } else if (typeof prepareAndRenderBackground === 'function') {
-      prepareAndRenderBackground(f);
+      prepareAndRenderBackground(ctxP, status);
     }
+
+    // ...and everywhere else replace ctx -> ctxP:
+    // drawPhoneAt(ctxP, ...)
+    // renderStartLeader(ctxP, status), renderRunning(ctxP, status), etc.
 
     // If we don't have a status object, just draw phones + bail
     if (!status || typeof status !== 'object') {
@@ -122,8 +120,8 @@ export function makeWallClockRenderer(config) {
         const slot = slots[i];
         const family = (mask != null) ? familyForIndex(i, mask) : familyForIndex(i);
         const baseAngle = slot.angle ?? 0;
-        const angle = baseAngle + RADIAL_OFFSET;
-        drawPhoneAt(ctx, { ...slot, angle, family, active: true, shadow: true });
+        const angle = baseAngle + (ctxP.orientBias ?? 0);
+        drawPhoneAt(ctxP, { ...slot, angle, family, active: true, shadow: true });
       }
       return;
     }
@@ -134,9 +132,9 @@ export function makeWallClockRenderer(config) {
     // --- LEADER MODE-SELECT VIEW: text only, NO phones ---
     if (!isRunning && isLeader) {
       if (typeof renderStartLeader === 'function') {
-        renderStartLeader(ctx, status);
+        renderStartLeader(ctxP, status);
       } else if (typeof renderStartBoth === 'function') {
-        renderStartBoth(ctx, status);
+        renderStartBoth(ctxP, status);
       }
       return; // ← important: skip phone drawing
     }
@@ -150,10 +148,9 @@ export function makeWallClockRenderer(config) {
     for (let i = 0; i < slots.length; i++) {
       const slot = slots[i];
       const family = (mask != null) ? familyForIndex(i, mask) : familyForIndex(i);
-      const baseAngle = slot.angle ?? 0;
-      const angle = baseAngle + RADIAL_OFFSET;
+      const angle = slot.angle ?? 0;
 
-      drawPhoneAt(ctx, {
+      drawPhoneAt(ctxP, {
         ...slot,
         angle,
         family,
@@ -166,14 +163,14 @@ export function makeWallClockRenderer(config) {
     if (!isRunning) {
       // CONSORT pre-view (leader case already handled above)
       if (typeof renderStartBoth === 'function') {
-        renderStartBoth(ctx, status);
+        renderStartBoth(ctxP, status);
       }
       return;
     }
 
     // RUNNING view (both leader and consort)
     if (typeof renderRunning === 'function') {
-      renderRunning(ctx, status);
+      renderRunning(ctxP, status);
     }
     // Later you can call renderEnd(ctx, status) when the show finishes.
   };
