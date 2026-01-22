@@ -1,6 +1,7 @@
 // sprites.js — phone sprites (active/inactive)
 import { setLinearGradient, ColorFamily } from './color.js';
 import { 
+  arrP, 
   arrF, 
   getSlots, 
   radializeSlots, 
@@ -25,62 +26,63 @@ async function makePhoneSprite({
 }) {
   const dpr = window.devicePixelRatio || 1;
 
-  const off = document.createElement('canvas');
-  off.width  = Math.ceil(w * dpr);
-  off.height = Math.ceil(h * dpr);
+  const cnvS = document.createElement('canvas');
+  cnvS.width  = Math.ceil(w * dpr);
+  cnvS.height = Math.ceil(h * dpr);
 
-  const ctx = off.getContext('2d');
+  const ctxS = cnvS.getContext('2d');
 
   // Clear in DEVICE pixels, then draw in CSS/design units
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.clearRect(0, 0, off.width, off.height);
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctxS.setTransform(1, 0, 0, 1, 0, 0);
+  ctxS.clearRect(0, 0, cnvS.width, cnvS.height);
+  ctxS.setTransform(dpr, 0, 0, dpr, 0, 0);
 
   // radius in pixels
   const rPx = Math.min(w, h) * 0.195; //* 0.065; initial version
 
   // IMPORTANT: correct signature
   
-  drawPhonePath(ctx, { x: 0, y: 0, w, h, r: rPx });
+  drawPhonePath(ctxS, { x: 0, y: 0, w, h, r: rPx });
 
   const hairlineCssPx = Math.max(hairlineAt1x / dpr, 0.5 / dpr);
-  ctx.lineWidth = hairlineCssPx;
-  ctx.lineJoin = 'round';
-  ctx.lineCap = 'round';
-  ctx.strokeStyle = (state === 'active')
+  ctxS.lineWidth = hairlineCssPx;
+  ctxS.lineJoin = 'round';
+  ctxS.lineCap = 'round';
+  ctxS.strokeStyle = (state === 'active')
     ? `rgba(0,0,0,${activeOutlineAlpha})`
     : `rgba(255,255,255,${inactiveOutlineAlpha})`;
-  ctx.stroke();
+  ctxS.stroke();
 
   if (state === 'active') {
-    const g = ctx.createLinearGradient(0, h, 0, 0);
+    const g = ctxS.createLinearGradient(0, h, 0, 0);
     setLinearGradient(family, g);
-    ctx.fillStyle = g;
-    ctx.fill();
+    ctxS.fillStyle = g;
+    ctxS.fill();
   }
 
   if (state === 'active') {
-    ctx.save();
-    ctx.shadowBlur = 6;
-    ctx.shadowColor = `rgba(0,0,0,${activeOutlineAlpha * 0.35})`;
+    ctxS.save();
+    ctxS.shadowBlur = 6;
+    ctxS.shadowColor = `rgba(0,0,0,${activeOutlineAlpha * 0.35})`;
 
     // IMPORTANT: correct signature again
-//    drawPhonePath(ctx, { x: 0, y: 0, w, h, r: rPx });
+    drawPhonePath(ctxS, { x: 0, y: 0, w, h, r: rPx });
 
     // “shadow-only” stroke trick (stroke itself transparent)
-    ctx.strokeStyle = 'rgba(0,0,0,0)';
-    ctx.stroke();
-    ctx.restore();
+    ctxS.strokeStyle = 'rgba(0,0,0,0)';
+    ctxS.stroke();
+    ctxS.restore();
   }
 
   if (state === 'inactive') {
   // outline only
-    ctx.lineWidth = 1.25; // a bit stronger than 1 for visibility
-    ctx.strokeStyle = 'rgba(220,220,220,0.50)'; // neutral outline
-    ctx.stroke();
+    ctxS.lineWidth = 1.25; // a bit stronger than 1 for visibility
+    ctxS.strokeStyle = 'rgba(220,220,220,0.50)'; // neutral outline
+    ctxS.stroke();
 }
-  return await createImageBitmap(off);
+  return await createImageBitmap(cnvS);
 }
+
 
 const atlas = { active: {}, inactive: {} };
 let phoneSpriteSize = { w: 0, h: 0 };
@@ -117,28 +119,28 @@ export function familyForIndex(i) {
   return color[i % color.length];
 }
  
-export function drawPhoneAt(ctx, { x, y, w, h, family, active = true, shadow = true, angle = 0 }) {
+export function drawPhoneAt(ctxS, { x, y, w, h, family, active = true, shadow = true, angle = 0 }) {
   const img = getPhoneSprite(family, active);
   if (!img) {
     console.warn('[drawPhoneAt] missing sprite for family', family, 'active', active);
     return;
   }
 
-  ctx.save();
-  ctx.translate(x, y);
+  ctxS.save();
+  ctxS.translate(x, y);
 
   // Swivel around the ring
-  ctx.rotate(angle ?? 0);
+  ctxS.rotate(angle ?? 0);
 
   if (shadow) {
-    ctx.shadowColor = 'rgba(0,0,0,0.25)';
-    ctx.shadowBlur = 8;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 10;
+    ctxS.shadowColor = 'rgba(0,0,0,0.25)';
+    ctxS.shadowBlur = 8;
+    ctxS.shadowOffsetX = 0;
+    ctxS.shadowOffsetY = 5;
   }
 
-  ctx.drawImage(img, -w / 2, -h / 2, w, h);
-  ctx.restore();
+  ctxS.drawImage(img, -w / 2, -h / 2, w, h);
+  ctxS.restore();
 }
 
 // Put this AFTER the functions above (or ensure the above are function declarations)

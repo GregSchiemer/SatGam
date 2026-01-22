@@ -5,10 +5,10 @@
 import { ColorFamily, setLinearGradient } from './color.js';
 
 export const arrP = []; // visible compositor: #mobile
-export const arrB    = []; // offscreen background layer
-export const arrF    = []; // offscreen foreground/phones layer
-export const arrT    = []; // offscreen text layer
-export const arrS 	 = []; // offscreen slots
+export const arrB    = []; // off screen background layer
+export const arrF    = []; // off screen foreground/phones layer
+export const arrT    = []; // off screen text layer
+export const arrS 	 = []; // off screen slots
 
 function stampGeometry(ctx, designW, designH, dpr, fit) {
   ctx.w = designW;
@@ -58,9 +58,9 @@ function configureCanvas(canvas, cssW, cssH, dpr, fit, designW, designH, isVisib
 /**
  * initSurfaces(): creates 4 contexts with identical geometry.
  * - ctxP: visible compositor on #mobile
- * - ctxB: offscreen background layer
- * - ctxF: offscreen foreground/phones layer
- * - ctxT: offscreen text layer
+ * - ctxB: off screen background layer
+ * - ctxF: off screen foreground/phones layer
+ * - ctxT: off screen text layer
  *
  * mode:
  * - 'fixed': CSS size = designW x designH (good for “hypothetical phone” on laptop)
@@ -88,7 +88,7 @@ export function initSurfaces({ paneId = 'mobile', designW = 390, designH = 844, 
   // Visible compositor (“window pane”)
   const ctxP = configureCanvas(cnvP, cssW, cssH, dpr, fit, designW, designH, true);
 
-  // Offscreen layers
+  // off screen layers
   const cnvB = document.createElement('canvas');
   const ctxB = configureCanvas(cnvB, cssW, cssH, dpr, fit, designW, designH, false);
 
@@ -218,6 +218,21 @@ export function blitBackgroundToPane() {
   ctxP.drawImage(cnvB, 0, 0, ctxP.w, ctxP.h);
   ctxP.restore();
 }
+
+// Copy the current sprites layer (arrB) onto the visible pane (arrP).
+export function blitSpritesToPane() {
+  const ctxP = arrP?.[0]?.ctx;
+  const cnvB    = arrB?.[0]?.canvas;
+
+  if (!ctxP || !cnvB) return;
+
+  ctxP.save();
+  ctxP.setTransform(1, 0, 0, 1, 0, 0);         // avoid inherited transforms
+  ctxP.clearRect(0, 0, ctxP.w, ctxP.h);
+  ctxP.drawImage(cnvB, 0, 0, ctxP.w, ctxP.h);
+  ctxP.restore();
+}
+
 
 // ---------------------------------------------------------------------------
 //  Pointer → canvas coordinate helper
