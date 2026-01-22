@@ -56,7 +56,7 @@ function configureCanvas(canvas, cssW, cssH, dpr, fit, designW, designH, isVisib
 }
 
 /**
- * initSurfaces(): creates 4 contexts with identical geometry.
+ * initCanvases(): creates 4 contexts with identical geometry.
  * - ctxP: visible compositor on #mobile
  * - ctxB: off screen background layer
  * - ctxF: off screen foreground/phones layer
@@ -66,9 +66,9 @@ function configureCanvas(canvas, cssW, cssH, dpr, fit, designW, designH, isVisib
  * - 'fixed': CSS size = designW x designH (good for “hypothetical phone” on laptop)
  * - 'fit'  : scales down to fit window (no upscaling; see fit clamp)
  */
-export function initSurfaces({ paneId = 'mobile', designW = 390, designH = 844, mode = 'fixed' } = {}) {
+export function initCanvases({ paneId = 'mobile', designW = 390, designH = 844, mode = 'fixed' } = {}) {
   const cnvP = document.getElementById(paneId);
-  if (!cnvP) throw new Error(`initSurfaces: no <canvas id="${paneId}"> found in DOM`);
+  if (!cnvP) throw new Error(`initCanvases: no <canvas id="${paneId}"> found in DOM`);
 
   const dpr = window.devicePixelRatio || 1;
 
@@ -103,22 +103,25 @@ export function initSurfaces({ paneId = 'mobile', designW = 390, designH = 844, 
 
   // Singleton assignment contract
   arrP[0] = { canvas: cnvP, ctx: ctxP, cssW, cssH };
-  arrB[0]    = { canvas: cnvB,    ctx: ctxB,    cssW, cssH };
-  arrF[0]    = { canvas: cnvF,    ctx: ctxF,    cssW, cssH };
-  arrT[0]    = { canvas: cnvT,    ctx: ctxT,    cssW, cssH };
+  arrB[0] = { canvas: cnvB, ctx: ctxB, cssW, cssH };
+  arrF[0] = { canvas: cnvF, ctx: ctxF, cssW, cssH };
+  arrS[0] = { canvas: cnvS, ctx: ctxS, cssW, cssH };
+  arrT[0] = { canvas: cnvT, ctx: ctxT, cssW, cssH };
 
-  console.log('[pairing check @initSurfaces]', {
-    pane: ctxP.canvas === cnvP,
-    bg:   ctxB.canvas    === cnvB,
-    fg:   ctxF.canvas    === cnvF,
-    text: ctxT.canvas    === cnvT,
-    paneSize: [cnvP.width, cnvP.height],
-    bgSize:   [cnvB.width, cnvB.height],
-    fgSize:   [cnvF.width, cnvF.height],
-    textSize: [cnvT.width, cnvT.height],
+  console.log('[pairing check @initCanvases]', {
+    pane: 		ctxP.canvas === cnvP,
+    bg:   		ctxB.canvas === cnvB,
+    fg:   		ctxF.canvas === cnvF,
+    sprite: 	ctxS.canvas === cnvS,
+    text:   	ctxT.canvas === cnvT,
+    paneSize:   [cnvP.width, cnvP.height],
+    bgSize:     [cnvB.width, cnvB.height],
+    fgSize:     [cnvF.width, cnvF.height],
+    spriteSize: [cnvS.width, cnvS.height],
+    textSize:   [cnvT.width, cnvT.height],
   });
 
-  return { ctxP, ctxB, ctxF, ctxT };
+  return { ctxP, ctxB, ctxF, ctxS, ctxT };
 }
 
 
@@ -133,24 +136,20 @@ function blit(ctxP, srcCanvas) {
   );
 }
 
-/**
- * composeFrame(): clears the visible pane and composites layers in order.
- * Call once per frame AFTER you've rendered into ctxB/ctxF/ctxT as needed.
- */
+// composeFrame(): clears the visible pane and composites layers in order.
+
 export function composeFrame({ drawB = true, drawF = true, drawT = true } = {}) {
   const { canvas: cnvP, ctx: ctxP } = arrP[0];
   const { canvas: cnvB } = arrB[0];
   const { canvas: cnvF } = arrF[0];
-  const { canvas: cnvS } = arrS[0];
   const { canvas: cnvT } = arrT[0];
 
   ctxP.clearRect(0, 0, ctxP.w, ctxP.h);
 
   if (drawB) blit(ctxP, cnvB);
   if (drawF) blit(ctxP, cnvF);
+  if (drawF) blit(ctxP, cnvF);
   if (drawT) blit(ctxP, cnvT);
-
-  // (cnvP unused here, but kept for symmetry/debugging)
 }
 
 // ---------------------------------------------------------------------------

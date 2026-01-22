@@ -1,8 +1,7 @@
 // js/gui/main.js
 
 import {
-//  initCanvas,
-  initSurfaces,
+  initCanvases,
   renderSavedBackground,
   prepareAndRenderBackground,
   getSlots,
@@ -74,7 +73,7 @@ export async function initApp() {
   const designH	   = parseInt(canvasPane.dataset.designH, 10);
   const mode       = canvasPane.dataset.mode;
 
-  const { ctxP, ctxB, ctxF, ctxT } = initSurfaces({
+  const { ctxP, ctxB, ctxF, ctxT } = initCanvases({
 //    paneId: canvasPane.id,
     designW,
     designH,
