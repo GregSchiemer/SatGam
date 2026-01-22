@@ -3,6 +3,7 @@
 import { 
   prepareAndRenderBackground,
   selectAndRenderBackground,
+  composeFrame,
   blitBackgroundToPane, 
   eventToCtxPoint, 
   getSlots, 
@@ -141,16 +142,6 @@ export function installLeaderModeConfirmHandler(ctx, canvas, status) {
       msPerBeat: status.msPerBeat
     });
 
-/*
-	if (!status._dumpedFamilyRing) {
-	  status._dumpedFamilyRing = true;   // one-shot
-	  downloadFamilyRingPNG({ 
-	    family: null, 
-	    active: true, 
-	    filename: 'family1-ring.png' 
-	    });
-	}
-*/
     refresh();
   });
 }
@@ -308,9 +299,8 @@ function installHengeHandler(ctx, canvas, status) {
     const ctxB = arrB?.[0]?.ctx;        
 if (ctxB) {
   selectAndRenderBackground(ctxB, status);
-  blitBackgroundToPane();   // <-- immediate visible update
+  composeFrame({ drawB: true, drawF: true, drawS: true, drawT: true });
 }
-//refresh();                  // keep, because you also want hotspots/text/phones updated
   }, { capture: true });
 }
 
