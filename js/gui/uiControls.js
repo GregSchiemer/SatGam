@@ -4,7 +4,7 @@ import {
   prepareAndRenderBackground,
   selectAndRenderBackground,
   composeFrame,
-  blitBackgroundToPane, 
+//  blitBackgroundToPane, 
   eventToCtxPoint, 
   getSlots, 
   radializeSlots,
@@ -80,12 +80,12 @@ export function installLeaderModeSelectHandler(ctx, canvas, status) {
       r: ctx.tapRadius
     });
 
-    const hitLeft  = isInsideCircle(x, y, ctx.left.x,  ctx.left.y,  ctx.tapRadius);
-    const hitRight = isInsideCircle(x, y, ctx.right.x, ctx.right.y, ctx.tapRadius);
+    const tapLeft  = isInsideCircle(x, y, ctx.left.x,  ctx.left.y,  ctx.tapRadius);
+    const tapRight = isInsideCircle(x, y, ctx.right.x, ctx.right.y, ctx.tapRadius);
 
-    if (!hitLeft && !hitRight) return;
+    if (!tapLeft && !tapRight) return;
 
-    if (hitLeft) {
+    if (tapLeft) {
       status.modeChosen = 'preview';
       status.msPerBeat  = status.previewClock;
       console.log('[mode] PREVIEW selected, msPerBeat =', status.msPerBeat);
@@ -120,8 +120,8 @@ export function installLeaderModeConfirmHandler(ctx, canvas, status) {
 
     console.log('[confirm] pointer', { x, y, x1, y1, r });
 
-    const hitConfirm = isInsideCircle(x, y, x1, y1, r);
-    if (!hitConfirm) return;
+    const tapConfirm = isInsideCircle(x, y, x1, y1, r);
+    if (!tapConfirm) return;
 
     status.modeConfirmed = true;
     status.running = false;
@@ -148,7 +148,6 @@ export function installLeaderModeConfirmHandler(ctx, canvas, status) {
 
 // ---------------------------------------------------------------------------
 //  Leader: stop while running (tap TOP text hot spot)
-//  (Adjust hotspot if you want it elsewhere; this keeps it away from the clock.)
 // ---------------------------------------------------------------------------
 export function installLeaderStopHandler(ctx, canvas, status) {
   canvas.addEventListener('pointerup', (ev) => {
@@ -162,8 +161,8 @@ export function installLeaderStopHandler(ctx, canvas, status) {
     const y1 = ctx.top.y;
     const r  = ctx.tapRadius;
 
-    const hitStop = isInsideCircle(x, y, x1, y1, r);
-    if (!hitStop) return;
+    const tapStop = isInsideCircle(x, y, x1, y1, r);
+    if (!tapStop) return;
 
     console.log('[stop] leader stop via top text tap');
 
@@ -190,8 +189,8 @@ export function installClockStartHandler(ctx, canvas, status) {
 
     const { x, y } = eventToDesignPoint(ev, canvas, ctx);
 
-    const hitClock = isInsideCircle(x, y, ctx.mid.x, ctx.mid.y, ctx.tapRadius);
-    if (!hitClock) {
+    const tapClock = isInsideCircle(x, y, ctx.mid.x, ctx.mid.y, ctx.tapRadius);
+    if (!tapClock) {
       console.log('[clock] ignored: outside clock');
       return;
     }
@@ -259,21 +258,21 @@ function installHengeHandler(ctx, canvas, status) {
 
     const { x, y } = eventToCtxPoint(ev, canvas, ctx);
 
-    // Hit test
-    const hit = pickSlotFromPoint(slots, x, y, ctx); // uses ctx.keyRadius
-    const hitI = hit ? (hit.i ?? hit.index ?? null) : null;
-    const hitFamily = (hitI != null) ? familyForIndex(hitI) : null;
+    // tap test
+    const tap = pickSlotFromPoint(slots, x, y, ctx, status); // uses ctx.keyRadius
+    const tapI = tap ? (tap.i ?? tap.index ?? null) : null;
+    const tapFamily = (tapI != null) ? familyForIndex(tapI) : null;
 
     // Always remember last pointer-up for debug overlay
-    status.debugTap = { x, y, hitI, hitFamily };
+    status.debugTap = { x, y, tapI, tapFamily };
 
-    if (!hit) {
+    if (!tap) {
       refresh();
       return;
     }
 
     // Block taps on “off” phones only while running — but pass family too
-    if (status.running && !isSlotVisibleInState({ i: hitI, family: hitFamily }, status.index)) {
+    if (status.running && !isSlotVisibleInState({ i: tapI, family: tapFamily }, status.index)) {
       refresh();
       return;
     }
@@ -282,8 +281,8 @@ function installHengeHandler(ctx, canvas, status) {
     ev.stopImmediatePropagation();
 
     console.log('[henge tap]', {
-      i: hitI,
-      family: hitFamily,
+      i: tapI,
+      family: tapFamily,
       x: Math.round(x),
       y: Math.round(y),
       r: ctx.keyRadius ?? 34,
@@ -292,14 +291,14 @@ function installHengeHandler(ctx, canvas, status) {
     });
 
     // Update background selection FIRST
-    status.bgFamily = hitFamily;
-    status.bgIndex  = hitI;
+    status.bgFamily = tapFamily;
+    status.bgIndex  = tapI;
 
     // Render to the BG layer (adjust this to your actual background ctx)
     const ctxB = arrB?.[0]?.ctx;        
 if (ctxB) {
   selectAndRenderBackground(ctxB, status);
-  composeFrame({ drawB: true, drawF: true, drawS: true, drawT: true });
+  composeFrame({ drawB: true, drawF: true, drawT: true });
 }
   }, { capture: true });
 }
@@ -334,6 +333,21 @@ function isSlotVisibleInState(slot, stateIndex) {
 }
 
 
+export function pickSlotFromPoint(slots, x, y, ctx, status) {
+  if (!Array.isArray(slots) || slots.length === 0) return null;
+
+  const r = (ctx?.keyRadius ?? 34);
+
+  // draw order makes later slots appear "on top", so iterate backwards.
+  for (let i = slots.length - 1; i >= 0; i--) {
+    const s = slots[i];
+    if (isInsideCircle(x, y, s.x, s.y, r)) return s;
+    status.lastKeyIndex = i;
+  }
+  return null;
+}
+
+/*
 export function pickSlotFromPoint(henge, x, y, ctx) {
   if (!Array.isArray(henge) || henge.length === 0) return null;
 
@@ -346,3 +360,4 @@ export function pickSlotFromPoint(henge, x, y, ctx) {
   }
   return null;
 }
+*/

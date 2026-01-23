@@ -105,10 +105,6 @@ if (!ctxP || !Array.isArray(slots) || !drawPhoneAt || !familyForIndex) {
       prepareAndRenderBackground(ctxP, status);
     }
 
-    // ...and everywhere else replace ctx -> ctxP:
-    // drawPhoneAt(ctxP, ...)
-    // renderStartLeader(ctxP, status), renderRunning(ctxP, status), etc.
-
     // If we don't have a status object, just draw phones + bail
     if (!status || typeof status !== 'object') {
       // (phones-only fallback)

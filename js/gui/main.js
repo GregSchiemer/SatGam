@@ -33,10 +33,8 @@ import {
 
 import {
   ensurePhoneAtlasForSlots,
-//  downloadFamilyRingPNG,
   drawPhoneAt,
   familyForIndex,
-//  radializeSlots,
 } from './sprites.js';
 
 import { clockify, set2Pi } from './helpers.js';
@@ -71,20 +69,17 @@ export async function initApp() {
   const canvasPane = document.getElementById('mobile');
   const designW    = parseInt(canvasPane.dataset.designW, 10);
   const designH	   = parseInt(canvasPane.dataset.designH, 10);
-  const mode       = canvasPane.dataset.mode;
 
   const { ctxP, ctxB, ctxF, ctxT } = initCanvases({
-//    paneId: canvasPane.id,
     designW,
     designH,
-    mode,
   });
 
 console.log('[pairing check @main]', {
   pane: ctxP.canvas === canvasPane,
-  bg:   ctxB.canvas    === arrB[0].canvas,
-  fg:   ctxF.canvas    === arrF[0].canvas,
-  text: ctxT.canvas    === arrT[0].canvas,
+  bg:   ctxB.canvas === arrB[0].canvas,
+  fg:   ctxF.canvas === arrF[0].canvas,
+  text: ctxT.canvas === arrT[0].canvas,
   paneSize: [canvasPane.width, canvasPane.height],
   bgSize:   [arrB[0].canvas.width, arrB[0].canvas.height],
   fgSize:   [arrF[0].canvas.width, arrF[0].canvas.height],
@@ -96,9 +91,9 @@ console.log('[pairing check @main]', {
   const ctx    = ctxP;
 
   // 2) status uses pane geometry
-  const status = createInitialStatus(ctx);
+  const status = initStatus(ctx);
 
-  status.debugKeys = true;
+  status.debugKeys = false;
   
   // 3) draw background layer offscreen 
   prepareAndRenderBackground(ctxB);
@@ -115,9 +110,9 @@ console.log('[pairing check @main]', {
 	const { slots, ctxS } = makeHenge(ctx, {
 	  N,
 	  arcRadiusMode: 'feet',
-	  arcRadius, //: 105,
 	  phoneW,
 	  phoneH,
+	  arcRadius,
 	  keyRadius,
 	});
 
@@ -153,7 +148,7 @@ console.log('[pairing check @main]', {
 // ---------------------------------------------------------------------------
 
 // Create the initial status object: all process/runtime flags live here.
-function createInitialStatus(ctx) {
+function initStatus(ctx) {
   const roleAtLaunch = window.location.pathname.includes('leader')
     ? 'leader'
     : 'consort';
@@ -224,9 +219,9 @@ function renderPhonesLayer(ctxF, status) {
 
 function frameRender(status) {
   const ctxP = arrP[0].ctx;
-  const ctxB    = arrB[0].ctx;
-  const ctxF    = arrF[0].ctx;
-  const ctxT    = arrT[0].ctx;
+  const ctxB = arrB[0].ctx;
+  const ctxF = arrF[0].ctx;
+  const ctxT = arrT[0].ctx;
 
   prepareAndRenderBackground(ctxB);
   ctxT.clearRect(0, 0, ctxT.w, ctxT.h);
