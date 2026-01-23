@@ -60,6 +60,9 @@ export function renderStartLeader(ctxT, status) {
 export function renderRunning(ctxT, { status, mins, secs }) {
   drawTopText(ctxT, String(status.index + 1));
   drawMidText(ctxT, `${mins}:${secs}`);
+  const k = Number.isInteger(status?.lastKeyIndex) ? (status.lastKeyIndex) : null;
+  drawLowText(ctxT, k ? `Key ${k}` : '');
+
 }
 
 // End view

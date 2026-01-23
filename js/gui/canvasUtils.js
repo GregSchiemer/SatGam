@@ -137,7 +137,6 @@ function blit(ctxP, srcCanvas) {
 }
 
 // composeFrame(): clears the visible pane and composites layers in order.
-
 export function composeFrame({ drawB = true, drawF = true, drawT = true } = {}) {
   const { canvas: cnvP, ctx: ctxP } = arrP[0];
   const { canvas: cnvB } = arrB[0];
