@@ -62,7 +62,6 @@ export function renderRunning(ctxT, { status, mins, secs }) {
   drawMidText(ctxT, `${mins}:${secs}`);
   const k = Number.isInteger(status?.lastKeyIndex) ? (status.lastKeyIndex) : null;
   drawLowText(ctxT, k ? `Key ${k}` : '');
-
 }
 
 // End view
@@ -70,4 +69,11 @@ export function renderEnd(ctxT, status) {
   drawTopText(ctxT, 'Phonehenge');
   drawMidText(ctxT, 'Duration : 12:24');
   drawLowText(ctxT, 'G. Schiemer © 2025');
+}
+
+export function renderDebug(ctxT, { status, mins, secs, bitPattern = '' }) {
+  drawTopText(ctxT, String(status.index + 1));
+  drawSubText(ctxT, bitPattern);
+  drawMidText(ctxT, `${mins}:${secs}`);
+  drawLowText(ctxT, 'DEBUG');
 }

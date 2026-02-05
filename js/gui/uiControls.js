@@ -4,7 +4,9 @@ import {
   prepareAndRenderBackground,
   selectAndRenderBackground,
   composeFrame,
-//  blitBackgroundToPane, 
+//  blitBackgroundToPane,
+//  blitSpritesToPane,
+  beginBackgroundCrossfade,  
   eventToCtxPoint, 
   getSlots, 
   radializeSlots,
@@ -28,9 +30,17 @@ import {
 } from './animation.js';
 
 import { isInsideCircle } from './helpers.js';
-import { getFamilyMask } from './sequence.js';
+import { getFamilyMask, sequence } from './sequence.js';
 import { drawHenge } from './henge.js';
 import { refresh } from './runTime.js';
+
+//import { sequence } from './sequence.js';
+import { FamilyIndex } from './color.js';
+
+import { startSequenceSanityRun }  from './main.js';
+//import { startAnimation } from './animation.js';
+//import { refresh } from './runTime.js';
+
 
 function isLeader(status) {
   return status.role === 'leader';
@@ -107,6 +117,8 @@ export function installLeaderModeSelectHandler(ctx, canvas, status) {
 // ---------------------------------------------------------------------------
 //  Leader: confirm by tapping bottom text hot spot (ctx.low)
 // ---------------------------------------------------------------------------
+
+
 export function installLeaderModeConfirmHandler(ctx, canvas, status) {
   canvas.addEventListener('pointerup', (ev) => {
     if (status.role !== 'leader') return;
@@ -136,6 +148,9 @@ export function installLeaderModeConfirmHandler(ctx, canvas, status) {
       console.log('[confirm] using mode for start view concert');
     }
 
+	status.startWall = null;
+	status.runStateDurationMs = null;
+
     console.log('[confirm] mode confirmed via bottom text tap');
     console.log('[confirm] state at confirm tap', {
       modeChosen: status.modeChosen,
@@ -145,6 +160,7 @@ export function installLeaderModeConfirmHandler(ctx, canvas, status) {
     refresh();
   });
 }
+
 
 // ---------------------------------------------------------------------------
 //  Leader: stop while running (tap TOP text hot spot)
@@ -177,39 +193,68 @@ export function installLeaderStopHandler(ctx, canvas, status) {
 // ---------------------------------------------------------------------------
 //  Clock tap: start animation (center clock hot spot at ctx.mid)
 // ---------------------------------------------------------------------------
+
+// uiControls.js
+
 export function installClockStartHandler(ctx, canvas, status) {
   canvas.addEventListener('pointerup', (ev) => {
-    // Leaders must confirm mode before clock can start.
-    if (status.role === 'leader' && !status.modeConfirmed) {
-      console.log('[clock] ignored: mode not confirmed');
-      return;
-    }
-    // End screen has its own handler
-    if (status.isEndScreen) return;
+    if (status.role === 'leader' && !status.modeConfirmed) return;
 
     const { x, y } = eventToDesignPoint(ev, canvas, ctx);
 
-    const tapClock = isInsideCircle(x, y, ctx.mid.x, ctx.mid.y, ctx.tapRadius);
-    if (!tapClock) {
-      console.log('[clock] ignored: outside clock');
+    const x1 = ctx.mid.x;
+    const y1 = ctx.mid.y;
+    const r  = ctx.tapRadius;
+
+    if (!isInsideCircle(x, y, x1, y1, r)) return;
+
+    ev.preventDefault();
+    ev.stopImmediatePropagation();
+
+    // If we're on the END screen: return to start view (do NOT restart)
+    if (status.isEndScreen) {
+      status.running = false;
+      status.isEndScreen = false;
+
+      // show full henge start view again
+      status.index = status.fullHenge;
+
+      // clear run timing
+      status.startWall = null;
+      status.runStateDurationMs = null;
+      status.nextStateWallMs = null;
+
+      refresh();
       return;
     }
 
-    if (status.running) {
-      console.log('[clock] ignored: already running');
-      return;
-    }
+    // Ignore if already running
+    if (status.running) return;
 
-    status.running = true;
+    // Ensure tempo is set from chosen mode (concert expected here)
+    status.msPerBeat = (status.modeChosen === 'preview')
+      ? status.previewClock
+      : status.concertClock;
+
+// enable/disable DEBUG mode (currently disabled)
+//	startSequenceSanityRun(status);
+//	return;
+
+    // Freeze timing for this run
+    status.runStateDurationMs = status.STATE_DUR * status.msPerBeat;
     status.startWall = performance.now();
+    status.nextStateWallMs = status.startWall + status.runStateDurationMs;
+
+    // Start at state 1 (index 0)
+    status.index = 0;
+    status.running = true;
     status.isEndScreen = false;
 
-    console.log('[mode] START animation via clock tap');
-
-    startAnimation();
-    refresh(); // immediate feedback; animation loop will take over
-  });
+    startAnimation?.();
+    refresh();
+  }, { capture: true });
 }
+
 
 // ---------------------------------------------------------------------------
 //  End screen: leader can tap clock to reselect mode (back to mode-select)
@@ -271,8 +316,11 @@ function installHengeHandler(ctx, canvas, status) {
       return;
     }
 
-    // Block taps on “off” phones only while running — but pass family too
-    if (status.running && !isSlotVisibleInState({ i: tapI, family: tapFamily }, status.index)) {
+	console.log('[installHengeHandler] tapped key :', tapI);
+
+    // Pass family and block taps on “off” phones
+	if (status.running && !isFamilyOnInState(tapFamily, status.index)) {
+
       refresh();
       return;
     }
@@ -296,41 +344,26 @@ function installHengeHandler(ctx, canvas, status) {
 
     // Render to the BG layer (adjust this to your actual background ctx)
     const ctxB = arrB?.[0]?.ctx;        
-if (ctxB) {
-  selectAndRenderBackground(ctxB, status);
-  composeFrame({ drawB: true, drawF: true, drawT: true });
+
+if (status.running) {
+  beginBackgroundCrossfade(status, arrB[0].ctx, tapFamily, 2320);
+  return;
 }
   }, { capture: true });
 }
 
+// returns true if this family is "on" in the current state
+function isFamilyOnInState(family, stateIndex) {
+  const bits = sequence?.[stateIndex];
+  if (!bits) return true; // out of range -> don't block taps
 
-
-// returns true if this slot is "on" in the current state
-function isSlotVisibleInState(slot, stateIndex) {
-  const mask = getFamilyMask(stateIndex);
-  if (!mask) return true; // if no mask available, don't block taps
-
-  // Case A: per-slot mask: length == number of phones (e.g. 25)
-  if (Array.isArray(mask) && mask.length >= 25) {
-    return !!mask[slot.i];
+  const bitPos = FamilyIndex[family];
+  if (!Number.isInteger(bitPos)) {
+    throw new Error(`FamilyIndex missing for family=${family}`);
   }
-
-  // Case B: per-family mask: length == number of families (e.g. 5)
-  if (Array.isArray(mask) && mask.length <= 8) {
-    const f = slot.family;                 // you now stamp this in makeHengeOf()
-    const fi = (f >= 1) ? (f - 1) : f;     // if families are 1..5, shift to 0..4
-    return !!mask[fi];
-  }
-
-  // Case C: numeric bitmask by family
-  if (typeof mask === 'number') {
-    const f = slot.family;
-    const fi = (f >= 1) ? (f - 1) : f;
-    return ((mask >> fi) & 1) === 1;
-  }
-
-  return true;
+  return bits[bitPos] !== 0;
 }
+
 
 
 export function pickSlotFromPoint(slots, x, y, ctx, status) {
