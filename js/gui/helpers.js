@@ -22,6 +22,16 @@ export function isInsideCircle(x, y, cx, cy, r) {
   return (dx * dx + dy * dy) <= (r * r);
 }
 
+// canvasUtils.js (or helpers.js)
+export function easeInOutQuad01(nowMs, bgFade) {
+  if (!bgFade?.startMs || !bgFade?.durationMs) return 1;
+
+  const u = Math.min(1, (nowMs - bgFade.startMs) / bgFade.durationMs);
+  return (u < 0.5)
+    ? (2 * u * u)
+    : (1 - Math.pow(-2 * u + 2, 2) / 2);
+}
+
 export function hide(){
 	return 'transparent';
 }

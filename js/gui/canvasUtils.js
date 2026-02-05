@@ -5,11 +5,13 @@
 import { ColorFamily, setLinearGradient } from './color.js';
 
 export const arrP = []; // visible compositor: #mobile
-export const arrB    = []; // off screen background layer
-export const arrF    = []; // off screen foreground/phones layer
-export const arrT    = []; // off screen text layer
-export const arrS 	 = []; // off screen slots
+export const arrA = []; // off screen atlas 
+export const arrB = []; // background layer
+export const arrF = []; // foreground layer
+export const arrS = []; // sprites layer
+export const arrT = []; // text layer
 
+// alternative name : setCtxProperties
 function stampGeometry(ctx, designW, designH, dpr, fit) {
   ctx.w = designW;
   ctx.h = designH;
@@ -34,18 +36,18 @@ function stampGeometry(ctx, designW, designH, dpr, fit) {
   ctx.fit = fit; // design-units → CSS pixels (before DPR)
 }
 
-function configureCanvas(canvas, cssW, cssH, dpr, fit, designW, designH, isVisible) {
+function configureCanvas(cnv, cssW, cssH, dpr, fit, designW, designH, isVisible) {
   if (isVisible) {
-    canvas.style.width = `${cssW}px`;
-    canvas.style.height = `${cssH}px`;
-    canvas.style.display = 'block';
+    cnv.style.width = `${cssW}px`;
+    cnv.style.height = `${cssH}px`;
+    cnv.style.display = 'block';
   }
 
   // Backing store (device pixels)
-  canvas.width  = Math.ceil(cssW * dpr);
-  canvas.height = Math.ceil(cssH * dpr);
+  cnv.width  = Math.ceil(cssW * dpr);
+  cnv.height = Math.ceil(cssH * dpr);
 
-  const ctx = canvas.getContext('2d');
+  const ctx = cnv.getContext('2d');
   if (!ctx) throw new Error('configureCanvas: 2D context not available');
 
   // Draw in DESIGN units; transform handles DPR + fit
@@ -66,6 +68,8 @@ function configureCanvas(canvas, cssW, cssH, dpr, fit, designW, designH, isVisib
  * - 'fixed': CSS size = designW x designH (good for “hypothetical phone” on laptop)
  * - 'fit'  : scales down to fit window (no upscaling; see fit clamp)
  */
+ 
+// alternative name : replicate  
 export function initCanvases({ paneId = 'mobile', designW = 390, designH = 844, mode = 'fixed' } = {}) {
   const cnvP = document.getElementById(paneId);
   if (!cnvP) throw new Error(`initCanvases: no <canvas id="${paneId}"> found in DOM`);
@@ -127,46 +131,46 @@ export function initCanvases({ paneId = 'mobile', designW = 390, designH = 844, 
 
 // ---- tiny compositor helper ----
 
-function blit(ctxP, srcCanvas) {
-  // IMPORTANT: map source pixels → destination design units
-  ctxP.drawImage(
-    srcCanvas,
-    0, 0, srcCanvas.width, srcCanvas.height,
-    0, 0, ctxP.w, ctxP.h
+function blit(ctxDst, cnvSrc) {
+  ctxDst.drawImage(
+    cnvSrc,
+    0, 0, cnvSrc.width, cnvSrc.height,
+    0, 0, ctxDst.w, ctxDst.h
   );
 }
 
+
 // composeFrame(): clears the visible pane and composites layers in order.
-export function composeFrame({ drawB = true, drawF = true, drawT = true } = {}) {
+
+export function composeFrame({ drawB = true, drawF = false, drawS = true, drawT = true } = {}) {
   const { canvas: cnvP, ctx: ctxP } = arrP[0];
   const { canvas: cnvB } = arrB[0];
   const { canvas: cnvF } = arrF[0];
+  const { canvas: cnvS } = arrS[0];
   const { canvas: cnvT } = arrT[0];
 
   ctxP.clearRect(0, 0, ctxP.w, ctxP.h);
 
   if (drawB) blit(ctxP, cnvB);
   if (drawF) blit(ctxP, cnvF);
-  if (drawF) blit(ctxP, cnvF);
+  if (drawS) blit(ctxP, cnvS);
   if (drawT) blit(ctxP, cnvT);
 }
+
 
 // ---------------------------------------------------------------------------
 //  Slots (henge geometry) – one entry per phone around the ring
 // ---------------------------------------------------------------------------
 
 export function setSlots(slots) {
-  arrS.length = 0;
-  if (Array.isArray(slots)) {
-    for (const s of slots) {
-      arrS.push(s);
-    }
-  }
+  arrA.length = 0;
+  if (Array.isArray(slots)) arrA.push(...slots);
 }
 
 export function getSlots() {
-  return arrS;
+  return arrA;
 }
+
 
 // ---------------------------------------------------------------------------
 //  Background rendering - color.js configures a neutral gradient
@@ -194,41 +198,13 @@ export function selectAndRenderBackground(ctxB, status) {
   const g = ctxB.createLinearGradient(0, ctxB.h, 0, 0);
   const gradient = setLinearGradient(fam, g);          // mutate g; ignore return value
 
-  console.log('[UI selected background] fam :', fam, 'g :', g);
+//  console.log('[UI selected background] fam :', fam, 'g :', g);
   
   ctxB.clearRect(0, 0, ctxB.w, ctxB.h);
   ctxB.save();
   ctxB.fillStyle = gradient;                 // use gradient
   ctxB.fillRect(0, 0, ctxB.w, ctxB.h);
   ctxB.restore();
-}
-
-// Copy the current background layer (arrB) onto the visible pane (arrP).
-export function blitBackgroundToPane() {
-  const ctxP = arrP?.[0]?.ctx;
-  const cnvB    = arrB?.[0]?.canvas;
-
-  if (!ctxP || !cnvB) return;
-
-  ctxP.save();
-  ctxP.setTransform(1, 0, 0, 1, 0, 0);         // avoid inherited transforms
-  ctxP.clearRect(0, 0, ctxP.w, ctxP.h);
-  ctxP.drawImage(cnvB, 0, 0, ctxP.w, ctxP.h);
-  ctxP.restore();
-}
-
-// Copy the current sprites layer (arrB) onto the visible pane (arrP).
-export function blitSpritesToPane() {
-  const ctxP = arrP?.[0]?.ctx;
-  const cnvB    = arrB?.[0]?.canvas;
-
-  if (!ctxP || !cnvB) return;
-
-  ctxP.save();
-  ctxP.setTransform(1, 0, 0, 1, 0, 0);         // avoid inherited transforms
-  ctxP.clearRect(0, 0, ctxP.w, ctxP.h);
-  ctxP.drawImage(cnvB, 0, 0, ctxP.w, ctxP.h);
-  ctxP.restore();
 }
 
 
@@ -328,7 +304,78 @@ export function radializeSlots(ctx, baseSlots) {
   });
 }
 
+// bgFade helpers (put near frameRender, or export from canvasUtils)
 
+export function ensureBgFadeBuffers(status, cnvB) {
+  if (!status._bgFade) status._bgFade = {};
+  const f = status._bgFade;
 
+  if (!f.from) f.from = document.createElement('canvas');
+  if (!f.to)   f.to   = document.createElement('canvas');
+
+  // Keep buffers in device-pixel size
+  if (f.from.width !== cnvB.width || f.from.height !== cnvB.height) {
+    f.from.width  = cnvB.width;
+    f.from.height = cnvB.height;
+  }
+  if (f.to.width !== cnvB.width || f.to.height !== cnvB.height) {
+    f.to.width  = cnvB.width;
+    f.to.height = cnvB.height;
+  }
+
+  if (!f.ctxFrom) f.ctxFrom = f.from.getContext('2d');
+  if (!f.ctxTo)   f.ctxTo   = f.to.getContext('2d');
+
+  return f;
+}
+
+export function beginBackgroundCrossfade(status, ctxB, newFamily, durationMs = 320) {
+  const cnvB = arrB[0].canvas;
+
+  // If a fade is in progress, "bake" the current blended result into cnvB first
+  if (status.bgFade?.active) {
+    const now = performance.now();
+    const t = Math.min(1, (now - status.bgFade.startMs) / status.bgFade.durationMs);
+    blendBgCanvasesInto(ctxB, cnvB, status._bgFade.from, status._bgFade.to, t);
+    status.bgFade.active = false;
+  }
+
+  const f = ensureBgFadeBuffers(status, cnvB);
+
+  // Snapshot CURRENT bg → from
+  f.ctxFrom.setTransform(1, 0, 0, 1, 0, 0);
+  f.ctxFrom.clearRect(0, 0, cnvB.width, cnvB.height);
+  f.ctxFrom.drawImage(cnvB, 0, 0);
+
+  // Render NEW bg into the real bg layer once (using your existing function)
+  status.bgFamily = newFamily;
+  selectAndRenderBackground(ctxB, status);
+
+  // Snapshot NEW bg → to
+  f.ctxTo.setTransform(1, 0, 0, 1, 0, 0);
+  f.ctxTo.clearRect(0, 0, cnvB.width, cnvB.height);
+  f.ctxTo.drawImage(cnvB, 0, 0);
+
+  // Start fade
+  status.bgFade = {
+    active: true,
+    startMs: performance.now(),
+    durationMs,
+  };
+}
+
+export function blendBgCanvasesInto(ctxB, cnvB, cnvFrom, cnvTo, t) {
+  ctxB.save();
+  ctxB.setTransform(1, 0, 0, 1, 0, 0);          // draw in device pixels
+  ctxB.clearRect(0, 0, cnvB.width, cnvB.height);
+
+  ctxB.globalAlpha = 1 - t;
+  ctxB.drawImage(cnvFrom, 0, 0, cnvB.width, cnvB.height);
+
+  ctxB.globalAlpha = t;
+  ctxB.drawImage(cnvTo, 0, 0, cnvB.width, cnvB.height);
+
+  ctxB.restore();
+}
 
 
