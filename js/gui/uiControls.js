@@ -194,13 +194,12 @@ export function installLeaderStopHandler(ctx, canvas, status) {
 //  Clock tap: start animation (center clock hot spot at ctx.mid)
 // ---------------------------------------------------------------------------
 
-// uiControls.js
-
 export function installClockStartHandler(ctx, canvas, status) {
   canvas.addEventListener('pointerup', (ev) => {
     if (status.role === 'leader' && !status.modeConfirmed) return;
 
-    const { x, y } = eventToDesignPoint(ev, canvas, ctx);
+    // 🔧 Use the same coordinate space as installHengeHandler
+    const { x, y } = eventToCtxPoint(ev, canvas, ctx);
 
     const x1 = ctx.mid.x;
     const y1 = ctx.mid.y;
@@ -211,15 +210,11 @@ export function installClockStartHandler(ctx, canvas, status) {
     ev.preventDefault();
     ev.stopImmediatePropagation();
 
-    // If we're on the END screen: return to start view (do NOT restart)
     if (status.isEndScreen) {
       status.running = false;
       status.isEndScreen = false;
-
-      // show full henge start view again
       status.index = status.fullHenge;
 
-      // clear run timing
       status.startWall = null;
       status.runStateDurationMs = null;
       status.nextStateWallMs = null;
@@ -228,29 +223,21 @@ export function installClockStartHandler(ctx, canvas, status) {
       return;
     }
 
-    // Ignore if already running
     if (status.running) return;
 
-    // Ensure tempo is set from chosen mode (concert expected here)
     status.msPerBeat = (status.modeChosen === 'preview')
       ? status.previewClock
       : status.concertClock;
 
-// enable/disable DEBUG mode (currently disabled)
-//	startSequenceSanityRun(status);
-//	return;
-
-    // Freeze timing for this run
     status.runStateDurationMs = status.STATE_DUR * status.msPerBeat;
     status.startWall = performance.now();
     status.nextStateWallMs = status.startWall + status.runStateDurationMs;
 
-    // Start at state 1 (index 0)
     status.index = 0;
-    status.running = true;
+    status.running = true;          // 🔧 must be truthy while running
     status.isEndScreen = false;
 
-    startAnimation?.();
+    startAnimation();               // 🔧 don’t silently skip
     refresh();
   }, { capture: true });
 }
@@ -302,55 +289,52 @@ function installHengeHandler(ctx, canvas, status) {
     if (!slots?.length) return;
 
     const { x, y } = eventToCtxPoint(ev, canvas, ctx);
+	let hitSlotHotspot = null;
 
-    // tap test
-    const tap = pickSlotFromPoint(slots, x, y, ctx, status); // uses ctx.keyRadius
-    const tapI = tap ? (tap.i ?? tap.index ?? null) : null;
-    const tapFamily = (tapI != null) ? familyForIndex(tapI) : null;
+    // ✅ Don’t compete with the clock start handler (centre hot spot)
+    if (isInsideCircle(x, y, ctx.mid.x, ctx.mid.y, ctx.tapRadius)) return;
 
-    // Always remember last pointer-up for debug overlay
+    // ✅ NEW: only treat taps as "henge taps" if they hit a real slot hot spot
+    for (const s of slots) {
+      const sx = s.x;
+      const sy = s.y;
+
+      if (isInsideCircle(x, y, sx, sy, ctx.keyRadius)) {
+        hitSlotHotspot = true;
+        break;
+      }
+    }
+    if (!hitSlotHotspot) return;
+
+    const tap = pickSlotFromPoint(slots, x, y, ctx);
+    if (!tap) return;
+
+    const tapI = tap.i ?? tap.index ?? null;
+    if (tapI == null) return;
+
+    const tapFamily = familyForIndex(tapI);
+
     status.debugTap = { x, y, tapI, tapFamily };
+    status.lastKeyIndex = tapI + 1; // Key 1..25
 
-    if (!tap) {
+    console.log('[installHengeHandler] tapped key :', tapI);
+
+    // START VIEW: show Key ID immediately (but do not swallow events)
+    if (!status.running) {
       refresh();
       return;
     }
 
-	console.log('[installHengeHandler] tapped key :', tapI);
+    // RUNNING: block off-family taps
+    if (!isFamilyOnInState(tapFamily, status.index)) return;
 
-    // Pass family and block taps on “off” phones
-	if (status.running && !isFamilyOnInState(tapFamily, status.index)) {
-
-      refresh();
-      return;
-    }
-
+    // RUNNING: now we can own the event + trigger fade
     ev.preventDefault();
     ev.stopImmediatePropagation();
-
-    console.log('[henge tap]', {
-      i: tapI,
-      family: tapFamily,
-      x: Math.round(x),
-      y: Math.round(y),
-      r: ctx.keyRadius ?? 34,
-      modeChosen: status.modeChosen,
-      running: status.running,
-    });
-
-    // Update background selection FIRST
-    status.bgFamily = tapFamily;
-    status.bgIndex  = tapI;
-
-    // Render to the BG layer (adjust this to your actual background ctx)
-    const ctxB = arrB?.[0]?.ctx;        
-
-if (status.running) {
-  beginBackgroundCrossfade(status, arrB[0].ctx, tapFamily, 2320);
-  return;
-}
+    beginBackgroundCrossfade(status, arrB[0].ctx, tapFamily, 2320);
   }, { capture: true });
 }
+
 
 // returns true if this family is "on" in the current state
 function isFamilyOnInState(family, stateIndex) {
@@ -364,33 +348,14 @@ function isFamilyOnInState(family, stateIndex) {
   return bits[bitPos] !== 0;
 }
 
-
-
-export function pickSlotFromPoint(slots, x, y, ctx, status) {
+export function pickSlotFromPoint(slots, x, y, ctx) {
   if (!Array.isArray(slots) || slots.length === 0) return null;
 
   const r = (ctx?.keyRadius ?? 34);
 
-  // draw order makes later slots appear "on top", so iterate backwards.
   for (let i = slots.length - 1; i >= 0; i--) {
     const s = slots[i];
     if (isInsideCircle(x, y, s.x, s.y, r)) return s;
-    status.lastKeyIndex = i;
   }
   return null;
 }
-
-/*
-export function pickSlotFromPoint(henge, x, y, ctx) {
-  if (!Array.isArray(henge) || henge.length === 0) return null;
-
-  const r = (ctx?.keyRadius ?? 34);
-
-  // If your draw order makes later slots appear "on top", iterate backwards.
-  for (let i = henge.length - 1; i >= 0; i--) {
-    const s = henge[i];
-    if (isInsideCircle(x, y, s.x, s.y, r)) return s;
-  }
-  return null;
-}
-*/
