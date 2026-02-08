@@ -1,6 +1,5 @@
 /* text.js */
 
-//import { arrT } from './main.js';
 import { arrT } from './canvasUtils.js';
 
 export function drawTopText(ctxT, text) {
@@ -46,7 +45,6 @@ export function renderStartBoth(ctxT, status) {
   drawTopText(ctxT, 'Phonehenge');
   drawSubText(ctxT, 'tap clock to start');
   drawMidText(ctxT, '00:00');
-//  drawLowText(ctxT, `${status.modeChosen.toUpperCase()} MODE`);
   drawLowText(ctxT, lowStartLine(status));
 }
 
@@ -54,26 +52,13 @@ export function renderStartLeader(ctxT, status) {
   drawSubText(ctxT, 'select MODE');
   drawLeftText(ctxT, 'PREVIEW');
   drawRightText(ctxT, 'CONCERT');
-//  drawLowText(ctxT, `${status.modeChosen.toUpperCase()} MODE`);
   drawLowText(ctxT, lowStartLine(status));
 }
 
-
-// Running view (both leader & consort)
 export function renderRunning(ctxT, { status, mins, secs }) {
   drawTopText(ctxT, String(status.index + 1));
   drawMidText(ctxT, `${mins}:${secs}`);
 }
-
-/*
-// Running view (both leader & consort)
-export function renderRunning(ctxT, { status, mins, secs }) {
-  drawTopText(ctxT, String(status.index + 1));
-  drawMidText(ctxT, `${mins}:${secs}`);
-  const k = Number.isInteger(status?.lastKeyIndex) ? (status.lastKeyIndex) : null;
-  drawLowText(ctxT, k ? `Key ${k}` : '');
-}
-*/
 
 // End view
 export function renderEnd(ctxT, status) {
@@ -91,12 +76,12 @@ export function renderDebug(ctxT, { status, mins, secs, bitPattern = '' }) {
 
 function lowStartLine(status) {
   // Show key id only before animation starts
-  if (!status?.running) {
-    const k = status?.lastKeyIndex;
+  if (!status.running) { //if (!status?.running) {
+    const k = status.lastKeyIndex;//const k = status?.lastKeyIndex;
     if (Number.isInteger(k)) return `Key ${k}`;
   }
   // Fallback: show mode
-  const m = status?.modeChosen ? String(status.modeChosen).toUpperCase() : 'CONCERT';
+    const m = status.modeChosen ? String(status.modeChosen).toUpperCase() : 'CONCERT'; //const m = status?.modeChosen ? (etc))
   return `${m} MODE`;
 }
 

@@ -1,6 +1,6 @@
 // js/gui/canvasUtils.js
 //
-// Canvas + geometry utilities for the Phonehenge GUI.
+// Canvas + geometry utilities for Phonehenge GUI.
 
 import { ColorFamily, setLinearGradient } from './color.js';
 
@@ -57,18 +57,16 @@ function configureCanvas(cnv, cssW, cssH, dpr, fit, designW, designH, isVisible)
   return ctx;
 }
 
-/**
- * initCanvases(): creates 4 contexts with identical geometry.
- * - ctxP: visible compositor on #mobile
- * - ctxB: off screen background layer
- * - ctxF: off screen foreground/phones layer
- * - ctxT: off screen text layer
- *
- * mode:
- * - 'fixed': CSS size = designW x designH (good for “hypothetical phone” on laptop)
- * - 'fit'  : scales down to fit window (no upscaling; see fit clamp)
- */
- 
+// initCanvases(): creates 4 contexts with identical geometry.
+// - ctxP: visible compositor on #mobile
+// - ctxB: off screen background layer
+// - ctxF: off screen foreground/phones layer
+// - ctxT: off screen text layer
+//
+// mode:
+// - 'fixed': CSS size = designW x designH (good for “hypothetical phone” on laptop)
+// - 'fit'  : scales down to fit window (no upscaling; see fit clamp)
+//
 // alternative name : replicate  
 export function initCanvases({ paneId = 'mobile', designW = 390, designH = 844, mode = 'fixed' } = {}) {
   const cnvP = document.getElementById(paneId);
@@ -128,9 +126,7 @@ export function initCanvases({ paneId = 'mobile', designW = 390, designH = 844, 
   return { ctxP, ctxB, ctxF, ctxS, ctxT };
 }
 
-
 // ---- tiny compositor helper ----
-
 function blit(ctxDst, cnvSrc) {
   ctxDst.drawImage(
     cnvSrc,
@@ -139,9 +135,7 @@ function blit(ctxDst, cnvSrc) {
   );
 }
 
-
 // composeFrame(): clears the visible pane and composites layers in order.
-
 export function composeFrame({ drawB = true, drawF = false, drawS = true, drawT = true } = {}) {
   const { canvas: cnvP, ctx: ctxP } = arrP[0];
   const { canvas: cnvB } = arrB[0];
@@ -157,11 +151,9 @@ export function composeFrame({ drawB = true, drawF = false, drawS = true, drawT 
   if (drawT) blit(ctxP, cnvT);
 }
 
-
 // ---------------------------------------------------------------------------
 //  Slots (henge geometry) – one entry per phone around the ring
 // ---------------------------------------------------------------------------
-
 export function setSlots(slots) {
   arrA.length = 0;
   if (Array.isArray(slots)) arrA.push(...slots);
@@ -171,11 +163,9 @@ export function getSlots() {
   return arrA;
 }
 
-
 // ---------------------------------------------------------------------------
 //  Background rendering - color.js configures a neutral gradient
 // ---------------------------------------------------------------------------
-
 export function prepareAndRenderBackground(ctxB) {
 
   ctxB.save();
@@ -191,7 +181,27 @@ export function prepareAndRenderBackground(ctxB) {
   ctxB.restore();
 }
 
+export function selectAndRenderBackground(ctxB, status) {
+  const family = status.bgFamily ?? ColorFamily.NONE;
 
+  ctxB.clearRect(0, 0, ctxB.w, ctxB.h);
+  ctxB.save();
+
+  if (family === ColorFamily.BLACK) {
+    ctxB.fillStyle = 'rgba(0, 0, 0, 1)';
+    ctxB.fillRect(0, 0, ctxB.w, ctxB.h);
+    ctxB.restore();
+    return;
+  }
+
+  const g = ctxB.createLinearGradient(0, ctxB.h, 0, 0);
+  setLinearGradient(family, g);     // mutates g
+  ctxB.fillStyle = g;
+  ctxB.fillRect(0, 0, ctxB.w, ctxB.h);
+  ctxB.restore();
+}
+
+/*
 export function selectAndRenderBackground(ctxB, status) {
   const fam = status?.bgFamily ?? ColorFamily.NONE;
   
@@ -206,16 +216,13 @@ export function selectAndRenderBackground(ctxB, status) {
   ctxB.fillRect(0, 0, ctxB.w, ctxB.h);
   ctxB.restore();
 }
-
+*/
 
 // ---------------------------------------------------------------------------
 //  Pointer → canvas coordinate helper
 // ---------------------------------------------------------------------------
 
-/**
- * Convert a PointerEvent / MouseEvent into canvas-space coordinates.
- */
- 
+// Convert a PointerEvent / MouseEvent into canvas-space coordinates.
 export function eventToCtxPoint(ev, canvas) {
   const rect = canvas.getBoundingClientRect();
   const x = ev.clientX - rect.left;
@@ -223,9 +230,8 @@ export function eventToCtxPoint(ev, canvas) {
   return { x, y };
 }
 
-
 export function renderSavedBackground(ctxP) {
-  const cnvB = arrB?.[0]?.canvas;
+  const cnvB = arrB[0].canvas;//const cnvB = arrB?.[0]?.canvas;
   if (!ctxP || !cnvB) return;
 
   ctxP.clearRect(0, 0, ctxP.w, ctxP.h);
@@ -235,7 +241,6 @@ export function renderSavedBackground(ctxP) {
 // ---------------------------------------------------------------------------
 //  Shape helpers (used by sprites.js)
 // ---------------------------------------------------------------------------
-
 export function drawPhonePath(ctx, { x, y, w, h, r }) {
   if (!ctx) return;
 
@@ -305,7 +310,6 @@ export function radializeSlots(ctx, baseSlots) {
 }
 
 // bgFade helpers (put near frameRender, or export from canvasUtils)
-
 export function ensureBgFadeBuffers(status, cnvB) {
   if (!status._bgFade) status._bgFade = {};
   const f = status._bgFade;
@@ -340,21 +344,21 @@ export function beginBackgroundCrossfade(status, ctxB, newFamily, durationMs = 3
     status.bgFade.active = false;
   }
 
-  const f = ensureBgFadeBuffers(status, cnvB);
+  const fade = ensureBgFadeBuffers(status, cnvB);
 
   // Snapshot CURRENT bg → from
-  f.ctxFrom.setTransform(1, 0, 0, 1, 0, 0);
-  f.ctxFrom.clearRect(0, 0, cnvB.width, cnvB.height);
-  f.ctxFrom.drawImage(cnvB, 0, 0);
+  fade.ctxFrom.setTransform(1, 0, 0, 1, 0, 0);
+  fade.ctxFrom.clearRect(0, 0, cnvB.width, cnvB.height);
+  fade.ctxFrom.drawImage(cnvB, 0, 0);
 
   // Render NEW bg into the real bg layer once (using your existing function)
   status.bgFamily = newFamily;
   selectAndRenderBackground(ctxB, status);
 
   // Snapshot NEW bg → to
-  f.ctxTo.setTransform(1, 0, 0, 1, 0, 0);
-  f.ctxTo.clearRect(0, 0, cnvB.width, cnvB.height);
-  f.ctxTo.drawImage(cnvB, 0, 0);
+  fade.ctxTo.setTransform(1, 0, 0, 1, 0, 0);
+  fade.ctxTo.clearRect(0, 0, cnvB.width, cnvB.height);
+  fade.ctxTo.drawImage(cnvB, 0, 0);
 
   // Start fade
   status.bgFade = {

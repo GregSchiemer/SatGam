@@ -63,135 +63,9 @@ import {
 } from './uiControls.js';
 
 import {
-  FamilyIndex 
+  FamilyIndex,
+  ColorFamily
 } from './color.js';
-
-export function startSequenceSanityRun(status) {
-  const ctxB = arrB[0].ctx;
-  const ctxS = arrS[0].ctx;
-  const ctxT = arrT[0].ctx;
-
-  // Neutral background once
-  prepareAndRenderBackground(ctxB);
-
-  const durMs = STATE_DUR * status.msPerBeat; // e.g. 24 * 1000 = 24000
-  const N = sequence.length;                  // should be 31
-
-  // --- isolate from normal runtime renderer ---
-  // Stop any prior sanity timer
-  if (status._sanityTimer) {
-    clearInterval(status._sanityTimer);
-    status._sanityTimer = null;
-  }
-
-  // Prevent the normal frameRender from running while sanity is active
-  // (refresh() can be called by other UI handlers; we don't want it to overwrite debug)
-  if (!status._sanityPrevRender) {
-    status._sanityPrevRender = true; // marker; we always restore to frameRender(status) at end
-  }
-  setRender(() => {}); // no-op renderer during sanity
-
-  // Sanity mode state (do NOT set status.running = true)
-  status.sanity = true;
-  status.isEndScreen = false;
-  status.index = 0;
-
-//  const DRAW_PHONES = false; // keep false until the 31 indices/patterns look right
-  const DRAW_PHONES = true;
-  
-  // helper: draw one sanity frame i -> screen
-  function drawSanityFrame(i) {
-    status.index = i;
-
-    ctxT.clearRect(0, 0, ctxT.w, ctxT.h);
-    ctxS.clearRect(0, 0, ctxS.w, ctxS.h);
-
-    const totalSec = i * STATE_DUR;
-    const mins = Math.floor(totalSec / 60);
-    const secs = String(totalSec % 60).padStart(2, '0');
-
-    const bits = sequence[i];
-    const bitPattern = bits ? bits.join('\t') : '(missing)';
-
-    renderDebug(ctxT, { status, mins, secs, bitPattern });
-
-    // Only enable once you want to test phone activation mapping
-    if (DRAW_PHONES) {
-      // IMPORTANT: only works if syncPhonesToSpritesLayer is in scope/imported
-      syncPhonesToSpritesLayer(i);
-    }
-
-    composeFrame({ drawB: true, drawS: true, drawT: true });
-  }
-
-  // First frame immediately (no refresh)
-  drawSanityFrame(0);
-
-  // Drive the debug display at 1Hz, while state changes happen at STATE_DUR-second boundaries.
-  status.sanityStartMs = performance.now();
-  let lastIdx = -1;
-
-  status._sanityTimer = setInterval(() => {
-    const nowMs = performance.now();
-	const elapsedSec = Math.floor((nowMs - status.sanityStartMs) / status.msPerBeat); 	// PREVIEW  
-//    const elapsedSec = Math.floor((nowMs - status.sanityStartMs) / 1000);				// CONCERT
-
-    // Total run is 31 states × 24 seconds = 744 seconds (12:24)
-    const totalSec = MAX_STATES * STATE_DUR; // 31*24 = 744
-    if (elapsedSec >= totalSec) {
-      clearInterval(status._sanityTimer);
-      status._sanityTimer = null;
-
-      // Show end view
-      status.sanity = false;
-      status.isEndScreen = true;
-
-      ctxT.clearRect(0, 0, ctxT.w, ctxT.h);
-      ctxS.clearRect(0, 0, ctxS.w, ctxS.h);
-      renderEnd(ctxT, status);
-      composeFrame({ drawB: true, drawS: true, drawT: true });
-
-      // Restore normal renderer
-      setRender(() => {
-        frameRender(status);
-      });
-
-      return;
-    }
-
-    // Which state are we in?
-    const idx = Math.floor(elapsedSec / STATE_DUR); // 0..30
-    status.index = Math.min(idx, MAX_STATES - 1);
-
-    // Derive clock text
-    const mins = Math.floor(elapsedSec / 60);
-    const secs = String(elapsedSec % 60).padStart(2, '0');
-
-    const bits = sequence[status.index];
-    const bitPattern = bits ? bits.join('\t') : '(missing)';
-
-    // Clear + draw debug every second
-    ctxT.clearRect(0, 0, ctxT.w, ctxT.h);
-    renderDebug(ctxT, { status, mins, secs, bitPattern });
-
-    // Only redraw sprites when the state index changes
-    if (DRAW_PHONES && status.index !== lastIdx) {
-//      ctxS.clearRect(0, 0, ctxS.w, ctxS.h);
-      syncPhonesToSpritesLayer(status.index);
-      lastIdx = status.index;
-    }
-
-	// Only redraw sprites when the state index changes
-//	if (DRAW_PHONES && status.index !== lastIdx) {
-//	  syncPhonesToSpritesLayer(status.index);   // this clears + draws into arrS[0].ctx
-//	  lastIdx = status.index;
-//	}
-
-    composeFrame({ drawB: true, drawS: true, drawT: true });
-	}, status.msPerBeat);	// PREVIEW  
-//  }, 1000);				// CONCERT
-
-}
 
 
 // MLS / sequence configuration
@@ -313,10 +187,10 @@ function initStatus(ctx) {
   console.log('[main] role =', roleAtLaunch);
 
   return {
-    // Role
+// Role
     role: 			roleAtLaunch,  			// 'leader' or 'consort'
 
-    // Animation state
+// Animation state
     running:    	false,               	// true while MLS sequence is running
     index: 			0,
     startWall:     	0,                   	// performance.now() when the show starts
@@ -325,8 +199,10 @@ function initStatus(ctx) {
     previewClock:	PREVIEW_CLK, 
     msPerBeat:     	CONCERT_CLK,    		// tempo in ms/beat (default = concert)
     fullHenge: 	   	FULL_HENGE,          	// pre-start state index (18)
+	endFadeStarted: false,
+	stopAfterFade:  false,
 
-    // Mode state
+// Mode state
     modeChosen:    	'concert',           	// 'concert' or 'preview'
     modeConfirmed: 	(roleAtLaunch === 'consort'),	// consorts skip mode-select; leaders don't
   };
@@ -358,19 +234,27 @@ function installResizeHandler() {
 // - Mode-select leader view: NO phones.
 // - Running: render current animated frame.
 // - Start view: render full henge (active phones).
+
 function renderPhonesLayer(ctxS, status) {
-  // Ensure phones layer is blank unless we explicitly draw phones below.
   ctxS.clearRect(0, 0, ctxS.w, ctxS.h);
 
   // 1) Leader mode select: text-only
   if (status.role === 'leader' && !status.modeConfirmed) return;
 
-  // 2) End screen: intentionally no phones
-  if (status.isEndScreen) return;
+  // 2) End screen: empty henge (inactive)
+  if (status.isEndScreen) {
+    syncPhonesToSpritesLayer(status.index, { maskBits: [0, 0, 0, 0, 0] });
+    return;
+  }
 
-  // 3) Otherwise draw phones
-  const idx = status.running ? status.index : status.fullHenge;
-  syncPhonesToSpritesLayer(idx);
+  // 3) Start view (not running): full henge (active)
+  if (!status.running) {
+    syncPhonesToSpritesLayer(status.fullHenge, { maskBits: [1, 1, 1, 1, 1] });
+    return;
+  }
+
+  // 4) Running: current animated frame (MLS-driven)
+  syncPhonesToSpritesLayer(status.index);
 }
 
 function frameRender(status) {
@@ -433,6 +317,7 @@ if (status.running) {
     status.running = false;
     status.isEndScreen = true;
     stopAnimation();
+//    beginBackgroundCrossfade(status, arrB[0].ctx, ColorFamily.NONE, 5000);
   } else {
     elapsedMs = nowMs - status.startWall;
 
@@ -456,6 +341,7 @@ if (status.running) {
       status.running     = false;
       status.isEndScreen = true;
       stopAnimation();
+//      beginBackgroundCrossfade(status, arrB[0].ctx, ColorFamily.NONE, 5000);
     }
   }
 } else {
@@ -483,7 +369,6 @@ if (status.running) {
   composeFrame({ drawB: true, drawS: true, drawT: true });
 }
 
-
 // - CONCERT: 00:00 to 12:24 real time
 // - PREVIEW: 00:00 to 12:24 fast-forward
 function computeClockMs(status, elapsedMs) {
@@ -502,30 +387,34 @@ function computeClockMs(status, elapsedMs) {
 }
 
 // Paint one MLS state into the SPRITES layer (ctxS), using sequence[stateIndex].
-export function syncPhonesToSpritesLayer(stateIndex) {
+
+export function syncPhonesToSpritesLayer(stateIndex, { maskBits = null } = {}) {
   const slots = getSlots();
   if (!slots?.length) return;
 
-  const ctxS = arrS[0].ctx;      // destination: sprites layer
+  const ctxS = arrS[0].ctx;
 
-  // Defensive default: if sequence[stateIndex] missing, treat all families active
-  const bits = sequence?.[stateIndex] ?? [1, 1, 1, 1, 1];
+  // Prefer explicit override; otherwise use MLS sequence.
+  const bits = maskBits ?? sequence[stateIndex]; // <- no optional chaining
 
-  // Clear sprites layer first
+  // If you still want a fallback full-on mask for out-of-range indices:
+  const safeBits = bits ?? [1, 1, 1, 1, 1];
+
   ctxS.clearRect(0, 0, ctxS.w, ctxS.h);
 
   for (let i = 0; i < slots.length; i++) {
     const slot   = slots[i];
-    const family = familyForIndex(i);          // 0..4 (expected)
+    const family = familyForIndex(i);
     const bitPos = FamilyIndex[family];
-  	if (!Number.isInteger(bitPos)) {
+    if (!Number.isInteger(bitPos)) {
       throw new Error(`FamilyIndex missing for family=${family} (index i=${i})`);
-  	}
-	const active = (bits[bitPos] !== 0);
-	const radialOrientation = Math.PI / 2;
+    }
 
+    const active = (safeBits[bitPos] !== 0);
+
+    const radialOrientation = Math.PI / 2;
     const theta = slot.theta ?? slot.angle ?? 0;
-    const angle = theta + radialOrientation;//(ctxS.orientBias ?? Math.PI / 2);
+    const angle = theta + radialOrientation;
 
     drawPhoneAt(ctxS, { ...slot, angle, family, active, shadow: true });
   }
@@ -574,6 +463,3 @@ function drawKeyDebugOverlay(ctxF, ctxP, status) {
 
   ctxF.restore();
 }
-
-
-

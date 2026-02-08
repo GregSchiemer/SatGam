@@ -36,11 +36,7 @@ export function setRender(fn) {
 
 export function renderFrame() {
   if (!rt.render) return;
-
-  const nowMs = performance.now();
-  const fauxClock = nowMs * 0.001; // seconds since page load
-
-  rt.render(fauxClock);
+  rt.render();
 }
 
 export function refresh() {

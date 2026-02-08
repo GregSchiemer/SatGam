@@ -229,7 +229,6 @@ export function makeHenge25(ctx, overrides = {}) {
   return makeHenge(ctx, { ...overrides, N: 25 });
 }
 
-
 //Debug visualiser: draws feet circle (rFeet), centre circle (rCenter),
 //phone bounding boxes, foot segments (length phoneW), and hotspot circles.
 

@@ -22,7 +22,6 @@ export function isInsideCircle(x, y, cx, cy, r) {
   return (dx * dx + dy * dy) <= (r * r);
 }
 
-// canvasUtils.js (or helpers.js)
 export function easeInOutQuad01(nowMs, bgFade) {
   if (!bgFade?.startMs || !bgFade?.durationMs) return 1;
 
