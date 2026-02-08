@@ -1,6 +1,7 @@
 // color.js
 
 export const ColorFamily = Object.freeze({
+  BLACK: -1,     // new
   NONE: 0,
   YELLOW: 1, RED: 2, GREEN: 3, BLUE: 4, MAGENTA: 5,
 });

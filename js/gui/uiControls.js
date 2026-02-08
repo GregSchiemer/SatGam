@@ -4,10 +4,8 @@ import {
   prepareAndRenderBackground,
   selectAndRenderBackground,
   composeFrame,
-//  blitBackgroundToPane,
-//  blitSpritesToPane,
   beginBackgroundCrossfade,  
-  eventToCtxPoint, 
+  eventToCtxPoint,
   getSlots, 
   radializeSlots,
   arrB
@@ -15,7 +13,6 @@ import {
 
 import { 
   drawPhoneAt,
-//  downloadFamilyRingPNG,
   familyForIndex, 
 } from './sprites.js';
 
@@ -34,12 +31,9 @@ import { getFamilyMask, sequence } from './sequence.js';
 import { drawHenge } from './henge.js';
 import { refresh } from './runTime.js';
 
-//import { sequence } from './sequence.js';
 import { FamilyIndex } from './color.js';
 
-import { startSequenceSanityRun }  from './main.js';
-//import { startAnimation } from './animation.js';
-//import { refresh } from './runTime.js';
+//import { startSequenceSanityRun }  from './main.js';
 
 
 function isLeader(status) {
@@ -80,7 +74,7 @@ export function installLeaderModeSelectHandler(ctx, canvas, status) {
     if (status.role !== 'leader') return;
     if (status.modeConfirmed) return;
 
-    const { x, y } = eventToDesignPoint(ev, canvas, ctx);
+    const { x, y } = eventToCtxPoint(ev, canvas, ctx);
 
     console.log('[select] pointer', {
       x, y,
@@ -124,7 +118,7 @@ export function installLeaderModeConfirmHandler(ctx, canvas, status) {
     if (status.role !== 'leader') return;
     if (status.modeConfirmed) return;
 
-    const { x, y } = eventToDesignPoint(ev, canvas, ctx);
+    const { x, y } = eventToCtxPoint(ev, canvas, ctx);
 
     const x1 = ctx.low.x;
     const y1 = ctx.low.y;
@@ -170,7 +164,7 @@ export function installLeaderStopHandler(ctx, canvas, status) {
     if (status.role !== 'leader') return;
     if (!status.running) return;
 
-    const { x, y } = eventToDesignPoint(ev, canvas, ctx);
+	const { x, y } = eventToCtxPoint(ev, canvas, ctx);
 
     // Use top text position as STOP hotspot
     const x1 = ctx.top.x;
@@ -206,6 +200,9 @@ export function installClockStartHandler(ctx, canvas, status) {
     const r  = ctx.tapRadius;
 
     if (!isInsideCircle(x, y, x1, y1, r)) return;
+
+	// Leader END screen is handled by installEndScreenTapHandler()
+	if (status.role === 'leader' && status.isEndScreen) return;
 
     ev.preventDefault();
     ev.stopImmediatePropagation();
@@ -251,7 +248,7 @@ export function installEndScreenTapHandler(ctx, canvas, status) {
     if (status.role !== 'leader') return;
     if (!status.isEndScreen) return;
 
-    const { x, y } = eventToDesignPoint(ev, canvas, ctx);
+    const { x, y } = eventToCtxPoint(ev, canvas, ctx);
 
     const reSelect = isInsideCircle(x, y, ctx.mid.x, ctx.mid.y, ctx.tapRadius);
     if (!reSelect) {
@@ -261,18 +258,19 @@ export function installEndScreenTapHandler(ctx, canvas, status) {
 
     console.log('[end] reselect: returning to mode select');
 
-    // Stop anything still ticking (safe even if already stopped)
+    // Stop anything still ticking
     stopAnimation();
 
     status.running = false;
     status.startWall = 0;
+    status.lastKeyIndex = null;
     status.isEndScreen = false;
 
     // Return leader to mode-select phase
     status.modeConfirmed = false;
 
     refresh();
-  });
+  }, { capture: true });
 }
 
 // ---------------------------------------------------------------------------
@@ -319,7 +317,7 @@ function installHengeHandler(ctx, canvas, status) {
 
     console.log('[installHengeHandler] tapped key :', tapI);
 
-    // START VIEW: show Key ID immediately (but do not swallow events)
+    // START VIEW: show Key ID without swallowing clock events)
     if (!status.running) {
       refresh();
       return;
@@ -351,7 +349,7 @@ function isFamilyOnInState(family, stateIndex) {
 export function pickSlotFromPoint(slots, x, y, ctx) {
   if (!Array.isArray(slots) || slots.length === 0) return null;
 
-  const r = (ctx?.keyRadius ?? 34);
+  const r = ctx.keyRadius; //const r = (ctx?.keyRadius ?? 34);
 
   for (let i = slots.length - 1; i >= 0; i--) {
     const s = slots[i];
