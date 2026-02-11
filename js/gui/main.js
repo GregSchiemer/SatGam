@@ -97,17 +97,6 @@ export async function initApp() {
     designH,
   });
 
-//console.log('[pairing check @main]', {
-//  pane: ctxP.canvas === cnvP,
-//  bg:   ctxB.canvas === arrB[0].canvas,
-//  fg:   ctxF.canvas === arrF[0].canvas,
-//  text: ctxT.canvas === arrT[0].canvas,
-//  paneSize: [cnvP.width, cnvP.height],
-//  bgSize:   [arrB[0].canvas.width, arrB[0].canvas.height],
-//  fgSize:   [arrF[0].canvas.width, arrF[0].canvas.height],
-//  textSize: [arrT[0].canvas.width, arrT[0].canvas.height],
-//});
-
   // Keep your existing variable names if you want
   const cnv = cnvP;
   const ctx = ctxP;
@@ -146,7 +135,7 @@ export async function initApp() {
 	  keyRadius,
 	});
 
-	ctx.keyRadius = ctxS.keyRadius;     // or ctxP.keyRadius, whichever you use consistently
+	ctx.keyRadius = ctxS.keyRadius;
 
 	setSlots(slots);
 
@@ -185,23 +174,29 @@ function initStatus(ctx) {
 
   return {
 // Role
-    role: 			roleAtLaunch,  			// 'leader' or 'consort'
+    role: 			roleAtLaunch,	// 'leader' or 'consort'
 
 // Animation state
-    running:    	false,               	// true while MLS sequence is running
+    running:    	false,    		// true while MLS sequence is running
     index: 			0,
-    startWall:     	0,                   	// performance.now() when the show starts
-    isEndScreen:	false,               	// true only while END view is shown
+    startWall:     	0,        		// performance.now() when the show starts
+    isEndScreen:	false,    		// true only while END view is shown
     concertClock:	CONCERT_CLK, 			
     previewClock:	PREVIEW_CLK, 
-    msPerBeat:     	CONCERT_CLK,    		// tempo in ms/beat (default = concert)
-    fullHenge: 	   	FULL_HENGE,          	// pre-start state index (18)
+    msPerBeat:     	CONCERT_CLK,	// tempo in ms/beat (default = concert)
+    fullHenge: 	   	FULL_HENGE,		// pre-start state index (18)
 	endFadeStarted: false,
 	stopAfterFade:  false,
 
 // Mode state
-    modeChosen:    	'concert',           	// 'concert' or 'preview'
+    modeChosen:    	'concert', 		// 'concert' or 'preview'
     modeConfirmed: 	(roleAtLaunch === 'consort'),	// consorts skip mode-select; leaders don't
+
+// Stage lighting
+	_view: null,              		// tracks current 1 of 4 views
+	lightsDownDone: false,    		// start-view fade fired?
+	lightsUpDone:   false,   		// end-view fade fired?
+	stopAfterFade:  false,     		// stop RAF when fade finishes
   };
 }
 
