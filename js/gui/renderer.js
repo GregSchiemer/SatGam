@@ -57,6 +57,108 @@ function renderPhonesLayer(ctxS, status) {
   syncPhonesToSpritesLayer(status.index);
 }
 
+// ---------- render storyboard ----------
+
+function crossFadeBackground(ctxB, cnvB, status){
+  const now = performance.now();
+  const t = easeInOutQuad01(now, status.bgFade);
+  blendBgCanvasesInto(ctxB, cnvB, status._bgFade.from, status._bgFade.to, t);
+  if (t >= 1) status.bgFade.active = false;
+  return;  
+} // 1.1
+
+function switchBackground(ctxB, status) {
+  if (status.running && status.bgFamily != null) {
+    selectAndRenderBackground(ctxB, status);
+  } else {
+    prepareAndRenderBackground(ctxB);
+  }
+  return;
+} // 1.2
+
+function clearModeSelectView(ctxT) {
+ctxT.clearRect(0, 0, ctxT.w, ctxT.h);
+} // 1.3
+
+function testModeSelect(status) {
+  return status.role === 'leader' && !status.modeConfirmed;
+} // 2.1
+
+function confirmModeSelect(ctxT, ctxS, status) {
+  // Don’t let mode-select influence an already-running animation
+  if (!status.running) status.msPerBeat = status.previewClock;
+  renderStartLeader(ctxT, status);
+  renderPhonesLayer(ctxS, status);
+  composeFrame({ drawB: true, drawS: true, drawT: true });
+} // 2.2
+
+function spritesReady() {
+  const slots = getSlots();
+  return Array.isArray(slots) && slots.length > 0;
+} // 3.1
+
+function renderSprites(ctxS, status) {
+  renderPhonesLayer(ctxS, status);
+  composeFrame({ drawB: true, drawS: true, drawT: true });
+} // 3.2
+
+function validateTimeValue(status) {
+  return (typeof status.startWall === 'number' &&
+          typeof status.runStateDurationMs === 'number');
+}
+
+function enterEndScreen(status) {
+  status.running = false;
+  status.isEndScreen = true;
+  stopAnimation();
+  // (later you’ll trigger the “house lights up” fade here)
+}
+
+function advanceRunningState(status, nowMs, maxStates) {
+  // Contract check
+  if (!validateTimeValue(status)) {
+    console.error('[frameRender] running but missing startWall/runStateDurationMs', {
+      startWall: status.startWall,
+      runStateDurationMs: status.runStateDurationMs,
+    });
+    enterEndScreen(status);
+    return 0; // elapsedMs
+  }
+
+  const elapsedMs = nowMs - status.startWall;
+
+  // Initialise boundary once 
+  if (typeof status.nextStateWallMs !== 'number') {
+    status.nextStateWallMs = status.startWall + status.runStateDurationMs;
+  }
+
+  // Step index deterministically
+  if (nowMs >= status.nextStateWallMs) {
+    const steps =
+      Math.floor((nowMs - status.nextStateWallMs) / status.runStateDurationMs) + 1;
+
+    status.index += steps;
+    status.nextStateWallMs += steps * status.runStateDurationMs;
+  }
+
+  // End condition
+  if (status.index >= maxStates) {
+    status.index = maxStates - 1;
+    enterEndScreen(status);
+  }
+  
+  return elapsedMs;
+}
+
+function applyIdleIndex(status) {
+  if (!status.isEndScreen) status.index = status.fullHenge;
+}
+
+function clampIndex(status, maxStates) {
+  if (status.index < 0) status.index = 0;
+  if (status.index >= maxStates) status.index = maxStates - 1;
+}
+
 // ---------- main render ----------
 export function frameRender(status) {
   const ctxP = arrP[0].ctx;
@@ -64,99 +166,45 @@ export function frameRender(status) {
   const ctxS = arrS[0].ctx;
   const ctxT = arrT[0].ctx;
 
-// 1) Background (supports crossfade)
-const cnvB = arrB[0].canvas;
-
-if (status.bgFade?.active) {
-  const now = performance.now();
-  const t = easeInOutQuad01(now, status.bgFade);
-  blendBgCanvasesInto(ctxB, cnvB, status._bgFade.from, status._bgFade.to, t);
-  if (t >= 1) status.bgFade.active = false;  
-} else {
-  if (status.running && status.bgFamily != null) {
-    selectAndRenderBackground(ctxB, status);
+// 1) Render Background
+  const cnvB = arrB[0].canvas;
+	
+  if (status.bgFade?.active) {
+	crossFadeBackground(ctxB, cnvB, status); // 1.1
   } else {
-    prepareAndRenderBackground(ctxB);
+	switchBackground(ctxB, status); // 1.2
   }
-}
-	     
-  ctxT.clearRect(0, 0, ctxT.w, ctxT.h);
-
-  // 2) Leader mode-select view: text-only + no running
-  if (status.role === 'leader' && !status.modeConfirmed) {
-    // Keep this, but DO NOT let it influence an already-running animation
-    if (!status.running) status.msPerBeat = status.previewClock;
-
-    renderStartLeader(ctxT, status);
-    renderPhonesLayer(ctxS, status);
-    composeFrame({ drawB: true, drawS: true, drawT: true });
-
-    return;
+	
+  clearModeSelectView(ctxT); // 1.3     
+  
+// 2) Render Start View
+  if (testModeSelect(status)) {	// 2.1
+	confirmModeSelect(ctxT, ctxS, status); // 2.2
+	return;
   }
 
-  // 3) If slots missing, still render whatever phones layer logic decides
-  const baseSlots = getSlots();
-  if (!baseSlots?.length) {
-    renderPhonesLayer(ctxS, status);
-    composeFrame({ drawB: true, drawS: true, drawT: true });
-    return;
+// 3) Render available sprites
+  if (!spritesReady()) { // 3.1
+ 	renderSprites(ctxS, status); // 3.2
+	return;
   }
 
-const MAX_STATES = sequence.length; // MUST be 31
+// 4) Advance MLS state
 
-let elapsedMs = 0;
-
-if (status.running) {
-  const nowMs = performance.now();
-
-  // Hard contract: must be set at clock tap
-  if (typeof status.startWall !== 'number' || typeof status.runStateDurationMs !== 'number') {
-    console.error('[frameRender] running but missing startWall/runStateDurationMs', {
-      startWall: status.startWall,
-      runStateDurationMs: status.runStateDurationMs,
-    });
-    status.running = false;
-    status.isEndScreen = true;
-    stopAnimation();
-//    beginBackgroundCrossfade(status, arrB[0].ctx, ColorFamily.NONE, 5000);
+  let elapsedMs = 0;
+	
+  if (status.running) {
+	elapsedMs = advanceRunningState(status, performance.now(), MAX_STATES);
   } else {
-    elapsedMs = nowMs - status.startWall;
-
-    // Initialize the next boundary once
-    if (typeof status.nextStateWallMs !== 'number') {
-      status.nextStateWallMs = status.startWall + status.runStateDurationMs;
-    }
-
-    // Advance index deterministically when boundaries are crossed
-    if (nowMs >= status.nextStateWallMs) {
-      const steps =
-        Math.floor((nowMs - status.nextStateWallMs) / status.runStateDurationMs) + 1;
-
-      status.index += steps;
-      status.nextStateWallMs += steps * status.runStateDurationMs;
-    }
-
-    // End condition
-    if (status.index 	>= MAX_STATES) {
-      status.index       = MAX_STATES - 1;
-      status.running     = false;
-      status.isEndScreen = true;
-      stopAnimation();
-//      beginBackgroundCrossfade(status, arrB[0].ctx, ColorFamily.NONE, 5000);
-    }
+	applyIdleIndex(status);
   }
-} else {
-  if (!status.isEndScreen) status.index = status.fullHenge;
-}
+  clampIndex(status, MAX_STATES);
+  
+// 5) Phones into sprites layer 
 
-  // Clamp (keeps everything in bounds even if idx computed at boundary)
-  if (status.index < 0) status.index = 0;
-  if (status.index >= MAX_STATES) status.index = MAX_STATES - 1;
-
-  // 5) Phones into sprites layer
   renderPhonesLayer(ctxS, status);
 
-  // 6) Text
+// 6) Text
   if (status.isEndScreen) {
     renderEnd(ctxT, status);
   } else {
@@ -166,9 +214,11 @@ if (status.running) {
     else renderStartBoth(ctxT, status);
   }
 
-  // 7) Composite (no debug foreground)
+// 7) Composite (no debug foreground)
   composeFrame({ drawB: true, drawS: true, drawT: true });
 }
+
+
 // - CONCERT: real time - PREVIEW: fast-forward.
 function computeClockMs(status, elapsedMs) {
   if (status.modeChosen === 'preview') {
@@ -184,6 +234,7 @@ function computeClockMs(status, elapsedMs) {
   // Concert mode: show true elapsed time
   return elapsedMs;
 }
+
 
 // Paint one MLS state into the SPRITES layer.
 export function syncPhonesToSpritesLayer(stateIndex, { maskBits = null } = {}) {

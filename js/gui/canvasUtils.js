@@ -181,6 +181,7 @@ export function prepareAndRenderBackground(ctxB) {
   ctxB.restore();
 }
 
+/*
 export function selectAndRenderBackground(ctxB, status) {
   const family = status.bgFamily ?? ColorFamily.NONE;
 
@@ -200,23 +201,28 @@ export function selectAndRenderBackground(ctxB, status) {
   ctxB.fillRect(0, 0, ctxB.w, ctxB.h);
   ctxB.restore();
 }
+*/
 
-/*
 export function selectAndRenderBackground(ctxB, status) {
-  const fam = status?.bgFamily ?? ColorFamily.NONE;
-  
-  const g = ctxB.createLinearGradient(0, ctxB.h, 0, 0);
-  const gradient = setLinearGradient(fam, g);          // mutate g; ignore return value
+  const fam = status.bgFamily ?? ColorFamily.NONE;
 
-//  console.log('[UI selected background] fam :', fam, 'g :', g);
-  
   ctxB.clearRect(0, 0, ctxB.w, ctxB.h);
   ctxB.save();
-  ctxB.fillStyle = gradient;                 // use gradient
+
+  if (fam === ColorFamily.BLACK) {
+    ctxB.fillStyle = 'rgba(0, 0, 0, 1)';
+    ctxB.fillRect(0, 0, ctxB.w, ctxB.h);
+    ctxB.restore();
+    return;
+  }
+
+  const g = ctxB.createLinearGradient(0, ctxB.h, 0, 0);
+  setLinearGradient(fam, g);
+  ctxB.fillStyle = g;
   ctxB.fillRect(0, 0, ctxB.w, ctxB.h);
   ctxB.restore();
 }
-*/
+
 
 // ---------------------------------------------------------------------------
 //  Pointer → canvas coordinate helper
