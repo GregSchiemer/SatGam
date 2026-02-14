@@ -143,17 +143,18 @@ export async function initApp() {
 
   // 5) build slot atlas
   await ensurePhoneAtlasForSlots(slots);
-
+	console.log('[main] //5)');	
   // 6) re-initialise geometry when user rotates phone
   installResizeHandler();
-  
+	console.log('[main] //6)');	
   // 7) attach UI to visible pane canvas
   installUIHandlers(ctxP, cnvP, status);
-
+	console.log('[main] //7)');	
   // 8) render arrB/arrS/arrT to composite layer arrP
   setRender(() => {
     frameRender(status); 
   });
+  	console.log('[main] //8)');	
 
   // 9) initial paint
   refresh();
@@ -187,6 +188,8 @@ function initStatus(ctx) {
     fullHenge: 	   	FULL_HENGE,		// pre-start state index (18)
 	endFadeStarted: false,
 	stopAfterFade:  false,
+	bgFamilyTarget: ColorFamily.NONE,
+	textColor: 		'white',
 
 // Mode state
     modeChosen:    	'concert', 		// 'concert' or 'preview'

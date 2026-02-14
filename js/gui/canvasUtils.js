@@ -181,45 +181,29 @@ export function prepareAndRenderBackground(ctxB) {
   ctxB.restore();
 }
 
-/*
 export function selectAndRenderBackground(ctxB, status) {
-  const family = status.bgFamily ?? ColorFamily.NONE;
+  const fam = status?.bgFamily ?? ColorFamily.NONE;
 
-  ctxB.clearRect(0, 0, ctxB.w, ctxB.h);
+  const W = ctxB.canvas.width;
+  const H = ctxB.canvas.height;
+
   ctxB.save();
+  ctxB.setTransform(1, 0, 0, 1, 0, 0);
+  ctxB.clearRect(0, 0, W, H);
 
-  if (family === ColorFamily.BLACK) {
-    ctxB.fillStyle = 'rgba(0, 0, 0, 1)';
-    ctxB.fillRect(0, 0, ctxB.w, ctxB.h);
-    ctxB.restore();
-    return;
-  }
-
-  const g = ctxB.createLinearGradient(0, ctxB.h, 0, 0);
-  setLinearGradient(family, g);     // mutates g
-  ctxB.fillStyle = g;
-  ctxB.fillRect(0, 0, ctxB.w, ctxB.h);
-  ctxB.restore();
-}
-*/
-
-export function selectAndRenderBackground(ctxB, status) {
-  const fam = status.bgFamily ?? ColorFamily.NONE;
-
-  ctxB.clearRect(0, 0, ctxB.w, ctxB.h);
-  ctxB.save();
-
+  // BLACK special case
   if (fam === ColorFamily.BLACK) {
     ctxB.fillStyle = 'rgba(0, 0, 0, 1)';
-    ctxB.fillRect(0, 0, ctxB.w, ctxB.h);
+    ctxB.fillRect(0, 0, W, H);
     ctxB.restore();
     return;
   }
 
-  const g = ctxB.createLinearGradient(0, ctxB.h, 0, 0);
+  const g = ctxB.createLinearGradient(0, H, 0, 0);
   setLinearGradient(fam, g);
   ctxB.fillStyle = g;
-  ctxB.fillRect(0, 0, ctxB.w, ctxB.h);
+  ctxB.fillRect(0, 0, W, H);
+
   ctxB.restore();
 }
 
@@ -340,6 +324,9 @@ export function ensureBgFadeBuffers(status, cnvB) {
 }
 
 export function beginBackgroundCrossfade(status, ctxB, newFamily, durationMs = 320) {
+  status.bgFamilyTarget = newFamily;   // ✅ for text contrast
+  status.bgFamily = newFamily;         // ✅ for steady background logic
+
   const cnvB = arrB[0].canvas;
 
   // If a fade is in progress, "bake" the current blended result into cnvB first
@@ -358,7 +345,7 @@ export function beginBackgroundCrossfade(status, ctxB, newFamily, durationMs = 3
   fade.ctxFrom.drawImage(cnvB, 0, 0);
 
   // Render NEW bg into the real bg layer once (using your existing function)
-  status.bgFamily = newFamily;
+  //status.bgFamily = newFamily;
   selectAndRenderBackground(ctxB, status);
 
   // Snapshot NEW bg → to
