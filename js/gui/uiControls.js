@@ -316,6 +316,7 @@ function installHengeHandler(ctx, canvas, status) {
     status.lastKeyIndex = tapI + 1; // Key 1..25
 
     console.log('[installHengeHandler] tapped key :', tapI);
+    console.log('[textColor]', { bgFamily: status.bgFamily, tapFamily: tapFamily, textColor: status.textColor });
 
     // START VIEW: show Key ID without swallowing clock events)
     if (!status.running) {

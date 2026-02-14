@@ -1,6 +1,7 @@
 /* text.js */
 
 import { arrT } from './canvasUtils.js';
+import { ColorFamily, TextColorByFamily } from './color.js';
 
 export function drawTopText(ctxT, text) {
   const x = ctxT.mid.x, y = ctxT.h * 0.10;
@@ -32,14 +33,37 @@ export function drawRightText(ctxT, text) {
   drawText(ctxT, text, x, y, 24);
 }
 
-function drawText(ctxT, text, x, y, size) {
+/*
+function drawText(ctxT, status, text, x, y, size) {
   ctxT.font = `${size}px Helvetica Neue, Helvetica, Arial, sans-serif`;
-  ctxT.fillStyle = 'white';
+  ctxT.fillStyle = status.textColor ?? 'white';
   ctxT.textAlign = 'center';
   ctxT.textBaseline = 'middle';
-  ctxT.shadowColor = 'transparent'; // no text shadow
+  ctxT.shadowColor = 'transparent';
   ctxT.fillText(text, x, y);
 }
+*/
+
+// Step C
+function drawText(ctxT, text, x, y, size) {
+  ctxT.font = `${size}px Helvetica Neue, Helvetica, Arial, sans-serif`;
+  // ctxT.fillStyle is set by renderer.js
+  ctxT.textAlign = 'center';
+  ctxT.textBaseline = 'middle';
+  ctxT.shadowColor = 'transparent';
+  ctxT.fillText(text, x, y);
+}
+
+export function chooseTextColorForBackground(status) {
+  const family = status.bgFamilyTarget ?? status.bgFamily ?? ColorFamily.NONE;
+
+  if (family === ColorFamily.YELLOW || family === ColorFamily.GREEN) {
+//    return 'rgba(0, 0, 0, 0.65)';   	// softer “black”
+      return '#AAA';           			// also nice
+  }
+  return 'white';
+}
+
 
 export function renderStartBoth(ctxT, status) {
   drawTopText(ctxT, 'Phonehenge');

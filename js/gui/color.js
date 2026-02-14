@@ -1,7 +1,7 @@
 // color.js
 
 export const ColorFamily = Object.freeze({
-  BLACK: -1,     // new
+  BLACK: -1,
   NONE: 0,
   YELLOW: 1, RED: 2, GREEN: 3, BLUE: 4, MAGENTA: 5,
 });
@@ -17,6 +17,19 @@ export const FamilyIndex = Object.freeze({
   [ColorFamily.BLUE]:   3,
   [ColorFamily.MAGENTA]:4,
 });
+
+export const TextColorByFamily = Object.freeze({
+  [ColorFamily.BLACK]:  'white',
+  [ColorFamily.NONE]:   'white',
+  [ColorFamily.YELLOW]: 'black',
+  [ColorFamily.GREEN]:  'black',
+  [ColorFamily.RED]:    'white',
+  [ColorFamily.BLUE]:   'white',
+  [ColorFamily.MAGENTA]:'white',
+});
+
+//export const TextColor = Object.freeze(['black', 'white', 'black', 'white', 'white']);
+
 
 // Central color dictionary (RGBA format)
 const COLOR_MAP = {

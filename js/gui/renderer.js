@@ -1,16 +1,63 @@
 // js/gui/renderer.js
 
 import { arrP, arrB, arrF, arrS, arrT, getSlots } from './canvasUtils.js';
-import { prepareAndRenderBackground, selectAndRenderBackground, blendBgCanvasesInto } from './canvasUtils.js';
-import { renderStartLeader, renderStartBoth, renderRunning, renderEnd } from './text.js';
+import { prepareAndRenderBackground, selectAndRenderBackground, blendBgCanvasesInto, beginBackgroundCrossfade } from './canvasUtils.js';
+import { renderStartLeader, renderStartBoth, renderRunning, renderEnd, chooseTextColorForBackground } from './text.js';
 import { FamilyIndex, ColorFamily } from './color.js';
 import { familyForIndex, drawPhoneAt } from './sprites.js'; 
 import { MAX_STATES, STATE_DUR, MAX_DUR, CONCERT_CLK, PREVIEW_CLK } from './globals.js'; 
 import { sequence } from './sequence.js';
-import { stopAnimation } from './animation.js';
-import { clockify, easeInOutQuad01 } from './helpers.js';
+import { stopAnimation, startAnimation } from './animation.js';
+import { clockify, easeInOutQuad01, isConcertMode } from './helpers.js';
 
-// ---------- compositing ----------
+// ==============================
+// —— Background (cross-cutting) ——
+// ==============================
+
+// 1.1 Play an in-progress crossfade (and optionally stop ticking when finished)
+function playBackgroundCrossfadeIfActive(ctxB, cnvB, status) {
+  if (!status.bgFade || !status.bgFade.active) return false;
+
+  const now = performance.now();
+  const t = easeInOutQuad01(now, status.bgFade);
+  blendBgCanvasesInto(ctxB, cnvB, status._bgFade.from, status._bgFade.to, t);
+
+  if (t >= 1) {
+    status.bgFade.active = false;
+
+    // If we were only ticking to run an auto-fade (start/end), stop after fade completes.
+    if (status.stopAfterFade && !status.running) {
+      status.stopAfterFade = false;
+      stopAnimation();
+    }
+  }
+  return true;
+}
+
+// 1.2 Paint a steady background when not fading
+function paintSteadyBackground(ctxB, status) {
+  if (status.running && status.bgFamily != null) selectAndRenderBackground(ctxB, status);
+  else prepareAndRenderBackground(ctxB);
+}
+
+// 1) Render background layer (fade takes precedence)
+function renderBackgroundLayer(ctxB, cnvB, status) {
+  if (playBackgroundCrossfadeIfActive(ctxB, cnvB, status)) return;
+  paintSteadyBackground(ctxB, status);
+}
+
+// ===============================
+// —— Composition (cross-cutting) ——
+// ===============================
+
+function blit(ctxDst, cnvSrc) {
+  ctxDst.drawImage(
+    cnvSrc,
+    0, 0, cnvSrc.width, cnvSrc.height,
+    0, 0, ctxDst.w, ctxDst.h
+  );
+}
+
 export function composeFrame({ drawB = true, drawF = false, drawS = true, drawT = true } = {}) {
   const { ctx: ctxP } = arrP[0];
   const { canvas: cnvB } = arrB[0];
@@ -26,13 +73,262 @@ export function composeFrame({ drawB = true, drawF = false, drawS = true, drawT 
   if (drawT) blit(ctxP, cnvT);
 }
 
-function blit(ctxDst, cnvSrc) {
-  ctxDst.drawImage(
-    cnvSrc,
-    0, 0, cnvSrc.width, cnvSrc.height,
-    0, 0, ctxDst.w, ctxDst.h
-  );
+// 2) Clear text layer
+function clearTextLayer(ctxT) {
+  ctxT.clearRect(0, 0, ctxT.w, ctxT.h);
 }
+
+// =====================
+// —— View detection ——
+// =====================
+
+const VIEW_MODE  = 'mode';
+const VIEW_START = 'start';
+const VIEW_RUN   = 'run';
+const VIEW_END   = 'end';
+
+// 3.1 Decide which view we are in (layman: “what screen should the audience see?”)
+function currentView(status) {
+  if (status.role === 'leader' && !status.modeConfirmed) return VIEW_MODE;
+  if (status.isEndScreen) return VIEW_END;
+  if (status.running) return VIEW_RUN;
+  return VIEW_START;
+}
+
+// 3.2 Detect view entry (layman: “did we just arrive at a new screen?”)
+function didEnterNewView(status, view) {
+  return status._view !== view;
+}
+
+function rememberCurrentView(status, view) {
+  status._view = view;
+}
+
+// ===============================
+// —— Auto fades on view entry ——
+// ===============================
+
+// 4.1 House lights down (Start View entry → fade to black)
+function startHouseLightsDownOnce(status, ctxB) {
+  if (status.lightsDownDone) return;
+
+  status.lightsDownDone = true;
+  status.stopAfterFade = true;     // tick only until fade completes (we’re not running)
+  beginBackgroundCrossfade(status, ctxB, ColorFamily.BLACK, 5000);
+  startAnimation();                // ensure frames while fading
+}
+
+// 4.2 House lights up (End View entry → fade to neutral)
+function startHouseLightsUpOnce(status, ctxB) {
+  if (status.lightsUpDone) return;
+
+  status.lightsUpDone = true;
+  status.stopAfterFade = true;     // tick only until fade completes (we’re not running)
+  beginBackgroundCrossfade(status, ctxB, ColorFamily.NONE, 5000);
+  startAnimation();                // ensure frames while fading
+}
+
+// 4) Run entry actions when we arrive at a new view
+function onEnterView(status, view, ctxB) {
+  if (view === VIEW_MODE) {
+    // new cycle begins
+    status.lightsDownDone = false;
+    status.lightsUpDone   = false;
+    status.stopAfterFade  = false;
+    return;
+  }
+
+  // ✅ Auto fades only in CONCERT mode
+  if (!isConcertMode(status)) return;
+
+  if (view === VIEW_START) {
+    startHouseLightsDownOnce(status, ctxB);
+    return;
+  }
+
+  if (view === VIEW_END) {
+    startHouseLightsUpOnce(status, ctxB);
+    return;
+  }
+
+  if (view === VIEW_RUN) status.stopAfterFade = false;
+}
+
+
+// ===========================
+// —— Mode Select View ——
+// ===========================
+
+function isModeSelectView(status) {
+  return status.role === 'leader' && !status.modeConfirmed;
+}
+
+function renderModeSelectView(ctxT, ctxS, status) {
+  if (!status.running) status.msPerBeat = status.previewClock;
+
+  renderStartLeader(ctxT, status);
+  renderPhonesLayer(ctxS, status);
+  composeFrame({ drawB: true, drawS: true, drawT: true });
+}
+
+// =======================
+// —— Running View ——
+// =======================
+
+function ensureRunTiming(status) {
+  return (typeof status.startWall === 'number' &&
+          typeof status.runStateDurationMs === 'number');
+}
+
+function enterEndScreen(status) {
+  status.running = false;
+  status.isEndScreen = true;
+  // DO NOT stopAnimation() here if you want “house lights up” to run.
+  // stopAnimation() is handled after fade completes via stopAfterFade.
+}
+
+function failRunTimingContract(status) {
+  if (ensureRunTiming(status)) return false;
+
+  console.error('[frameRender] running but missing startWall/runStateDurationMs', {
+    startWall: status.startWall,
+    runStateDurationMs: status.runStateDurationMs,
+  });
+
+  enterEndScreen(status);
+  return true;
+}
+
+function computeElapsedMs(status, nowMs) {
+  return nowMs - status.startWall;
+}
+
+function ensureNextBoundaryIsInitialised(status) {
+  if (typeof status.nextStateWallMs === 'number') return;
+  status.nextStateWallMs = status.startWall + status.runStateDurationMs;
+}
+
+function applyBoundaryStepIfDue(status, nowMs) {
+  if (nowMs < status.nextStateWallMs) return;
+
+  const steps =
+    Math.floor((nowMs - status.nextStateWallMs) / status.runStateDurationMs) + 1;
+
+  status.index += steps;
+  status.nextStateWallMs += steps * status.runStateDurationMs;
+}
+
+function applyEndConditionIfReached(status, maxStates) {
+  if (status.index < maxStates) return;
+
+  status.index = maxStates - 1;
+  enterEndScreen(status);
+}
+
+function advanceRunningState(status, nowMs, maxStates) {
+  if (failRunTimingContract(status)) return 0;
+
+  const elapsedMs = computeElapsedMs(status, nowMs);
+  ensureNextBoundaryIsInitialised(status);
+  applyBoundaryStepIfDue(status, nowMs);
+  applyEndConditionIfReached(status, maxStates);
+
+  return elapsedMs;
+}
+
+// =====================
+// —— Start / End ——
+// =====================
+
+function applyIdleIndex(status) {
+  if (!status.isEndScreen) status.index = status.fullHenge;
+}
+
+function clampIndex(status, maxStates) {
+  if (status.index < 0) status.index = 0;
+  if (status.index >= maxStates) status.index = maxStates - 1;
+}
+
+function slotsReady() {
+  const slots = getSlots();
+  return Array.isArray(slots) && slots.length > 0;
+}
+
+function renderWithoutSlots(ctxS, status) {
+  renderPhonesLayer(ctxS, status);
+  composeFrame({ drawB: true, drawS: true, drawT: true });
+}
+
+// Step A (in renderer.js)
+function renderTextLayer(ctxT, status, elapsedMs) {
+  ctxT.fillStyle = chooseTextColorForBackground(status);  // returns 'black' or 'white'
+
+  if (status.isEndScreen) {
+    renderEnd(ctxT, status);
+    return;
+  }
+
+  const clockMs = computeClockMs(status, elapsedMs);
+  const { mins, secs } = clockify(clockMs);
+
+  if (status.running) renderRunning(ctxT, { status, mins, secs });
+  else renderStartBoth(ctxT, status);
+}
+
+
+// ======================
+// —— MAIN STORYBOARD ——
+// ======================
+
+export function frameRender(status) {
+  const ctxB = arrB[0].ctx;
+  const ctxS = arrS[0].ctx;
+  const ctxT = arrT[0].ctx;
+  const cnvB = arrB[0].canvas;
+
+  // 0) Decide view + run “enter view” actions once
+  const view = currentView(status);
+  if (didEnterNewView(status, view)) {
+    rememberCurrentView(status, view);
+    onEnterView(status, view, ctxB);
+  }
+
+  // 1) Render background (fade playback or steady paint)
+  renderBackgroundLayer(ctxB, cnvB, status);
+
+  // 2) Clear text layer for fresh draw
+  clearTextLayer(ctxT);
+
+  // 3) Mode Select View (leader only)
+  if (isModeSelectView(status)) {
+    renderModeSelectView(ctxT, ctxS, status);
+    return;
+  }
+
+  // 4) If slots missing, render what we can and exit
+  if (!slotsReady()) {
+    renderWithoutSlots(ctxS, status);
+    return;
+  }
+
+  // 5) Advance show state (only when running)
+  let elapsedMs = 0;
+  if (status.running) elapsedMs = advanceRunningState(status, performance.now(), MAX_STATES);
+  else applyIdleIndex(status);
+
+  // 6) Keep state index in range
+  clampIndex(status, MAX_STATES);
+
+  // 7) Render phones/sprites for this view/state
+  renderPhonesLayer(ctxS, status);
+
+  // 8) Render text overlay (start/running/end)
+  renderTextLayer(ctxT, status, elapsedMs);
+
+  // 9) Composite layers to pane
+  composeFrame({ drawB: true, drawS: true, drawT: true });
+}
+
 
 // ---------- phones ----------
 function renderPhonesLayer(ctxS, status) {
@@ -55,167 +351,6 @@ function renderPhonesLayer(ctxS, status) {
 
   // 4) Running view
   syncPhonesToSpritesLayer(status.index);
-}
-
-// ---------- render storyboard ----------
-
-function crossFadeBackground(ctxB, cnvB, status){
-  const now = performance.now();
-  const t = easeInOutQuad01(now, status.bgFade);
-  blendBgCanvasesInto(ctxB, cnvB, status._bgFade.from, status._bgFade.to, t);
-  if (t >= 1) status.bgFade.active = false;
-  return;  
-} // 1.1
-
-function switchBackground(ctxB, status) {
-  if (status.running && status.bgFamily != null) {
-    selectAndRenderBackground(ctxB, status);
-  } else {
-    prepareAndRenderBackground(ctxB);
-  }
-  return;
-} // 1.2
-
-function clearModeSelectView(ctxT) {
-ctxT.clearRect(0, 0, ctxT.w, ctxT.h);
-} // 1.3
-
-function testModeSelect(status) {
-  return status.role === 'leader' && !status.modeConfirmed;
-} // 2.1
-
-function confirmModeSelect(ctxT, ctxS, status) {
-  // Don’t let mode-select influence an already-running animation
-  if (!status.running) status.msPerBeat = status.previewClock;
-  renderStartLeader(ctxT, status);
-  renderPhonesLayer(ctxS, status);
-  composeFrame({ drawB: true, drawS: true, drawT: true });
-} // 2.2
-
-function spritesReady() {
-  const slots = getSlots();
-  return Array.isArray(slots) && slots.length > 0;
-} // 3.1
-
-function renderSprites(ctxS, status) {
-  renderPhonesLayer(ctxS, status);
-  composeFrame({ drawB: true, drawS: true, drawT: true });
-} // 3.2
-
-function validateTimeValue(status) {
-  return (typeof status.startWall === 'number' &&
-          typeof status.runStateDurationMs === 'number');
-}
-
-function enterEndScreen(status) {
-  status.running = false;
-  status.isEndScreen = true;
-  stopAnimation();
-  // (later you’ll trigger the “house lights up” fade here)
-}
-
-function advanceRunningState(status, nowMs, maxStates) {
-  // Contract check
-  if (!validateTimeValue(status)) {
-    console.error('[frameRender] running but missing startWall/runStateDurationMs', {
-      startWall: status.startWall,
-      runStateDurationMs: status.runStateDurationMs,
-    });
-    enterEndScreen(status);
-    return 0; // elapsedMs
-  }
-
-  const elapsedMs = nowMs - status.startWall;
-
-  // Initialise boundary once 
-  if (typeof status.nextStateWallMs !== 'number') {
-    status.nextStateWallMs = status.startWall + status.runStateDurationMs;
-  }
-
-  // Step index deterministically
-  if (nowMs >= status.nextStateWallMs) {
-    const steps =
-      Math.floor((nowMs - status.nextStateWallMs) / status.runStateDurationMs) + 1;
-
-    status.index += steps;
-    status.nextStateWallMs += steps * status.runStateDurationMs;
-  }
-
-  // End condition
-  if (status.index >= maxStates) {
-    status.index = maxStates - 1;
-    enterEndScreen(status);
-  }
-  
-  return elapsedMs;
-}
-
-function applyIdleIndex(status) {
-  if (!status.isEndScreen) status.index = status.fullHenge;
-}
-
-function clampIndex(status, maxStates) {
-  if (status.index < 0) status.index = 0;
-  if (status.index >= maxStates) status.index = maxStates - 1;
-}
-
-// ---------- main render ----------
-export function frameRender(status) {
-  const ctxP = arrP[0].ctx;
-  const ctxB = arrB[0].ctx;
-  const ctxS = arrS[0].ctx;
-  const ctxT = arrT[0].ctx;
-
-// 1) Render Background
-  const cnvB = arrB[0].canvas;
-	
-  if (status.bgFade?.active) {
-	crossFadeBackground(ctxB, cnvB, status); // 1.1
-  } else {
-	switchBackground(ctxB, status); // 1.2
-  }
-	
-  clearModeSelectView(ctxT); // 1.3     
-  
-// 2) Render Start View
-  if (testModeSelect(status)) {	// 2.1
-	confirmModeSelect(ctxT, ctxS, status); // 2.2
-	return;
-  }
-
-// 3) Render available sprites
-  if (!spritesReady()) { // 3.1
- 	renderSprites(ctxS, status); // 3.2
-	return;
-  }
-
-// 4) Advance MLS state
-
-  let elapsedMs = 0;
-	
-  if (status.running) {
-	elapsedMs = advanceRunningState(status, performance.now(), MAX_STATES);
-  } else {
-	applyIdleIndex(status);
-  }
-  clampIndex(status, MAX_STATES);
-  
-// 5) Phones into sprites layer 
-
-  renderPhonesLayer(ctxS, status);
-
-// 6) Text
-  if (status.isEndScreen) {
-    renderEnd(ctxT, status);
-  } else {
-    const clockMs = computeClockMs(status, elapsedMs);
-    const { mins, secs } = clockify(clockMs);
-    if (status.running) renderRunning(ctxT, { status, mins, secs });
-    else renderStartBoth(ctxT, status);
-  }
-
-// 7) Composite (no debug foreground)
-  composeFrame({ drawB: true, drawS: true, drawT: true });
 }
 
 
@@ -268,4 +403,3 @@ export function syncPhonesToSpritesLayer(stateIndex, { maskBits = null } = {}) {
     drawPhoneAt(ctxS, { ...slot, angle, family, active, shadow: true });
   }
 }
-

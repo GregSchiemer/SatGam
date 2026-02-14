@@ -34,3 +34,7 @@ export function easeInOutQuad01(nowMs, bgFade) {
 export function hide(){
 	return 'transparent';
 }
+
+export function isConcertMode(status) {  
+return status.modeChosen === 'concert';   // mirror your tap-handler rule
+}
