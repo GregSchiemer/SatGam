@@ -31,7 +31,7 @@ import { getFamilyMask, sequence } from './sequence.js';
 import { drawHenge } from './henge.js';
 import { refresh } from './runTime.js';
 
-import { FamilyIndex } from './color.js';
+import { FamilyIndex, ColorFamily } from './color.js';
 
 //import { startSequenceSanityRun }  from './main.js';
 
@@ -50,6 +50,7 @@ export function installUIHandlers(ctx, canvas, status) {
   installClockStartHandler(ctx, canvas, status);
   installEndScreenTapHandler(ctx, canvas, status);
   installHengeHandler(ctx, canvas, status);
+  installFadeToBlackHandler(ctx, canvas, status);
 }
 
 // --- helper: PointerEvent -> DESIGN coords (works for fixed and fit) ---
@@ -331,6 +332,33 @@ function installHengeHandler(ctx, canvas, status) {
     ev.preventDefault();
     ev.stopImmediatePropagation();
     beginBackgroundCrossfade(status, arrB[0].ctx, tapFamily, 2320);
+  }, { capture: true });
+}
+
+function installFadeToBlackHandler(ctx, canvas, status) {
+//export function installFadeToBlackHandler(ctx, canvas, status) {
+  canvas.addEventListener('pointerup', (ev) => {
+    if (!status.running) return;                 // only mid-performance
+    if (status.role === 'leader' && !status.modeConfirmed) return;
+    if (status.isEndScreen) return;
+
+    const { x, y } = eventToCtxPoint(ev, canvas, ctx);
+
+    // Hotspot around the top state-number text
+    const hx = ctx.mid.x;
+    const hy = ctx.h * 0.10;
+    const r  = ctx.tapRadius;
+
+    if (!isInsideCircle(x, y, hx, hy, r)) return;
+
+    ev.preventDefault();
+    ev.stopImmediatePropagation();
+
+    // Trigger fade-to-black from current bg
+    beginBackgroundCrossfade(status, arrB[0].ctx, ColorFamily.BLACK, 5000);
+
+    // Ensure bgFamily reflects “black” after fade completes
+    status.bgFamily = ColorFamily.BLACK;
   }, { capture: true });
 }
 
