@@ -35,6 +35,10 @@ import { FamilyIndex, ColorFamily } from './color.js';
 
 //import { startSequenceSanityRun }  from './main.js';
 
+import { pingBeep } from "./satgamPing.js";
+
+//import { primeAudioContext, enableCsound, playTestTone, getCsoundInfo } from "./csoundInit.js";
+import { primeAudioContext, enableCsound, playTestTone } from "./csoundInit.js";
 
 function isLeader(status) {
   return status.role === 'leader';
@@ -49,8 +53,11 @@ export function installUIHandlers(ctx, canvas, status) {
   installLeaderStopHandler(ctx, canvas, status);
   installClockStartHandler(ctx, canvas, status);
   installEndScreenTapHandler(ctx, canvas, status);
-  installHengeHandler(ctx, canvas, status);
+//  installHengeHandler(ctx, canvas, status);
   installFadeToBlackHandler(ctx, canvas, status);
+
+  installCsoundHandler(ctx, canvas, status);
+//  installPingHandler(ctx, canvas, status);
 }
 
 // --- helper: PointerEvent -> DESIGN coords (works for fixed and fit) ---
@@ -278,6 +285,60 @@ export function installEndScreenTapHandler(ctx, canvas, status) {
 //  Leader & Consort: trigger sound by tapping henge hot spots
 // ---------------------------------------------------------------------------
 
+function installCsoundHandler(ctx, canvas, status) {
+  canvas.addEventListener('pointerup', async (ev) => {
+    if (status.role === 'leader' && !status.modeConfirmed) return;
+    if (status.modeChosen === 'preview') return;
+    if (status.isEndScreen) return;
+
+    const slots = getSlots();
+    if (!slots?.length) return;
+
+    const { x, y } = eventToCtxPoint(ev, canvas, ctx);
+    let hitSlotHotspot = null;
+
+    // ✅ Don’t compete with the clock start handler (centre hot spot)
+    if (isInsideCircle(x, y, ctx.mid.x, ctx.mid.y, ctx.tapRadius)) return;
+
+    // ✅ Only treat taps as "henge taps" if they hit a real slot hot spot
+    for (const s of slots) {
+      if (isInsideCircle(x, y, s.x, s.y, ctx.keyRadius)) {
+        hitSlotHotspot = true;
+        break;
+      }
+    }
+    if (!hitSlotHotspot) return;
+
+    const tap = pickSlotFromPoint(slots, x, y, ctx);
+    if (!tap) return;
+
+    const tapI = tap.i ?? tap.index ?? null;
+    if (tapI == null) return;
+
+    const tapFamily = familyForIndex(tapI);
+
+    status.debugTap = { x, y, tapI, tapFamily };
+    const keyID = tapI + 1;
+
+    status.lastKeyIndex = keyID; // Key 1..25
+    console.log('[installHengeHandler] tapped key :', keyID);
+
+    // ✅ Csound test: tap Key 1 => init (gesture-safe) + short beep
+
+    if (keyID === 1) {
+      console.log("[installCsoundHandler] key 1 -> beep");
+      try {
+        await primeAudioContext();
+        await enableCsound();
+        await playTestTone({ hz: 440, dur: 0.2, amp: 0.25 });
+      } catch (e) {
+        console.error("❌ Csound beep failed:", e);
+      }
+    }
+  }, { capture: true });
+}
+
+
 function installHengeHandler(ctx, canvas, status) {
   canvas.addEventListener('pointerup', (ev) => {
     if (status.role === 'leader' && !status.modeConfirmed) return;
@@ -314,9 +375,10 @@ function installHengeHandler(ctx, canvas, status) {
     const tapFamily = familyForIndex(tapI);
 
     status.debugTap = { x, y, tapI, tapFamily };
-    status.lastKeyIndex = tapI + 1; // Key 1..25
-
-    console.log('[installHengeHandler] tapped key :', tapI);
+	const keyID = tapI + 1;    
+    status.lastKeyIndex = keyID; // Key 1..25
+    
+    console.log('[installHengeHandler] keyID :', keyID);
     console.log('[textColor]', { bgFamily: status.bgFamily, tapFamily: tapFamily, textColor: status.textColor });
 
     // START VIEW: show Key ID without swallowing clock events)
@@ -334,6 +396,62 @@ function installHengeHandler(ctx, canvas, status) {
     beginBackgroundCrossfade(status, arrB[0].ctx, tapFamily, 2320);
   }, { capture: true });
 }
+
+function installPingHandler(ctx, canvas, status) {
+  canvas.addEventListener('pointerup', async (ev) => {
+    if (status.role === 'leader' && !status.modeConfirmed) return;
+    if (status.modeChosen === 'preview') return;
+    if (status.isEndScreen) return;
+
+    const slots = getSlots();
+    if (!slots?.length) return;
+
+    const { x, y } = eventToCtxPoint(ev, canvas, ctx);
+    let hitSlotHotspot = null;
+
+    // ✅ Don’t compete with the clock start handler (centre hot spot)
+    if (isInsideCircle(x, y, ctx.mid.x, ctx.mid.y, ctx.tapRadius)) return;
+
+    // ✅ Only treat taps as "henge taps" if they hit a real slot hot spot
+    for (const s of slots) {
+      if (isInsideCircle(x, y, s.x, s.y, ctx.keyRadius)) {
+        hitSlotHotspot = true;
+        break;
+      }
+    }
+    if (!hitSlotHotspot) return;
+
+    const tap = pickSlotFromPoint(slots, x, y, ctx);
+    if (!tap) return;
+
+    const tapI = tap.i ?? tap.index ?? null;
+    if (tapI == null) return;
+
+    const tapFamily = familyForIndex(tapI);
+
+    status.debugTap = { x, y, tapI, tapFamily };
+    const keyID = tapI + 1;
+
+    status.lastKeyIndex = keyID; // Key 1..25
+    console.log('[installPingHandler] tapped key :', keyID);
+
+    // ✅ Ping test: tap Key 1 => init (gesture-safe) + short beep
+
+//function installPingHandler(ctx, canvas, status) {
+//  canvas.addEventListener("pointerup", async (ev) => {
+    // ... your existing hit-testing to get keyID ...
+
+    if (keyID === 1) {
+      console.log("[installPingHandler] key 1 -> ping");
+      try {
+        await pingBeep({ hz: 440, dur: 0.2, amp: 0.25 });
+      } catch (e) {
+        console.error("❌ Ping failed:", e);
+      }
+    }
+  }, { capture: true });
+}
+
 
 function installFadeToBlackHandler(ctx, canvas, status) {
 //export function installFadeToBlackHandler(ctx, canvas, status) {
@@ -361,7 +479,6 @@ function installFadeToBlackHandler(ctx, canvas, status) {
     status.bgFamily = ColorFamily.BLACK;
   }, { capture: true });
 }
-
 
 // returns true if this family is "on" in the current state
 function isFamilyOnInState(family, stateIndex) {

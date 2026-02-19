@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GUI</title>
+  <link rel="stylesheet" href="./css/bootstrap.min.css">
+  <link rel="icon" href="./favicon.ico" type="image/x-icon" />
+  <style>
+    body {
+      margin: 0;
+      background-color: black;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      touch-action: manipulation;
+    }
+  </style>
+</head>
+
+<body>
+  <!--canvas id="mobile" width="390" height="844"></canvas-->
+  <canvas id="mobile" data-design-w="390" data-design-h="844" data-mode="fixed"
+></canvas>
+
+<script>
+(() => {
+  // log fetches
+  const origFetch = window.fetch;
+  window.fetch = async (...args) => {
+    const url = (typeof args[0] === "string") ? args[0] : args[0]?.url;
+    if (url && (url.includes(".wasm") || url.includes("a.wasm") || url.includes("c.wasm") || url.includes("d.wasm"))) {
+      console.log("[FETCH]", url);
+    }
+    return origFetch(...args);
+  };
+
+  // log workers
+  const OrigWorker = window.Worker;
+  window.Worker = function(url, opts) {
+    console.log("[WORKER]", url);
+    return new OrigWorker(url, opts);
+  };
+
+  // log audio worklets
+  const origAdd = AudioWorklet.prototype.addModule;
+  AudioWorklet.prototype.addModule = function(url, opts) {
+    console.log("[WORKLET addModule]", url);
+    return origAdd.call(this, url, opts);
+  };
+})();
+</script>
+
+  <script>window.role = 'leader';</script>
+
+  <script type="module">
+    import { initApp } from './js/gui/main.js';
+    window.addEventListener('DOMContentLoaded', () => {
+      initApp().catch(err => console.error('[main] init failed:', err));
+    });
+  </script>
+
+</body>
+</html>
+
