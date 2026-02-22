@@ -111,7 +111,7 @@ export async function initApp() {
 // Ensure clean start values
   status.startWall = null;
   status.runStateDurationMs = null;
-
+  status.audioReady = false;
   status.debugKeys = false;
   
   // 3) draw background layer offscreen 
