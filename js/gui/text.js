@@ -99,6 +99,22 @@ export function renderDebug(ctxT, { status, mins, secs, bitPattern = '' }) {
 }
 
 function lowStartLine(status) {
+  // Start View (not running): show key id if available
+  if (!status.running) {
+    const k = status.lastKeyIndex;
+    if (Number.isInteger(k)) return `Key ${k}`;
+
+    // If no key selected yet, show audio readiness once primed
+    if (status.audioReady) return "AUDIO READY";
+  }
+
+  // Fallback: show mode
+  const m = status.modeChosen ? String(status.modeChosen).toUpperCase() : "CONCERT";
+  return `${m} MODE`;
+}
+
+/*
+function lowStartLine(status) {
   // Show key id only before animation starts
   if (!status.running) { //if (!status?.running) {
     const k = status.lastKeyIndex;//const k = status?.lastKeyIndex;
@@ -108,4 +124,4 @@ function lowStartLine(status) {
     const m = status.modeChosen ? String(status.modeChosen).toUpperCase() : 'CONCERT'; //const m = status?.modeChosen ? (etc))
   return `${m} MODE`;
 }
-
+*/

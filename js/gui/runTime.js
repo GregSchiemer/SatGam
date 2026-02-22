@@ -1,8 +1,6 @@
 // js/gui/runTime.js
 
-// Internal runtime state (shared across the app)
 export const rt = {
-  // Who is this page for? (set from main.js)
   role: 'consort',   // 'leader' or 'consort'
   mode: 'concert',   // 'concert' or 'preview'
   ticking: false,    // true when RAF loop is running

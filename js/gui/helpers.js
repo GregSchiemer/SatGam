@@ -38,3 +38,20 @@ export function hide(){
 export function isConcertMode(status) {  
 return status.modeChosen === 'concert';   // mirror your tap-handler rule
 }
+
+export function logStatusProbe(stringID, status, extra = {}) {
+  if (!status) {
+    console.log(stringID, { status: null, ...extra });
+    return;
+  }
+
+  console.log(stringID, {
+    running: status.running,
+    isEndScreen: status.isEndScreen,
+    modeChosen: status.modeChosen,
+    index: status.index,
+    bgFamily: status.bgFamily,
+    bgFamilyTarget: status.bgFamilyTarget,
+    ...extra, // caller-specific fields (keyID, tapFamily, familyOn, etc.)
+  });
+}

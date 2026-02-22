@@ -8,7 +8,7 @@ import { familyForIndex, drawPhoneAt } from './sprites.js';
 import { MAX_STATES, STATE_DUR, MAX_DUR, CONCERT_CLK, PREVIEW_CLK } from './globals.js'; 
 import { sequence } from './sequence.js';
 import { stopAnimation, startAnimation } from './animation.js';
-import { clockify, easeInOutQuad01, isConcertMode } from './helpers.js';
+import { clockify, easeInOutQuad01, isConcertMode, logStatusProbe } from './helpers.js';
 
 // ==============================
 // —— Background (cross-cutting) ——

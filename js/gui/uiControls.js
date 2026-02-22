@@ -26,7 +26,7 @@ import {
   stopAnimation 
 } from './animation.js';
 
-import { isInsideCircle } from './helpers.js';
+import { isInsideCircle, logStatusProbe } from './helpers.js';
 import { getFamilyMask, sequence } from './sequence.js';
 import { drawHenge } from './henge.js';
 import { refresh } from './runTime.js';
@@ -55,7 +55,6 @@ export function installUIHandlers(ctx, canvas, status) {
   installEndScreenTapHandler(ctx, canvas, status);
 //  installHengeHandler(ctx, canvas, status);
   installFadeToBlackHandler(ctx, canvas, status);
-
   installCsoundHandler(ctx, canvas, status);
 //  installPingHandler(ctx, canvas, status);
 }
@@ -120,7 +119,6 @@ export function installLeaderModeSelectHandler(ctx, canvas, status) {
 //  Leader: confirm by tapping bottom text hot spot (ctx.low)
 // ---------------------------------------------------------------------------
 
-
 export function installLeaderModeConfirmHandler(ctx, canvas, status) {
   canvas.addEventListener('pointerup', (ev) => {
     if (status.role !== 'leader') return;
@@ -150,8 +148,8 @@ export function installLeaderModeConfirmHandler(ctx, canvas, status) {
       console.log('[confirm] using mode for start view concert');
     }
 
-	status.startWall = null;
-	status.runStateDurationMs = null;
+    status.startWall = null;
+    status.runStateDurationMs = null;
 
     console.log('[confirm] mode confirmed via bottom text tap');
     console.log('[confirm] state at confirm tap', {
@@ -159,10 +157,35 @@ export function installLeaderModeConfirmHandler(ctx, canvas, status) {
       msPerBeat: status.msPerBeat
     });
 
+    // ✅ Make the view transition happen immediately
     refresh();
-  });
-}
 
+    // ✅ Prime + start Csound on the CONFIRM gesture (concert “warm-up”)
+    // Guard so it only happens once (but allow retry if it fails)
+
+// ✅ Prime + start Csound on the CONFIRM gesture
+if (!status.csoundPrimed) {
+  status.csoundPrimed = true;
+  status.audioReady = false;
+
+  console.log("[confirm] priming Csound + test beep");
+
+  primeAudioContext()
+    .then(() => enableCsound())
+    .then(() => playTestTone({ freq: 440, dur: 0.2, amp: 0.25 }))
+    .then(() => {
+      status.audioReady = true;
+      refresh(); // update bottom line to "AUDIO READY"
+    })
+    .catch((e) => {
+      status.csoundPrimed = false; // allow retry on next confirm if needed
+      status.audioReady = false;
+      console.error("❌ Csound prime/beep failed:", e);
+      refresh();
+    });
+   }
+  }, { capture: true });
+}
 
 // ---------------------------------------------------------------------------
 //  Leader: stop while running (tap TOP text hot spot)
@@ -286,7 +309,83 @@ export function installEndScreenTapHandler(ctx, canvas, status) {
 // ---------------------------------------------------------------------------
 
 function installCsoundHandler(ctx, canvas, status) {
-  canvas.addEventListener('pointerup', async (ev) => {
+  canvas.addEventListener('pointerup', (ev) => {
+    // Ignore taps until leader has confirmed mode
+    if (status.role === 'leader' && !status.modeConfirmed) return;
+
+    // No henge tap actions in preview mode
+    if (status.modeChosen === 'preview') return;
+
+    // Ignore end screen
+    if (status.isEndScreen) return;
+
+    const slots = getSlots();
+    if (!slots?.length) return;
+
+    const { x, y } = eventToCtxPoint(ev, canvas, ctx);
+    let hitSlotHotspot = false;
+
+    // Don’t compete with the centre clock/start hotspot
+    if (isInsideCircle(x, y, ctx.mid.x, ctx.mid.y, ctx.tapRadius)) return;
+
+    // Only treat taps as henge taps if they hit a real slot hotspot
+    for (const s of slots) {
+      if (isInsideCircle(x, y, s.x, s.y, ctx.keyRadius)) {
+        hitSlotHotspot = true;
+        break;
+      }
+    }
+    if (!hitSlotHotspot) return;
+
+    const tap = pickSlotFromPoint(slots, x, y, ctx);
+    if (!tap) return;
+
+    const tapI = tap.i ?? tap.index ?? null;
+    if (tapI == null) return;
+
+    const tapFamily = familyForIndex(tapI);
+    const keyID = tapI + 1; // 1..25
+
+    // Debug/status bookkeeping
+    status.debugTap = { x, y, tapI, tapFamily };
+    status.tapFamily = tapFamily;      // ✅ keep real family (no modulo / no .length)
+    status.lastKeyIndex = keyID;       // ✅ used by Start View "Key N" message
+
+    // Optional probe (safe to remove later)
+    logStatusProbe("[tap/pre-branch]", status, { keyID, tapFamily });
+
+    console.log('[installCsoundHandler] tapped key :', keyID);
+
+    // ✅ Start View: repaint immediately so "Key N" updates without DevTools
+    if (!status.running) {
+      refresh();
+      return;
+    }
+
+    // ✅ Running View: only allow active family taps for this state
+    const familyOn = isFamilyOnInState(tapFamily, status.index);
+
+    // Optional probe (safe to remove later)
+    logStatusProbe("[tap/run gate]", status, { keyID, tapFamily, familyOn });
+
+    if (!familyOn) return;
+
+    // ✅ Trigger background colour change / crossfade during running view
+    // Adjust duration to taste (e.g. 240..480ms)
+    const ctxB = arrB?.[0]?.ctx;
+    if (ctxB) {
+      beginBackgroundCrossfade(status, ctxB, tapFamily, 3320);
+    }
+
+    // Usually not needed in running mode if your render loop is active,
+    // but harmless if you want an immediate repaint kick:
+    // refresh();
+
+  }, { capture: true });
+}
+/*
+function installCsoundHandler(ctx, canvas, status) {
+  canvas.addEventListener('pointerup', (ev) => {
     if (status.role === 'leader' && !status.modeConfirmed) return;
     if (status.modeChosen === 'preview') return;
     if (status.isEndScreen) return;
@@ -295,7 +394,7 @@ function installCsoundHandler(ctx, canvas, status) {
     if (!slots?.length) return;
 
     const { x, y } = eventToCtxPoint(ev, canvas, ctx);
-    let hitSlotHotspot = null;
+    let hitSlotHotspot = false;
 
     // ✅ Don’t compete with the clock start handler (centre hot spot)
     if (isInsideCircle(x, y, ctx.mid.x, ctx.mid.y, ctx.tapRadius)) return;
@@ -320,24 +419,38 @@ function installCsoundHandler(ctx, canvas, status) {
     status.debugTap = { x, y, tapI, tapFamily };
     const keyID = tapI + 1;
 
+    status.tapFamily = tapI % FamilyIndex.length;
     status.lastKeyIndex = keyID; // Key 1..25
-    console.log('[installHengeHandler] tapped key :', keyID);
+    
+    console.log('[installCsoundHandler] tapped key :', keyID);
 
-    // ✅ Csound test: tap Key 1 => init (gesture-safe) + short beep
+	logStatusProbe("[tap/pre-branch]", status, { //
+	  keyID,
+	  tapFamily,
+	});
 
-    if (keyID === 1) {
-      console.log("[installCsoundHandler] key 1 -> beep");
-      try {
-        await primeAudioContext();
-        await enableCsound();
-        await playTestTone({ hz: 440, dur: 0.2, amp: 0.25 });
-      } catch (e) {
-        console.error("❌ Csound beep failed:", e);
-      }
-    }
-  }, { capture: true });
+if (!status.running) {
+  refresh();
+  return;
 }
 
+const familyOn = isFamilyOnInState(status); //tap Family, st atus.index);
+
+logStatusProbe("[tap/run gate]", status, {
+  keyID,
+  tapFamily,
+  familyOn,
+});
+
+if (!familyOn) return;
+// ✅ Start View: repaint immediately so "Key N" updates without DevTools
+	if (!status.running) {
+	  refresh();
+	  return;
+	}
+  }, { capture: true });
+}
+*/
 
 function installHengeHandler(ctx, canvas, status) {
   canvas.addEventListener('pointerup', (ev) => {
@@ -373,6 +486,7 @@ function installHengeHandler(ctx, canvas, status) {
     if (tapI == null) return;
 
     const tapFamily = familyForIndex(tapI);
+    status.tappedFamily = tapI % FamilyIndex.length;
 
     status.debugTap = { x, y, tapI, tapFamily };
 	const keyID = tapI + 1;    
@@ -388,7 +502,8 @@ function installHengeHandler(ctx, canvas, status) {
     }
 
     // RUNNING: block off-family taps
-    if (!isFamilyOnInState(tapFamily, status.index)) return;
+    if (!isFamilyOnInState(status, tapFamily)) return;
+//if (!isFamilyO nInState(tapF amily, sta tus.i ndex)) return;
 
     // RUNNING: now we can own the event + trigger fade
     ev.preventDefault();
@@ -453,8 +568,8 @@ function installPingHandler(ctx, canvas, status) {
 }
 
 
-function installFadeToBlackHandler(ctx, canvas, status) {
-//export function installFadeToBlackHandler(ctx, canvas, status) {
+//function installFadeToBlackHandler(ctx, canvas, status) {
+export function installFadeToBlackHandler(ctx, canvas, status) {
   canvas.addEventListener('pointerup', (ev) => {
     if (!status.running) return;                 // only mid-performance
     if (status.role === 'leader' && !status.modeConfirmed) return;
@@ -489,6 +604,7 @@ function isFamilyOnInState(family, stateIndex) {
   if (!Number.isInteger(bitPos)) {
     throw new Error(`FamilyIndex missing for family=${family}`);
   }
+
   return bits[bitPos] !== 0;
 }
 
