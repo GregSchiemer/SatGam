@@ -3,7 +3,7 @@
 SatGam server: static HTTP + WebSocket clock bus + preflight checks
 """
 
-import argparse, asyncio, json, mimetypes, os, re, sys, threading
+import argparse, asyncio, json, mimetypes, os, re, sys, threading, time, webbrowser
 from datetime import datetime, timezone
 from functools import partial
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
@@ -175,6 +175,26 @@ async def run_ws(host: str, port: int):
     async with websockets.serve(ws_handler, host, port, max_size=2**20):
         await asyncio.Future()
 
+def auto_open_leader(args):
+    """
+    Open leader.html in the local browser after HTTP server starts.
+    This opens on the Mac running server.py (not on phones).
+    """
+    if not getattr(args, "open_leader", False):
+        return
+
+    # 0.0.0.0 is a bind address, not a browser destination
+    browser_host = "127.0.0.1" if args.host in ("0.0.0.0", "::") else args.host
+
+    qs = f"?wsPort={args.ws_port}" if getattr(args, "ws_port", None) else ""
+    url = f"http://{browser_host}:{args.http_port}/leader.html{qs}"
+
+    # Let HTTP thread start listening first
+    time.sleep(0.25)
+
+    print(f"[open] {url}")
+    webbrowser.open_new_tab(url)
+    
 def main():
     ap = argparse.ArgumentParser(description="SatGam HTTP + WS server")
     ap.add_argument("-r", "--root", default=".", help="Static root directory")
@@ -184,6 +204,7 @@ def main():
     ap.add_argument("--no-preflight", action="store_true", help="Skip preflight checks")
     ap.add_argument("--preflight-only", action="store_true", help="Run preflight and exit")
     ap.add_argument("--fail-on-preflight", action="store_true", help="Exit 1 if preflight fails")
+    ap.add_argument("--open-leader", action="store_true", help="Auto-open leader.html in local browser after startup")
     args = ap.parse_args()
 
     root = os.path.abspath(args.root)
@@ -198,6 +219,9 @@ def main():
     # start HTTP in a thread
     t = threading.Thread(target=run_http, args=(root, args.host, args.http_port), daemon=True)
     t.start()
+
+    # optional: open leader page locally in browser
+    auto_open_leader(args)
 
     # run WS on main loop
     try:
