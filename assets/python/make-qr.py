@@ -68,7 +68,7 @@ def main():
     outdir = Path(args.outdir); outdir.mkdir(parents=True, exist_ok=True)
 
     # Colors (safe for scanning)
-    BLUE_DARK  = (0, 70, 160)
+    BLUE_DARK  = (0, 0, 255)
     BLUE_LIGHT = (220, 235, 255)
     WHITE      = (255, 255, 255)
     BLACK      = (0, 0, 0)
@@ -76,14 +76,14 @@ def main():
     # Leader: dark blue modules on white, blue banner
     leader_url  = f"{base}/leader.html{suffix}"
     leader_qr   = mk_qr(leader_url, fill=BLUE_DARK, back=WHITE)
-    leader_card = add_label(leader_qr, "Leader", palette={"bg": WHITE, "banner_bg": BLUE_DARK, "banner_fg": WHITE})
+    leader_card = add_label(leader_qr, "SatGam - leader", palette={"bg": WHITE, "banner_bg": BLUE_DARK, "banner_fg": WHITE})
     leader_path = outdir / "qr-leader.png"
     leader_card.save(leader_path)
 
     # Consort: black modules on light blue, blue banner
     consort_url  = f"{base}/consort.html{suffix}"
     consort_qr   = mk_qr(consort_url, fill=BLACK, back=BLUE_LIGHT)
-    consort_card = add_label(consort_qr, "Consort", palette={"bg": BLUE_LIGHT, "banner_bg": BLUE_DARK, "banner_fg": WHITE})
+    consort_card = add_label(consort_qr, "SatGam - consort", palette={"bg": BLUE_LIGHT, "banner_bg": BLUE_DARK, "banner_fg": WHITE})
     consort_path = outdir / "qr-consort.png"
     consort_card.save(consort_path)
 
