@@ -37,7 +37,7 @@ function playBackgroundCrossfadeIfActive(ctxB, cnvB, status) {
 // 1.2 Paint a steady background when not fading
 function paintSteadyBackground(ctxB, status) {
   if (status.running && status.bgFamily != null) selectAndRenderBackground(ctxB, status);
-  else prepareAndRenderBackground(ctxB);
+  else prepareAndRenderBackground(ctxB, status);
 }
 
 // 1) Render background layer (fade takes precedence)
@@ -87,7 +87,7 @@ const VIEW_START = 'start';
 const VIEW_RUN   = 'run';
 const VIEW_END   = 'end';
 
-// 3.1 Decide which view we are in (layman: “what screen should the audience see?”)
+// 3.1 Decide which view we are in (layman: “what screen should the leader see?”)
 function currentView(status) {
   if (status.role === 'leader' && !status.modeConfirmed) return VIEW_MODE;
   if (status.isEndScreen) return VIEW_END;
@@ -167,8 +167,9 @@ function renderModeSelectView(ctxT, ctxS, status) {
   if (!status.running) status.msPerBeat = status.previewClock;
 
   renderStartLeader(ctxT, status);
-  renderPhonesLayer(ctxS, status);
-  composeFrame({ drawB: true, drawS: true, drawT: true });
+//  renderPhonesLayer(ctxS, status);
+//  composeFrame({ drawB: true, drawS: true, drawT: true });
+  composeFrame({ drawB: true, drawS: false, drawT: true });
 }
 
 // =======================
@@ -261,7 +262,6 @@ function renderWithoutSlots(ctxS, status) {
 
 // Step A (in renderer.js)
 function renderTextLayer(ctxT, status, elapsedMs) {
-  ctxT.fillStyle = chooseTextColorForBackground(status);  // returns 'black' or 'white'
 
   if (status.isEndScreen) {
     renderEnd(ctxT, status);

@@ -166,7 +166,7 @@ export function getSlots() {
 // ---------------------------------------------------------------------------
 //  Background rendering - color.js configures a neutral gradient
 // ---------------------------------------------------------------------------
-export function prepareAndRenderBackground(ctxB) {
+export function prepareAndRenderBackground(ctxB, status) {
 
   ctxB.save();
 
@@ -175,10 +175,16 @@ export function prepareAndRenderBackground(ctxB) {
   const gradientFill = ctxB.createLinearGradient(0, ctxB.h, 0, 0);
   setLinearGradient(ColorFamily.NONE, gradientFill);
 
+  const family = ColorFamily.NONE;
+  
   ctxB.fillStyle = gradientFill;
   ctxB.fillRect(0, 0, ctxB.w, ctxB.h);
 
   ctxB.restore();
+  
+  status.bgFamily = family;
+  status.bgFamilyTarget ??= family;
+
 }
 
 export function selectAndRenderBackground(ctxB, status) {

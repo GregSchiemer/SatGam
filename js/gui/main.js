@@ -25,6 +25,7 @@ import {
   renderRunning,
   renderDebug,
   renderEnd,
+  chooseTextColorForBackground
 } from './text.js';
 
 import {
@@ -49,7 +50,8 @@ import {
 } from './helpers.js';
 
 import { 
-  makeHenge25, 
+  makeHenge25,
+  henge25, 
   makeHenge, 
   arcRadiusForHotspotTouch  
 } from './henge.js';
@@ -67,6 +69,8 @@ import {
   ColorFamily
 } from './color.js';
 
+import { frameRender } from './renderer.js';
+
 import { 
   MAX_STATES, 
   STATE_DUR, 
@@ -74,9 +78,7 @@ import {
   CONCERT_CLK, 
   PREVIEW_CLK,
   FULL_HENGE
-} from './globals.js'; 
-
-import { frameRender } from './renderer.js';
+} from './globals.js';
 
 let _lastPhonesKey = null;
 
@@ -103,52 +105,29 @@ export async function initApp() {
 
   // 2) status uses pane geometry
   const status = initStatus(ctx);
-// main.js (inside initApp, right after initStatus)
-//
-// Make STATE_DUR available to UI handlers (clock start)
-  status.STATE_DUR = STATE_DUR;
-
-// Ensure clean start values
-  status.startWall = null;
-  status.runStateDurationMs = null;
-  status.audioReady = false;
-  status.debugKeys = false;
   
-  // 3) draw background layer offscreen 
-  prepareAndRenderBackground(ctxB);
+  // 3) slots uses pane geometry
 
-  // 4) slots uses pane geometry
+  const { slots, ctxS } = makeHenge(ctx, henge25);
 
-	const N = 25;
-	const phoneW = 30; //40;
-	const phoneH = 56; //70;
-	const keyRadius = 18; // can be whatever; it doesn't affect foot-touch
-	
-	const arcRadius = (phoneW / (2 * Math.tan(Math.PI / N))); // feet-touch
+  ctx.keyRadius = ctxS.keyRadius;
 
-	const { slots, ctxS } = makeHenge(ctx, {
-	  N,
-	  arcRadiusMode: 'feet',
-	  phoneW,
-	  phoneH,
-	  arcRadius,
-	  keyRadius,
-	});
+  setSlots(slots);
 
-	ctx.keyRadius = ctxS.keyRadius;
+  console.log('[main] ctxS entries:', Object.entries(ctxS));		
 
-	setSlots(slots);
-
-    console.log('[main] ctxS entries:', Object.entries(ctxS));		
-
-  // 5) build slot atlas
+  // 4) build slot atlas
   await ensurePhoneAtlasForSlots(slots);
 
-  // 6) re-initialise geometry when user rotates phone
-  installResizeHandler();
+  // 5) re-initialise geometry when user rotates phone
+  installResizeHandler(ctxB, status);
 
-  // 7) attach UI to visible pane canvas
+  // 6) attach UI to visible pane canvas
   installUIHandlers(ctxP, cnvP, status);
+
+  // 7) initialise Mode Select View
+  prepareAndRenderBackground(ctxB, status);
+ // initModeSelect(ctxB, status);
 
   // 8) render arrB/arrS/arrT to composite layer arrP
   setRender(() => {
@@ -159,6 +138,13 @@ export async function initApp() {
   refresh();
 }
 
+/*
+function initModeSelect(ctxB, status){
+  prepareAndRenderBackground(ctxB, status);
+  chooseTextColorForBackground(ctxB, status);
+  console.log('[modeSelect] textColor =', status.textColor, 'bg =', status.bgName ?? status.bgIndex);
+}
+*/
 
 // ---------------------------------------------------------------------------
 //  Helpers
@@ -174,35 +160,44 @@ function initStatus(ctx) {
 
   return {
 // Role
-    role: 			roleAtLaunch,	// 'leader' or 'consort'
+    role: 				roleAtLaunch,		// 'leader' or 'consort'
 
 // Animation state
-    running:    	false,    		// true while MLS sequence is running
-    index: 			0,
-    startWall:     	0,        		// performance.now() when the show starts
-    isEndScreen:	false,    		// true only while END view is shown
-    concertClock:	CONCERT_CLK, 			
-    previewClock:	PREVIEW_CLK, 
-    msPerBeat:     	CONCERT_CLK,	// tempo in ms/beat (default = concert)
-    fullHenge: 	   	FULL_HENGE,		// pre-start state index (18)
-	endFadeStarted: false,
-	stopAfterFade:  false,
-	bgFamilyTarget: ColorFamily.NONE,
-	textColor: 		'white',
+    running:    		false,    			// true in Running View
+    index: 				0,					// increments in Running View
+    isEndScreen:		false,    			// true in End View
+    concertClock:		CONCERT_CLK, 		// 1000 ms/beat		
+    previewClock:		PREVIEW_CLK, 		// 42.8 ms/beat
+    msPerBeat:     		CONCERT_CLK,		// default : concert
+    fullHenge: 	   		FULL_HENGE,			// pre-start state index (18)
+
+	STATE_DUR: 			STATE_DUR,			// clock ticks per state
+	startWall:			null,				// performance.now()
+	runStateDurationMs: null,				// current duration
+	audioReady:			false,
+	debugKeys:			false,
 
 // Mode state
-    modeChosen:    	'concert', 		// 'concert' or 'preview'
-    modeConfirmed: 	(roleAtLaunch === 'consort'),	// consorts skip mode-select; leaders don't
+    modeChosen:    		'concert', 			// 'concert' or 'preview'
 
-// Stage lighting
-	_view: null,              		// tracks current 1 of 4 views
-	lightsDownDone: false,    		// start-view fade fired?
-	lightsUpDone:   false,   		// end-view fade fired?
-	stopAfterFade:  false,     		// stop RAF when fade finishes
+// Role state
+    roleConfirmed: 		(roleAtLaunch === 'consort'),	// 'leader' or 'consort'
+
+// Animation/Stage lighting
+	_view: null,              				// tracks current 1 of 4 views
+	endFadeStarted: 	false,
+	stopAfterFade:  	false,
+    bgFamily:			ColorFamily.NONE,	// none selected
+	bgFamilyTarget: 	ColorFamily.NONE,
+	textColor: 			'white',
+
+	lightsDownDone: 	false,    	// start-view fade fired?
+	lightsUpDone:   	false,   	// end-view fade fired?
+	stopAfterFade:  	false,  	// stop RAF when fade finishes
   };
 }
 
-function installResizeHandler() {
+function installResizeHandler(ctxB, status) {
   // debounce state (kept inside the handler closure)
   let tId = null;
 
@@ -214,7 +209,7 @@ function installResizeHandler() {
 
       tId = setTimeout(() => {
         tId = null;
-        prepareAndRenderBackground(arrB[0].ctx);
+        prepareAndRenderBackground(ctxB, status);
 
         refresh();
       }, 120);
