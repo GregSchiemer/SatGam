@@ -7,7 +7,7 @@ Make two QR codes for SatGam:
 
 Examples:
   python3 assets/python/make-qr.py --host MacBook-Pro-2.local --http-port 8000 --ws-port 8010
-  python3 assets/python/make-qr.py --host 192.168.1.50 --http-port 8000
+  python3 assets/python/make-qr.py --host 192.168.0.5 --http-port 8000
 """
 import argparse, socket
 from pathlib import Path

@@ -5,7 +5,7 @@
 // ring outward without making the phones bigger.
 //
 // Exports:
-//   - HENGE_SPECS_DEFAULT
+//   - henge25
 //   - makeHenge(ctx, specs) => { slots, ctxS }
 //   - makeHenge25(ctx, overrides)
 //   - drawHenge(ctx, slots, ctxS, opts)  // debug visualiser
@@ -17,7 +17,7 @@
 // to prevent overlap, without resizing sprites.
 //
 // Exports:
-//   - HENGE_SPECS_DEFAULT
+//   - henge25
 //   - makeHenge(ctx, specs)  => { slots, ctxS }
 //   - makeHenge25(ctx, overrides)
 //   - drawHenge(ctx, slots, ctxS, opts)  // debug visualiser
@@ -50,7 +50,7 @@ function reqInt(name, v) {
   if (!Number.isInteger(v)) throw new Error(`[henge] ${name} must be an integer, got ${v}`);
 }
 
-export const HENGE_SPECS_DEFAULT = {
+export const henge25 = Object.freeze({
   // Fundamental
   N: 25,
 
@@ -58,28 +58,34 @@ export const HENGE_SPECS_DEFAULT = {
   // Mode 'feet' means arcRadius is the feet-circle radius (incircle radius).
   // Mode 'center' means arcRadius is the sprite-centre ring radius (legacy-ish).
   arcRadiusMode: 'feet', // 'feet' | 'center'
-  arcRadius: 158,        // px
-
+  arcRadius: 120,        // px
+  
+/* 	NOTE: if you use arcRadiusMode: 'feet' and 
+	you want feet-touch packing, you still 
+	need arcRadius = phoneW/(2*tan(pi/N)). 
+	Your preset’s arcRadius: 158 is just a choice, 
+	not “feet-touch by definition”*/
+	
   // Orientation
-  angleStartDeg: -87,    // slot 0 just after 12 o’clock
+  angleStartDeg: -80,    // slot 0 just after 12 o’clock
 
   // Explicit phone dimensions (px)
-  phoneW: 40,
-  phoneH: 70,
-
+  phoneW: 30,
+  phoneH: 56,
+  
   // Explicit hotspot radius (px). Keep it conservative at first.
-  // If null, we derive a safe default from geometry.
-  keyRadius: null,
+  keyRadius: 18,
 
   // Scale down the geometric non-overlap max for hotspots (only used when keyRadius=null)
-  keyRadiusFrac: 0.85,
+//  keyRadiusFrac: 0.85,
 
   // Debug logging
   debug: false,
-};
+});
+
 
 export function makeHenge(ctx, specs = {}) {
-  const s = { ...HENGE_SPECS_DEFAULT, ...specs };
+  const s = { ...henge25, ...specs };
 
   // --- Contracts (principal inputs) ---
   reqFinite('ctx.mid.x', ctx?.mid?.x);
@@ -228,6 +234,7 @@ export function makeHenge(ctx, specs = {}) {
 export function makeHenge25(ctx, overrides = {}) {
   return makeHenge(ctx, { ...overrides, N: 25 });
 }
+
 
 //Debug visualiser: draws feet circle (rFeet), centre circle (rCenter),
 //phone bounding boxes, foot segments (length phoneW), and hotspot circles.

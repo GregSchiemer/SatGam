@@ -374,7 +374,7 @@ function installCsoundHandler(ctx, canvas, status) {
     // Adjust duration to taste (e.g. 240..480ms)
     const ctxB = arrB?.[0]?.ctx;
     if (ctxB) {
-      beginBackgroundCrossfade(status, ctxB, tapFamily, 3320);
+      beginBackgroundCrossfade(status, ctxB, tapFamily, 5320);
     }
 
     // Usually not needed in running mode if your render loop is active,
