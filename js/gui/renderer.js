@@ -1,14 +1,18 @@
 // js/gui/renderer.js
 
-import { arrP, arrB, arrF, arrS, arrT, getSlots } from './canvasUtils.js';
-import { prepareAndRenderBackground, selectAndRenderBackground, blendBgCanvasesInto, beginBackgroundCrossfade } from './canvasUtils.js';
-import { renderStartLeader, renderStartBoth, renderRunning, renderEnd, chooseTextColorForBackground } from './text.js';
+import { arrP, arrB, arrF, arrS, arrT, getSlots 
+} from './canvasUtils.js';
+import { prepareAndRenderBackground, selectAndRenderBackground, blendBgCanvasesInto, beginBackgroundCrossfade 
+} from './canvasUtils.js';
+import { renderStartLeader, renderStartBoth, renderRunning, renderEnd, chooseTextColorForBackground, renderModeSelectLeader} from './text.js';
 import { FamilyIndex, ColorFamily } from './color.js';
 import { familyForIndex, drawPhoneAt } from './sprites.js'; 
 import { MAX_STATES, STATE_DUR, MAX_DUR, CONCERT_CLK, PREVIEW_CLK } from './globals.js'; 
 import { sequence } from './sequence.js';
 import { stopAnimation, startAnimation } from './animation.js';
-import { clockify, easeInOutQuad01, isConcertMode, logStatusProbe } from './helpers.js';
+import { clockify, easeInOutQuad01,
+  isConcertMode, logStatusProbe 
+} from './helpers.js';
 
 // ==============================
 // —— Background (cross-cutting) ——
@@ -167,10 +171,17 @@ function renderModeSelectView(ctxT, ctxS, status) {
   if (!status.running) status.msPerBeat = status.previewClock;
 
   renderStartLeader(ctxT, status);
-//  renderPhonesLayer(ctxS, status);
-//  composeFrame({ drawB: true, drawS: true, drawT: true });
   composeFrame({ drawB: true, drawS: false, drawT: true });
 }
+/*
+function renderModeSelectView(ctxT, ctxS, status) {
+  if (!status.running) status.msPerBeat = status.previewClock;
+
+  renderModeSelectLeader(ctxT, status);
+  composeFrame({ drawB: true, drawS: false, drawT: true });
+}
+*/
+
 
 // =======================
 // —— Running View ——
@@ -184,8 +195,6 @@ function ensureRunTiming(status) {
 function enterEndScreen(status) {
   status.running = false;
   status.isEndScreen = true;
-  // DO NOT stopAnimation() here if you want “house lights up” to run.
-  // stopAnimation() is handled after fade completes via stopAfterFade.
 }
 
 function failRunTimingContract(status) {
