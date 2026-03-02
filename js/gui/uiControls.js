@@ -99,14 +99,14 @@ export function installLeaderModeSelectHandler(ctx, canvas, status) {
     if (tapLeft) {
       status.modeChosen = 'preview';
       status.msPerBeat  = status.previewClock;
-      console.log('[mode] PREVIEW selected, msPerBeat =', status.msPerBeat);
+      console.log('[mode] PREVIEW selected to be confirmed, msPerBeat =', status.msPerBeat);
     } else {
       status.modeChosen = 'concert';
       status.msPerBeat  = status.concertClock;
-      console.log('[mode] CONCERT selected, msPerBeat =', status.msPerBeat);
+      console.log('[mode] CONCERT selected to be confirmed, msPerBeat =', status.msPerBeat);
     }
 
-    console.log('[select] state after mode tap:', {
+    console.log('[Mode Select View] unconfirmed state after mode selection:', {
       modeChosen: status.modeChosen,
       msPerBeat: status.msPerBeat
     });
@@ -138,21 +138,21 @@ export function installLeaderModeConfirmHandler(ctx, canvas, status) {
     status.modeConfirmed = true;
     status.running = false;
     status.isEndScreen = false;
-
+	status.lastConfirmedMode = status.modeChosen;
+	
     // Lock tempo to chosen mode
     if (status.modeChosen === 'preview') {
       status.msPerBeat = status.previewClock;
-      console.log('[confirm] using mode for start view preview');
+      console.log('[Mode Select View] lastConfirmedMode will be PREVIEW MODE');
     } else {
       status.msPerBeat = status.concertClock;
-      console.log('[confirm] using mode for start view concert');
+      console.log('[Mode Select View] lastConfirmedMode will be CONCERT MODE');
     }
 
     status.startWall = null;
     status.runStateDurationMs = null;
 
-    console.log('[confirm] mode confirmed via bottom text tap');
-    console.log('[confirm] state at confirm tap', {
+    console.log('[confirm] status at confirm tap', {
       modeChosen: status.modeChosen,
       msPerBeat: status.msPerBeat
     });
@@ -292,16 +292,38 @@ export function installEndScreenTapHandler(ctx, canvas, status) {
     // Stop anything still ticking
     stopAnimation();
 
-    status.running = false;
-    status.startWall = 0;
-    status.lastKeyIndex = null;
-    status.isEndScreen = false;
+	status.running = false;
+	status.isEndScreen = false;
+	status.startWall = 0;
+	status.index = 0;
 
-    // Return leader to mode-select phase
+	status.lastKeyIndex = null;
+	status.modeChosen = status.lastConfirmedMode ?? status.modeChosen ?? 'concert';
+
+    if (status.modeChosen === 'preview') {
+      status.msPerBeat = status.previewClock;
+      console.log('[End View] lastConfirmedMode was PREVIEW MODE');
+    } else {
+      status.msPerBeat = status.concertClock;
+      console.log('[End View] lastConfirmedMode was CONCERT MODE');
+    }
+// Return leader to Mode Select View
     status.modeConfirmed = false;
 
     refresh();
   }, { capture: true });
+}
+
+function backToModeSelect(status) {
+  status.running = false;
+  status.isEndScreen = false;
+  status.startWall = 0;
+  status.lastKeyIndex = null;
+
+  status.index = 0;
+
+  status.modeConfirmed = false;  // ✅ this is what makes it Mode Select view
+  status.modeChosen = status.lastConfirmedMode ?? status.modeChosen ?? 'concert';
 }
 
 // ---------------------------------------------------------------------------
@@ -377,80 +399,8 @@ function installCsoundHandler(ctx, canvas, status) {
       beginBackgroundCrossfade(status, ctxB, tapFamily, 5320);
     }
 
-    // Usually not needed in running mode if your render loop is active,
-    // but harmless if you want an immediate repaint kick:
-    // refresh();
-
   }, { capture: true });
 }
-/*
-function installCsoundHandler(ctx, canvas, status) {
-  canvas.addEventListener('pointerup', (ev) => {
-    if (status.role === 'leader' && !status.modeConfirmed) return;
-    if (status.modeChosen === 'preview') return;
-    if (status.isEndScreen) return;
-
-    const slots = getSlots();
-    if (!slots?.length) return;
-
-    const { x, y } = eventToCtxPoint(ev, canvas, ctx);
-    let hitSlotHotspot = false;
-
-    // ✅ Don’t compete with the clock start handler (centre hot spot)
-    if (isInsideCircle(x, y, ctx.mid.x, ctx.mid.y, ctx.tapRadius)) return;
-
-    // ✅ Only treat taps as "henge taps" if they hit a real slot hot spot
-    for (const s of slots) {
-      if (isInsideCircle(x, y, s.x, s.y, ctx.keyRadius)) {
-        hitSlotHotspot = true;
-        break;
-      }
-    }
-    if (!hitSlotHotspot) return;
-
-    const tap = pickSlotFromPoint(slots, x, y, ctx);
-    if (!tap) return;
-
-    const tapI = tap.i ?? tap.index ?? null;
-    if (tapI == null) return;
-
-    const tapFamily = familyForIndex(tapI);
-
-    status.debugTap = { x, y, tapI, tapFamily };
-    const keyID = tapI + 1;
-
-    status.tapFamily = tapI % FamilyIndex.length;
-    status.lastKeyIndex = keyID; // Key 1..25
-    
-    console.log('[installCsoundHandler] tapped key :', keyID);
-
-	logStatusProbe("[tap/pre-branch]", status, { //
-	  keyID,
-	  tapFamily,
-	});
-
-if (!status.running) {
-  refresh();
-  return;
-}
-
-const familyOn = isFamilyOnInState(status); //tap Family, st atus.index);
-
-logStatusProbe("[tap/run gate]", status, {
-  keyID,
-  tapFamily,
-  familyOn,
-});
-
-if (!familyOn) return;
-// ✅ Start View: repaint immediately so "Key N" updates without DevTools
-	if (!status.running) {
-	  refresh();
-	  return;
-	}
-  }, { capture: true });
-}
-*/
 
 function installHengeHandler(ctx, canvas, status) {
   canvas.addEventListener('pointerup', (ev) => {

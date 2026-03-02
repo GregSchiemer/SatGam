@@ -113,6 +113,15 @@ function lowStartLine(status) {
   return `${m} MODE`;
 }
 
+// text.js
+export function renderModeSelectLeader(ctxT, status) {
+  drawTopText(ctxT, status, 'Phonehenge');
+  drawSubText(ctxT, status, status.modeChosen === 'preview' ? 'PREVIEW MODE' : 'CONCERT MODE');
+  drawMidText(ctxT, status, 'tap left/right to choose');
+  drawLowText(ctxT, status, 'tap bottom text to confirm'); // never AUDIO READY here
+}
+
+
 /*
 function lowStartLine(status) {
   // Show key id only before animation starts
