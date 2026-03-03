@@ -98,27 +98,49 @@ export function renderDebug(ctxT, { status, mins, secs, bitPattern = '' }) {
   drawLowText(ctxT, status, 'DEBUG');
 }
 
+function isStartView(status) {
+  return status.modeConfirmed && !status.running && !status.isEndScreen;
+}
+
 function lowStartLine(status) {
-  // Start View (not running): show key id if available
-  if (!status.running) {
+
+console.log('[lowStartLine probe]', {
+  modeConfirmed: status.modeConfirmed,
+  running: status.running,
+  isEndScreen: status.isEndScreen,
+  modeChosen: status.modeChosen,
+  audioReady: status.audioReady,
+  lastKeyIndex: status.lastKeyIndex,
+});
+
+
+  // ✅ Only show these “start-only” messages in Start View
+  if (isStartView(status)) {
     const k = status.lastKeyIndex;
     if (Number.isInteger(k)) return `Key ${k}`;
 
-    // If no key selected yet, show audio readiness once primed
-    if (status.audioReady) return "AUDIO READY";
+    if (status.modeChosen === 'concert' && status.audioReady) return "AUDIO READY";
+
+    // default PREVIEW prompt in Start View
+    return "PREVIEW (silent)";
   }
 
-  // Fallback: show mode
+  // Outside Start View: never show AUDIO READY
   const m = status.modeChosen ? String(status.modeChosen).toUpperCase() : "CONCERT";
   return `${m} MODE`;
 }
-
 // text.js
 export function renderModeSelectLeader(ctxT, status) {
+/*
   drawTopText(ctxT, status, 'Phonehenge');
   drawSubText(ctxT, status, status.modeChosen === 'preview' ? 'PREVIEW MODE' : 'CONCERT MODE');
   drawMidText(ctxT, status, 'tap left/right to choose');
-  drawLowText(ctxT, status, 'tap bottom text to confirm'); // never AUDIO READY here
+  drawLowText(ctxT, status, 'DEBUG'); // never AUDIO READY here
+*/
+  drawSubText(ctxT, status, 'select MODE');
+  drawLeftText(ctxT, status, 'PREVIEW');
+  drawRightText(ctxT, status, 'CONCERT');
+  drawLowText(ctxT, status, lowStartLine(status)); 
 }
 
 

@@ -1,17 +1,54 @@
 // js/gui/renderer.js
 
-import { arrP, arrB, arrF, arrS, arrT, getSlots 
+import { 
+  arrP, 
+  arrB, 
+  arrF, 
+  arrS, 
+  arrT, 
+  getSlots 
 } from './canvasUtils.js';
-import { prepareAndRenderBackground, selectAndRenderBackground, blendBgCanvasesInto, beginBackgroundCrossfade 
+import { 
+  prepareAndRenderBackground, 
+  selectAndRenderBackground, 
+  blendBgCanvasesInto, 
+  beginBackgroundCrossfade 
 } from './canvasUtils.js';
-import { renderStartLeader, renderStartBoth, renderRunning, renderEnd, chooseTextColorForBackground, renderModeSelectLeader} from './text.js';
-import { FamilyIndex, ColorFamily } from './color.js';
-import { familyForIndex, drawPhoneAt } from './sprites.js'; 
-import { MAX_STATES, STATE_DUR, MAX_DUR, CONCERT_CLK, PREVIEW_CLK } from './globals.js'; 
-import { sequence } from './sequence.js';
-import { stopAnimation, startAnimation } from './animation.js';
-import { clockify, easeInOutQuad01,
-  isConcertMode, logStatusProbe 
+import {
+  renderStartLeader,
+  renderStartBoth,
+  renderRunning,
+  renderEnd,
+  chooseTextColorForBackground,
+  renderModeSelectLeader,
+} from './text.js';
+import { 
+  FamilyIndex, 
+  ColorFamily 
+} from './color.js';
+import { 
+  familyForIndex, 
+  drawPhoneAt 
+} from './sprites.js'; 
+import { 
+  MAX_STATES, 
+  STATE_DUR, 
+  MAX_DUR, 
+  CONCERT_CLK, 
+  PREVIEW_CLK 
+} from './globals.js'; 
+import { 
+  sequence 
+} from './sequence.js';
+import { 
+  stopAnimation, 
+  startAnimation } 
+from './animation.js';
+import { 
+  clockify, 
+  easeInOutQuad01,
+  isConcertMode,
+logStatusProbe 
 } from './helpers.js';
 
 // ==============================
@@ -158,7 +195,7 @@ function onEnterView(status, view, ctxB) {
   if (view === VIEW_RUN) status.stopAfterFade = false;
 }
 
-
+/*
 // ===========================
 // —— Mode Select View ——
 // ===========================
@@ -173,15 +210,26 @@ function renderModeSelectView(ctxT, ctxS, status) {
   renderStartLeader(ctxT, status);
   composeFrame({ drawB: true, drawS: false, drawT: true });
 }
-/*
-function renderModeSelectView(ctxT, ctxS, status) {
-  if (!status.running) status.msPerBeat = status.previewClock;
-
-  renderModeSelectLeader(ctxT, status);
-  composeFrame({ drawB: true, drawS: false, drawT: true });
-}
 */
 
+// ===========================
+// —— Mode Select View ——
+// ===========================
+
+function isModeSelectView(status) {
+  return status.role === 'leader' && !status.modeConfirmed;
+}
+
+function renderModeSelectView(ctxT, ctxS, status) {
+  // Keep whatever tempo you want while in mode-select (preview is fine)
+  if (!status.running) status.msPerBeat = status.previewClock;
+
+  // ✅ IMPORTANT: do NOT call renderStartLeader() here.
+  // Mode Select must never show AUDIO READY.
+  renderModeSelectLeader(ctxT, status);
+
+  composeFrame({ drawB: true, drawS: false, drawT: true });
+}
 
 // =======================
 // —— Running View ——
