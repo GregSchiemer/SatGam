@@ -33,11 +33,8 @@ import { refresh } from './runTime.js';
 
 import { FamilyIndex, ColorFamily } from './color.js';
 
-//import { startSequenceSanityRun }  from './main.js';
-
 import { pingBeep } from "./satgamPing.js";
 
-//import { primeAudioContext, enableCsound, playTestTone, getCsoundInfo } from "./csoundInit.js";
 import { primeAudioContext, enableCsound, playTestTone } from "./csoundInit.js";
 
 function isLeader(status) {
@@ -47,15 +44,19 @@ function isLeader(status) {
 // ---------------------------------------------
 //  PUBLIC ENTRY POINT
 // ---------------------------------------------
-export function installUIHandlers(ctx, canvas, status) {
+export function installUIHandlers(ctx, canvas, status, audio) {
   installLeaderModeSelectHandler(ctx, canvas, status);
-  installLeaderModeConfirmHandler(ctx, canvas, status);
-  installLeaderStopHandler(ctx, canvas, status);
+  installLeaderModeConfirmHandler(ctx, canvas, status, audio);
   installClockStartHandler(ctx, canvas, status);
   installEndScreenTapHandler(ctx, canvas, status);
-//  installHengeHandler(ctx, canvas, status);
   installFadeToBlackHandler(ctx, canvas, status);
-  installCsoundHandler(ctx, canvas, status);
+  installCsoundHandler(ctx, canvas, status, audio);
+
+//  installHengeHandler(ctx, canvas, status);
+//  installLeaderModeConfirmHandler(ctx, canvas, status);
+//  installLeaderStopHandler(ctx, canvas, status);
+//  installCsoundHandler(ctx, canvas, status, csound);
+//  installCsoundHandler(ctx, canvas, status);
 //  installPingHandler(ctx, canvas, status);
 }
 
@@ -119,7 +120,7 @@ export function installLeaderModeSelectHandler(ctx, canvas, status) {
 //  Leader: confirm by tapping bottom text hot spot (ctx.low)
 // ---------------------------------------------------------------------------
 
-export function installLeaderModeConfirmHandler(ctx, canvas, status) {
+export function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
   canvas.addEventListener('pointerup', (ev) => {
     if (status.role !== 'leader') return;
     if (status.modeConfirmed) return;
@@ -160,6 +161,26 @@ export function installLeaderModeConfirmHandler(ctx, canvas, status) {
     // ✅ Make the view transition happen immediately
     refresh();
 
+if (!status.csoundPrimed) {
+  status.csoundPrimed = true;
+  status.audioReady = false;
+
+  console.log("[confirm] priming Csound + test beep");
+
+  audio.prime({ beep: true })
+    .then(() => {
+      status.audioReady = true;
+      refresh();
+    })
+    .catch((e) => {
+      status.csoundPrimed = false; // allow retry
+      status.audioReady = false;
+      console.error("❌ Csound prime/beep failed:", e);
+      refresh();
+    });
+}
+
+/*
     // ✅ Prime + start Csound on the CONFIRM gesture (concert “warm-up”)
     // Guard so it only happens once (but allow retry if it fails)
 
@@ -183,7 +204,7 @@ if (!status.csoundPrimed) {
       console.error("❌ Csound prime/beep failed:", e);
       refresh();
     });
-   }
+   } */
   }, { capture: true });
 }
 
@@ -314,23 +335,12 @@ export function installEndScreenTapHandler(ctx, canvas, status) {
   }, { capture: true });
 }
 
-function backToModeSelect(status) {
-  status.running = false;
-  status.isEndScreen = false;
-  status.startWall = 0;
-  status.lastKeyIndex = null;
-
-  status.index = 0;
-
-  status.modeConfirmed = false;  // ✅ this is what makes it Mode Select view
-  status.modeChosen = status.lastConfirmedMode ?? status.modeChosen ?? 'concert';
-}
 
 // ---------------------------------------------------------------------------
 //  Leader & Consort: trigger sound by tapping henge hot spots
 // ---------------------------------------------------------------------------
 
-function installCsoundHandler(ctx, canvas, status) {
+function installCsoundHandler(ctx, canvas, status, audio) {
   canvas.addEventListener('pointerup', (ev) => {
     // Ignore taps until leader has confirmed mode
     if (status.role === 'leader' && !status.modeConfirmed) return;
@@ -377,6 +387,24 @@ function installCsoundHandler(ctx, canvas, status) {
     logStatusProbe("[tap/pre-branch]", status, { keyID, tapFamily });
 
     console.log('[installCsoundHandler] tapped key :', keyID);
+
+	const dur       = status.noteDur   ?? 2.0;
+	const formalOct = status.formalOct ?? 0;
+	const nNotes    = status.nNotes    ?? 5;
+	const mode      = status.chordMode ?? 0;
+	
+	audio.noteOn({ keyID, dur, formalOct, nNotes, mode })
+	  .catch(e => console.error("❌ noteOn failed:", e));
+/*
+	// Tune these for testing (later you can hang them off UI controls)
+	const dur       = status.noteDur   ?? 2.0;  // seconds
+	const formalOct = status.formalOct ?? 0;    // … -1,0,+1 …
+	const nNotes    = status.nNotes    ?? 5;    // 1..5 (1 = single-note)
+	const mode      = status.chordMode ?? 0;    // 0=chord, 1=formal-oct doubling
+
+	// keyID is 1..25, matches instr numbers in the new CSD
+	csound.inputMessage(`i ${keyID} 0 ${dur} ${formalOct} ${nNotes} ${mode}`);
+*/
 
     // ✅ Start View: repaint immediately so "Key N" updates without DevTools
     if (!status.running) {
@@ -569,3 +597,4 @@ export function pickSlotFromPoint(slots, x, y, ctx) {
   }
   return null;
 }
+
