@@ -60,6 +60,14 @@ import {
   sequence 
 } from './sequence.js';
 
+//import {
+//  enableCsound
+//} from './initCsound.js';
+
+import { 
+  makeAudioEngine 
+} from "./audioEngine.js";
+
 import { 
   installUIHandlers 
 } from './uiControls.js';
@@ -123,7 +131,11 @@ export async function initApp() {
   installResizeHandler(ctxB, status);
 
   // 6) attach UI to visible pane canvas
-  installUIHandlers(ctxP, cnvP, status);
+  const audio = makeAudioEngine();
+  installUIHandlers(ctxP, cnvP, status, audio);
+
+
+//  installUIHandlers(ctxP, cnvP, status);
 
   // 7) initialise Mode Select View
   prepareAndRenderBackground(ctxB, status);

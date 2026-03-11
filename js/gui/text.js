@@ -104,6 +104,7 @@ function isStartView(status) {
 
 function lowStartLine(status) {
 
+/*
 console.log('[lowStartLine probe]', {
   modeConfirmed: status.modeConfirmed,
   running: status.running,
@@ -112,8 +113,7 @@ console.log('[lowStartLine probe]', {
   audioReady: status.audioReady,
   lastKeyIndex: status.lastKeyIndex,
 });
-
-
+*/
   // ✅ Only show these “start-only” messages in Start View
   if (isStartView(status)) {
     const k = status.lastKeyIndex;
