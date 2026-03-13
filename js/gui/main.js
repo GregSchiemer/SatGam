@@ -130,33 +130,23 @@ export async function initApp() {
   // 5) re-initialise geometry when user rotates phone
   installResizeHandler(ctxB, status);
 
-  // 6) attach UI to visible pane canvas
+  // 6) initialise audio engine
   const audio = makeAudioEngine();
+  
+  // 7) attach UI to visible pane canvas
   installUIHandlers(ctxP, cnvP, status, audio);
 
-
-//  installUIHandlers(ctxP, cnvP, status);
-
-  // 7) initialise Mode Select View
+  // 8) initialise Mode Select View
   prepareAndRenderBackground(ctxB, status);
- // initModeSelect(ctxB, status);
 
-  // 8) render arrB/arrS/arrT to composite layer arrP
+  // 9) render arrB/arrS/arrT to composite layer arrP
   setRender(() => {
     frameRender(status); 
   });
 
-  // 9) initial paint
+  // 10) initial paint
   refresh();
 }
-
-/*
-function initModeSelect(ctxB, status){
-  prepareAndRenderBackground(ctxB, status);
-  chooseTextColorForBackground(ctxB, status);
-  console.log('[modeSelect] textColor =', status.textColor, 'bg =', status.bgName ?? status.bgIndex);
-}
-*/
 
 // ---------------------------------------------------------------------------
 //  Helpers
@@ -187,6 +177,7 @@ function initStatus(ctx) {
 	startWall:			null,				// performance.now()
 	runStateDurationMs: null,				// current duration
 	audioReady:			false,
+	testToneEnabled: 	false,
 	debugKeys:			false,
 
 // Mode state

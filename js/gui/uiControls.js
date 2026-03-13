@@ -178,33 +178,7 @@ if (!status.csoundPrimed) {
       console.error("❌ Csound prime/beep failed:", e);
       refresh();
     });
-}
-
-/*
-    // ✅ Prime + start Csound on the CONFIRM gesture (concert “warm-up”)
-    // Guard so it only happens once (but allow retry if it fails)
-
-// ✅ Prime + start Csound on the CONFIRM gesture
-if (!status.csoundPrimed) {
-  status.csoundPrimed = true;
-  status.audioReady = false;
-
-  console.log("[confirm] priming Csound + test beep");
-
-  primeAudioContext()
-    .then(() => enableCsound())
-    .then(() => playTestTone({ freq: 440, dur: 0.2, amp: 0.25 }))
-    .then(() => {
-      status.audioReady = true;
-      refresh(); // update bottom line to "AUDIO READY"
-    })
-    .catch((e) => {
-      status.csoundPrimed = false; // allow retry on next confirm if needed
-      status.audioReady = false;
-      console.error("❌ Csound prime/beep failed:", e);
-      refresh();
-    });
-   } */
+   }
   }, { capture: true });
 }
 
