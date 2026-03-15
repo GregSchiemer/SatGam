@@ -100,7 +100,7 @@ instr 210
   iBaseOct  = p5
   iBaseDeg  = p6
 
-  iN  = int(p7)
+  iN  = 1
   if (iN <= 0) then
     iN = 5
   endif

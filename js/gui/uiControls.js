@@ -362,23 +362,28 @@ function installCsoundHandler(ctx, canvas, status, audio) {
 
     console.log('[installCsoundHandler] tapped key :', keyID);
 
-	const dur       = status.noteDur   ?? 2.0;
+	const dur       = status.noteDur   ?? 24.0;
 	const formalOct = status.formalOct ?? 0;
 	const nNotes    = status.nNotes    ?? 5;
 	const mode      = status.chordMode ?? 0;
+
+	// Only enforce the tap limit during Running View
+	if (status.running) {
+	  // If already locked, ignore henge taps
+	  if (status.hengeLocked) return;
 	
+	  status.tapsThisState = (status.tapsThisState ?? 0) + 1;
+	
+	  if (status.tapsThisState > status.tapLimit) {
+		status.hengeLocked = true;
+//		status.showHenge = false;     // hide for remainder of state
+		refresh();                    // update visuals + subtext
+		return;
+	  }
+	}
+		
 	audio.noteOn({ keyID, dur, formalOct, nNotes, mode })
 	  .catch(e => console.error("❌ noteOn failed:", e));
-/*
-	// Tune these for testing (later you can hang them off UI controls)
-	const dur       = status.noteDur   ?? 2.0;  // seconds
-	const formalOct = status.formalOct ?? 0;    // … -1,0,+1 …
-	const nNotes    = status.nNotes    ?? 5;    // 1..5 (1 = single-note)
-	const mode      = status.chordMode ?? 0;    // 0=chord, 1=formal-oct doubling
-
-	// keyID is 1..25, matches instr numbers in the new CSD
-	csound.inputMessage(`i ${keyID} 0 ${dur} ${formalOct} ${nNotes} ${mode}`);
-*/
 
     // ✅ Start View: repaint immediately so "Key N" updates without DevTools
     if (!status.running) {

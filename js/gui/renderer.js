@@ -195,22 +195,6 @@ function onEnterView(status, view, ctxB) {
   if (view === VIEW_RUN) status.stopAfterFade = false;
 }
 
-/*
-// ===========================
-// —— Mode Select View ——
-// ===========================
-
-function isModeSelectView(status) {
-  return status.role === 'leader' && !status.modeConfirmed;
-}
-
-function renderModeSelectView(ctxT, ctxS, status) {
-  if (!status.running) status.msPerBeat = status.previewClock;
-
-  renderStartLeader(ctxT, status);
-  composeFrame({ drawB: true, drawS: false, drawT: true });
-}
-*/
 
 // ===========================
 // —— Mode Select View ——
@@ -274,6 +258,11 @@ function applyBoundaryStepIfDue(status, nowMs) {
 
   status.index += steps;
   status.nextStateWallMs += steps * status.runStateDurationMs;
+
+  // ✅ reset per (new) state
+  status.tapsThisState = 0;
+  status.hengeLocked = false;
+  status.showHenge = true;
 }
 
 function applyEndConditionIfReached(status, maxStates) {
@@ -407,9 +396,9 @@ function renderPhonesLayer(ctxS, status) {
   }
 
   // 4) Running view
+	if (status.running && !status.showHenge) return;
   syncPhonesToSpritesLayer(status.index);
 }
-
 
 // - CONCERT: real time - PREVIEW: fast-forward.
 function computeClockMs(status, elapsedMs) {

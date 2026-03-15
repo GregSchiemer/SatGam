@@ -281,6 +281,7 @@ endin
 
 // --- CSD 'chord' instrument --------------------------------------------------
 
+
 const ORC = `
 ; Phonehenge / Stockhausen (Studie II) — cpsxpch version (for web app)
 sr     = 44100
@@ -533,6 +534,65 @@ export async function enableCsound() {
     msgUnsub = (typeof ret === "function") ? ret : null;
 
     await csound.setOption("-odac");
+
+    // ---- Load ORC from assets/csd (no copy/paste into JS) ----
+    const params = new URLSearchParams(window.location.search);
+    const orcName = params.get("orc") ?? "sprite-chords.orc";
+
+    // Resolve robustly relative to this module file (js/gui/csoundInit.js):
+    // ../../assets/csd/<orcName>
+    const orcURL = new URL(`../../assets/csd/${orcName}`, import.meta.url).toString();
+
+    const res = await fetch(orcURL, { cache: "no-store" });
+    if (!res.ok) throw new Error(`[csound] failed to fetch ORC ${orcName} (${res.status})`);
+    const orcText = await res.text();
+
+    console.log("[csound] compiling ORC", { orcName, orcURL, chars: orcText.length });
+    await csound.compileOrc(orcText);
+
+    await csound.start();
+
+    // ---- Initialise shared defaults ONCE so baseCps/ampDbfs/etc are non-zero ----
+    await csound.inputMessage("i 900 0 0.01");
+
+    console.log("✅ Csound engine ready", { csoundSource, csoundVersion, orcName });
+    return csound;
+  })();
+
+  return initPromise;
+}
+
+export async function playTestTone({ dur = 0.2 } = {}) {
+  const cs = await enableCsound();
+
+  // Helpful: report baseCps from JS as well (matches printf_i inside instr 902)
+  try {
+    const base = await cs.getControlChannel?.("baseCps");
+    if (typeof base === "number") console.log("[csound] baseCps (JS) =", base, "Hz");
+  } catch (_) {
+    // ignore if API not available in this build
+  }
+
+  // Use a dedicated ORC-side test instrument that prints baseCps and plays it.
+  // (You must define instr 902 in the ORC.)
+  await cs.inputMessage(`i 902 0 ${dur}`);
+}
+/*
+export async function enableCsound() {
+  if (csound) return csound;
+  if (initPromise) return initPromise;
+
+  initPromise = (async () => {
+    const ac = await primeAudioContext();
+    const { Csound } = await importCsoundModule();
+
+    csound = await Csound({ audioContext: ac, autoConnect: true });
+
+    // Attach exactly one message listener
+    const ret = csound.on?.("message", onMsg);
+    msgUnsub = (typeof ret === "function") ? ret : null;
+
+    await csound.setOption("-odac");
     await csound.compileOrc(ORC);
     await csound.start();
 
@@ -549,6 +609,7 @@ export async function playTestTone({ dur = 0.2 } = {}) {
   await cs.inputMessage("i 900 0 0.01");
   await cs.inputMessage(`i 1 0 ${dur} 0 1 0`);  // key 1, oct 0, 1 note, mode 0
 }
+*/
 
 /*
 export async function playTestTone({ freq = 440, dur = 0.25, amp = 0.25 } = {}) {
