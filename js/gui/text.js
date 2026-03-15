@@ -52,6 +52,7 @@ function drawText(ctxT, status, text, x, y, size) {
   ctxT.fillText(text, x, y);
 }
 
+
 export function chooseTextColorForBackground(status) {
   const family = status.bgFamilyTarget ?? status.bgFamily ?? ColorFamily.NONE;
 
@@ -62,7 +63,6 @@ export function chooseTextColorForBackground(status) {
   status.textColor = 'white'
   return;
 }
-
 
 export function renderStartBoth(ctxT, status) {
   drawTopText(ctxT, status, 'Phonehenge');
@@ -76,12 +76,26 @@ export function renderStartLeader(ctxT, status) {
   drawLeftText(ctxT, status, 'PREVIEW');
   drawRightText(ctxT, status, 'CONCERT');
   drawLowText(ctxT, status, lowStartLine(status));
-//  console.log('[renderStartLeader] textColor =', status.textColor, 'bg =', status.bgName ?? status.bgIndex);
 }
 
 export function renderRunning(ctxT, { status, mins, secs }) {
   drawTopText(ctxT, status, String(status.index + 1));
+  drawSubText(ctxT, status, makeSubText(status));
   drawMidText(ctxT, status, `${mins}:${secs}`);
+}
+
+export function makeSubText(status) {
+  // Only show indicator in Running View (concert)
+  if (!(status.modeChosen === "concert" && status.running)) return "";
+
+  const limit = status.tapLimit ?? 0;
+  const used = status.tapsThisState ?? 0;
+  const remaining = Math.max(0, limit - used);
+
+  let out = "●".repeat(remaining) + "○".repeat(Math.max(0, limit - remaining));
+  if (status.hengeLocked) out = "○".repeat(limit);
+
+  return out;
 }
 
 // End view

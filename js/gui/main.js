@@ -115,11 +115,8 @@ export async function initApp() {
   const status = initStatus(ctx);
   
   // 3) slots uses pane geometry
-
   const { slots, ctxS } = makeHenge(ctx, henge25);
-
   ctx.keyRadius = ctxS.keyRadius;
-
   setSlots(slots);
 
   console.log('[main] ctxS entries:', Object.entries(ctxS));		
@@ -193,6 +190,12 @@ function initStatus(ctx) {
     bgFamily:			ColorFamily.NONE,	// none selected
 	bgFamilyTarget: 	ColorFamily.NONE,
 	textColor: 			'white',
+
+	tapsThisState: 		0,     	// tap counter
+	tapLimit: 			3,
+	hengeLocked: 		false,
+	showHenge: 			true,    // required for gate rendering
+
 
 	lightsDownDone: 	false,    	// start-view fade fired?
 	lightsUpDone:   	false,   	// end-view fade fired?
