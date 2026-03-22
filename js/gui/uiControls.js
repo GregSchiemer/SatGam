@@ -120,6 +120,101 @@ export function installLeaderModeSelectHandler(ctx, canvas, status) {
 //  Leader: confirm by tapping bottom text hot spot (ctx.low)
 // ---------------------------------------------------------------------------
 
+function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
+  canvas.addEventListener('pointerup', async (ev) => {
+    if (status.role !== 'leader') return;
+    if (status.modeConfirmed) return;
+    if (status.confirmPending) return;   // prevent double taps while priming
+
+    const { x, y } = eventToCtxPoint(ev, canvas, ctx);
+
+    const x1 = ctx.low.x;
+    const y1 = ctx.low.y;
+    const r  = ctx.tapRadius;
+
+    console.log('[confirm] pointer', { x, y, x1, y1, r });
+
+    const tapConfirm = isInsideCircle(x, y, x1, y1, r);
+    if (!tapConfirm) return;
+
+    status.running = false;
+    status.isEndScreen = false;
+    status.lastConfirmedMode = status.modeChosen;
+    status.startWall = null;
+    status.runStateDurationMs = null;
+
+    // Lock tempo to chosen mode
+    if (status.modeChosen === 'preview') {
+      status.msPerBeat = status.previewClock;
+      console.log('[Mode Select View] lastConfirmedMode will be PREVIEW MODE');
+
+      // Preview mode enters Start View immediately
+      status.audioReady = false;
+      status.csoundPrimed = false;
+      status.modeConfirmed = true;
+
+      console.log('[confirm] status at confirm tap', {
+        modeChosen: status.modeChosen,
+        msPerBeat: status.msPerBeat,
+        audioReady: status.audioReady
+      });
+
+      refresh();
+      return;
+    }
+
+    // Concert mode: prepare audio BEFORE entering Start View
+    status.msPerBeat = status.concertClock;
+    console.log('[Mode Select View] lastConfirmedMode will be CONCERT MODE');
+
+    console.log('[confirm] status at confirm tap', {
+      modeChosen: status.modeChosen,
+      msPerBeat: status.msPerBeat,
+      audioReady: status.audioReady
+    });
+
+    status.confirmPending = true;
+    status.audioReady = false;
+
+    // Optional: use this in Mode Select View to show "PREPARING AUDIO..."
+    status.audioStage = 'loading';
+    refresh();
+
+    try {
+      if (!status.csoundPrimed) {
+        console.log('[confirm] priming Csound + test beep');
+        await audio.prime({ beep: true });
+        status.csoundPrimed = true;
+      }
+
+      status.audioReady = true;
+      status.audioStage = 'prepared';
+
+      // Only NOW enter Start View
+      status.modeConfirmed = true;
+
+      console.log('[confirm] concert audio prepared; entering Start View', {
+        modeChosen: status.modeChosen,
+        msPerBeat: status.msPerBeat,
+        audioReady: status.audioReady,
+        csoundPrimed: status.csoundPrimed
+      });
+
+      refresh();
+    } catch (e) {
+      status.csoundPrimed = false;
+      status.audioReady = false;
+      status.audioStage = 'failed';
+      console.error('❌ Csound prime/beep failed:', e);
+
+      // Stay in Mode Select View so leader can retry
+      refresh();
+    } finally {
+      status.confirmPending = false;
+    }
+  }, { capture: true });
+}
+/*
 export function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
   canvas.addEventListener('pointerup', (ev) => {
     if (status.role !== 'leader') return;
@@ -181,6 +276,7 @@ if (!status.csoundPrimed) {
    }
   }, { capture: true });
 }
+*/
 
 // ---------------------------------------------------------------------------
 //  Leader: stop while running (tap TOP text hot spot)

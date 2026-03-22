@@ -88,6 +88,8 @@ import {
   FULL_HENGE
 } from './globals.js';
 
+import { makeClockBus } from './clockBus.js';
+
 let _lastPhonesKey = null;
 
 // ---------------------------------------------------------------------------
@@ -267,4 +269,25 @@ function drawKeyDebugOverlay(ctxF, ctxP, status) {
   }
 
   ctxF.restore();
+}
+
+const bus = makeClockBus({
+  role: 'leader',
+  onMsg: (msg) => {
+    // leaders usually won't receive broadcasts (server sends to consorts),
+    // but leaving this here is useful during debugging
+    if (msg?.type) console.log('[leader bus rx]', msg);
+  },
+});
+
+// Optional: send "start" once you enter Running View (or when clock tapped)
+function leaderStartClock() {
+  bus.send({ type: 'start', bpm: Math.round(60000 / status.msPerBeat) });
+  bus.startTicking(() => status.msPerBeat);      // <- uses your GUI timing
+}
+
+// Optional: stop
+function leaderStopClock() {
+  bus.stopTicking();
+  bus.send({ type: 'stop' });
 }

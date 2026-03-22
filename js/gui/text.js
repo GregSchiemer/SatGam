@@ -118,20 +118,54 @@ function isStartView(status) {
 
 function lowStartLine(status) {
 
+//console.log('[lowStartLine probe]', {
+//  modeConfirmed: status.modeConfirmed,
+//  running: status.running,
+//  isEndScreen: status.isEndScreen,
+//  modeChosen: status.modeCh/osen,
+//  audioReady: status.audioReady,
+//  lastKeyIndex: status.lastKeyIndex,
+//});
+
+
+  if (isStartView(status)) {
+    const k = status.lastKeyIndex;
+    if (Number.isInteger(k)) return `Key ${k}`;
+
+    if (status.modeChosen === 'concert') {
+      if (status.audioStage === 'loading') return 'PREPARING AUDIO...';
+      if (status.audioReady) return 'AUDIO READY';
+      if (status.audioStage === 'failed') return 'AUDIO FAILED';
+      return 'CONCERT MODE';
+    }
+
+    return 'PREVIEW (silent)';
+  }
+
+  const m = status.modeChosen ? String(status.modeChosen).toUpperCase() : 'CONCERT';
+  return `${m} MODE`;
+}
 /*
+function lowStartLine(status) {
+
 console.log('[lowStartLine probe]', {
-  modeConfirmed: status.modeConfirmed,
-  running: status.running,
-  isEndScreen: status.isEndScreen,
-  modeChosen: status.modeChosen,
-  audioReady: status.audioReady,
-  lastKeyIndex: status.lastKeyIndex,
+//  modeConfirmed: status.modeConfirmed,
+//  running: status.running,
+//  isEndScreen: status.isEndScreen,
+//  modeChosen: status.modeCh/osen,
+//  audioReady: status.audioReady,
+//  lastKeyIndex: status.lastKeyIndex,
 });
-*/
+
   // ✅ Only show these “start-only” messages in Start View
   if (isStartView(status)) {
     const k = status.lastKeyIndex;
     if (Number.isInteger(k)) return `Key ${k}`;
+    
+//	const BUILD_TAG = '2026-03-16 A';
+//	drawTopText(ctxT, status, BUILD_TAG);
+//	const AUDIO_READY = status.audioReady;
+//	drawTopText(ctxT, status, 'Audio ready', AUDIO_READY);
 
     if (status.modeChosen === 'concert' && status.audioReady) return "AUDIO READY";
 
@@ -143,7 +177,8 @@ console.log('[lowStartLine probe]', {
   const m = status.modeChosen ? String(status.modeChosen).toUpperCase() : "CONCERT";
   return `${m} MODE`;
 }
-// text.js
+*/
+
 export function renderModeSelectLeader(ctxT, status) {
 /*
   drawTopText(ctxT, status, 'Phonehenge');
