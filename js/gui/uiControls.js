@@ -39,6 +39,8 @@ import { pingBeep } from "./satgamPing.js";
 
 import { primeAudioContext, enableCsound, playTestTone } from "./csoundInit.js";
 
+import { startPerformanceWakeLock } from './wakeLock.js';
+
 function isLeader(status) {
   return status.role === 'leader';
 }
@@ -359,8 +361,8 @@ export function installClockStartHandler(ctx, canvas, status) {
 
     if (!isInsideCircle(x, y, x1, y1, r)) return;
 
-	// Leader END screen is handled by installEndScreenTapHandler()
-	if (status.role === 'leader' && status.isEndScreen) return;
+    // Leader END screen is handled by installEndScreenTapHandler()
+    if (status.role === 'leader' && status.isEndScreen) return;
 
     ev.preventDefault();
     ev.stopImmediatePropagation();
@@ -391,9 +393,18 @@ export function installClockStartHandler(ctx, canvas, status) {
     status.index = 0;
     status.running = true;
     status.isEndScreen = false;
-    
-	// ✅ start leader clock bus when leader enters Running View
-	if (status.role === 'leader') leaderStartClock(status);
+
+    // ✅ Request wake lock from the same user gesture that starts the run
+    startPerformanceWakeLock(status).then((ok) => {
+      if (!ok) {
+        console.warn(
+          '[wakeLock] unavailable; player may need to disable auto-lock manually'
+        );
+      }
+    });
+
+    // ✅ start leader clock bus when leader enters Running View
+    if (status.role === 'leader') leaderStartClock(status);
 
     startAnimation();
     refresh();
