@@ -33,6 +33,8 @@ import { refresh } from './runTime.js';
 
 import { FamilyIndex, ColorFamily } from './color.js';
 
+import { leaderStartClock } from './main.js';
+ 
 import { pingBeep } from "./satgamPing.js";
 
 import { primeAudioContext, enableCsound, playTestTone } from "./csoundInit.js";
@@ -120,6 +122,7 @@ export function installLeaderModeSelectHandler(ctx, canvas, status) {
 //  Leader: confirm by tapping bottom text hot spot (ctx.low)
 // ---------------------------------------------------------------------------
 
+/*
 function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
   canvas.addEventListener('pointerup', async (ev) => {
     if (status.role !== 'leader') return;
@@ -214,11 +217,12 @@ function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
     }
   }, { capture: true });
 }
-/*
-export function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
-  canvas.addEventListener('pointerup', (ev) => {
+*/
+function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
+  canvas.addEventListener('pointerup', async (ev) => {
     if (status.role !== 'leader') return;
     if (status.modeConfirmed) return;
+    if (status.confirmPending) return;
 
     const { x, y } = eventToCtxPoint(ev, canvas, ctx);
 
@@ -231,52 +235,84 @@ export function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
     const tapConfirm = isInsideCircle(x, y, x1, y1, r);
     if (!tapConfirm) return;
 
-    status.modeConfirmed = true;
     status.running = false;
     status.isEndScreen = false;
-	status.lastConfirmedMode = status.modeChosen;
-	
+    status.lastConfirmedMode = status.modeChosen;
+    status.startWall = null;
+    status.runStateDurationMs = null;
+
     // Lock tempo to chosen mode
     if (status.modeChosen === 'preview') {
       status.msPerBeat = status.previewClock;
       console.log('[Mode Select View] lastConfirmedMode will be PREVIEW MODE');
-    } else {
-      status.msPerBeat = status.concertClock;
-      console.log('[Mode Select View] lastConfirmedMode will be CONCERT MODE');
+
+      status.audioReady = false;
+      status.csoundPrimed = false;
+      status.audioStage = 'idle';
+      status.modeConfirmed = true;
+
+      console.log('[confirm] preview mode entering Start View', {
+        modeChosen: status.modeChosen,
+        msPerBeat: status.msPerBeat,
+        audioReady: status.audioReady
+      });
+
+      refresh();
+      return;
     }
 
-    status.startWall = null;
-    status.runStateDurationMs = null;
+    // Concert mode: enter Start View immediately, then prepare audio
+    status.msPerBeat = status.concertClock;
+    console.log('[Mode Select View] lastConfirmedMode will be CONCERT MODE');
 
     console.log('[confirm] status at confirm tap', {
       modeChosen: status.modeChosen,
-      msPerBeat: status.msPerBeat
+      msPerBeat: status.msPerBeat,
+      audioReady: status.audioReady
     });
 
-    // ✅ Make the view transition happen immediately
+    status.modeConfirmed = true;      // <-- enter Start View now
+    status.confirmPending = true;
+    status.audioReady = false;
+    status.audioStage = 'loading';
+
+    console.log('[confirm] concert mode entering Start View; preparing audio');
+
     refresh();
 
-if (!status.csoundPrimed) {
-  status.csoundPrimed = true;
-  status.audioReady = false;
+    try {
+      if (!status.csoundPrimed) {
+        console.log('[confirm] priming Csound + test beep');
+        await audio.prime({ beep: true });
+        status.csoundPrimed = true;
+      }
 
-  console.log("[confirm] priming Csound + test beep");
-
-  audio.prime({ beep: true })
-    .then(() => {
       status.audioReady = true;
+      status.audioStage = 'prepared';
+
+      console.log('[confirm] concert audio prepared', {
+        modeChosen: status.modeChosen,
+        msPerBeat: status.msPerBeat,
+        audioReady: status.audioReady,
+        csoundPrimed: status.csoundPrimed
+      });
+
       refresh();
-    })
-    .catch((e) => {
-      status.csoundPrimed = false; // allow retry
+    } catch (e) {
+      status.csoundPrimed = false;
       status.audioReady = false;
-      console.error("❌ Csound prime/beep failed:", e);
+      status.audioStage = 'failed';
+
+      console.error('❌ Csound prime/beep failed:', e);
+
+      // Stay in Start View, but mark audio as failed/not ready
       refresh();
-    });
-   }
+    } finally {
+      status.confirmPending = false;
+      refresh();
+    }
   }, { capture: true });
 }
-*/
 
 // ---------------------------------------------------------------------------
 //  Leader: stop while running (tap TOP text hot spot)
@@ -353,10 +389,13 @@ export function installClockStartHandler(ctx, canvas, status) {
     status.nextStateWallMs = status.startWall + status.runStateDurationMs;
 
     status.index = 0;
-    status.running = true;          // 🔧 must be truthy while running
+    status.running = true;
     status.isEndScreen = false;
+    
+	// ✅ start leader clock bus when leader enters Running View
+	if (status.role === 'leader') leaderStartClock(status);
 
-    startAnimation();               // 🔧 don’t silently skip
+    startAnimation();
     refresh();
   }, { capture: true });
 }

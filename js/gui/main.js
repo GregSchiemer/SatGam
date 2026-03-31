@@ -35,6 +35,7 @@ import {
 
 import {
   stopAnimation,
+  startAnimation,
 } from './animation.js';
 
 import {
@@ -91,7 +92,7 @@ import {
 import { makeClockBus } from './clockBus.js';
 
 let _lastPhonesKey = null;
-
+console.log('[main] page loaded', window.location.pathname);
 // ---------------------------------------------------------------------------
 //  App entry point
 // ---------------------------------------------------------------------------
@@ -116,6 +117,9 @@ export async function initApp() {
   // 2) status uses pane geometry
   const status = initStatus(ctx);
   
+  initBus(status);
+  console.log('[main] role =', status.role);
+
   // 3) slots uses pane geometry
   const { slots, ctxS } = makeHenge(ctx, henge25);
   ctx.keyRadius = ctxS.keyRadius;
@@ -151,19 +155,305 @@ export async function initApp() {
 //  Helpers
 // ---------------------------------------------------------------------------
 
+function initBus(status) {
+  console.log('[bus init]', {
+    statusId: status.statusId,
+    role: status.role,
+    path: location.pathname
+  });
+
+//  console.log('[bus init]', { role: status.role, statusId: status.statusId });  
+
+  if (status.clockBus) {
+    console.warn('[bus guard @main] existing clockBus reused', {
+      statusId: status.statusId,
+      busId: status.clockBus?.busId,
+      socketId: status.clockBus?.socketId,
+      role: status.role
+    });
+    return status.clockBus;
+  }
+
+  const q = new URLSearchParams(window.location.search).get('wsPort');
+  const wsPort = q && /^\d+$/.test(q) ? Number(q) : undefined;
+
+  status.clockBus = makeClockBus({
+    role: status.role,
+    wsPort: wsPort,
+    statusId: status.statusId,
+    onMsg: (msg) => handleClockMsg(msg, status),
+  });
+
+  console.log('[bus made]', {
+    statusId: status.statusId,
+    busId: status.clockBus?.busId,
+    socketId: status.clockBus?.socketId,
+    role: status.role
+  });
+
+  return status.clockBus;
+}
+
+export function leaderStartClock(status) {
+  if (status.role !== 'leader') return;
+  if (!status.clockBus) return;
+  if (status.netRunning) return;
+
+  const mode = status.modeChosen || status.lastConfirmedMode || 'concert';
+
+  // Set to false only if you want start/stop without checkpoint ticks.
+  const sendTicks = true;
+
+  status.netRunning = true;
+  status.netTickCount = 0;
+  status.netLastTickMs = null;
+
+  status.clockBus.send({
+    type: 'config',
+    mode,
+    sendTicks,
+    checkpointEveryBeats: STATE_DUR,
+  });
+
+  status.clockBus.send({ type: 'start' });
+
+  status.clockBus.startTicking(() => status.msPerBeat, {
+    sendTicks,
+    checkpointEveryBeats: STATE_DUR,
+  });
+
+  console.log('[leader] bus start', {
+    mode,
+    msPerBeat: status.msPerBeat,
+    sendTicks,
+    checkpointEveryBeats: STATE_DUR,
+  });
+}
+
+export function leaderStopClock(status) {
+  if (status.role !== 'leader') return;
+  if (!status.clockBus) return;
+
+  status.netRunning = false;
+  status.clockBus.stopTicking();
+  status.clockBus.send({ type: 'stop' });
+
+  console.log('[leader] bus stop', {
+    tickCount: status.clockBus?.tickCount ?? 0,
+  });
+}
+
+function resetConsortTapState(status) {
+  status.tapsThisState = 0;
+  status.hengeLocked = false;
+}
+
+function handleClockMsg(msg, status) {
+  if (status.role !== 'consort') return;
+
+  if (msg.type === 'config') {
+    status.netMode = msg.mode || 'concert';
+    status.netSendTicks = msg.sendTicks !== false;
+    status.netCheckpointEveryBeats =
+      Number(msg.checkpointEveryBeats ?? STATE_DUR);
+
+    status.msPerBeat =
+      status.netMode === 'preview' ? PREVIEW_CLK : CONCERT_CLK;
+
+    console.log('[consort] CONFIG', {
+      mode: status.netMode,
+      sendTicks: status.netSendTicks,
+      checkpointEveryBeats: status.netCheckpointEveryBeats,
+      msPerBeat: status.msPerBeat,
+    });
+    return;
+  }
+
+  if (msg.type === 'start') {
+    status.netRunning = true;
+    status.netTickCount = 0;
+    status.netLastTickMs = Date.now();
+
+    status.modeChosen = status.netMode || 'concert';
+    status.lastConfirmedMode = status.modeChosen;
+    status.modeConfirmed = true;
+
+    status.running = true;
+    status.isEndScreen = false;
+    status.index = 0;
+
+    status.startWall = performance.now();
+    status.runStateDurationMs = MAX_STATES * STATE_DUR * status.msPerBeat;
+
+    // State 1 begins here.
+    resetConsortTapState(status);
+
+    console.log('[consort] START', {
+      mode: status.modeChosen,
+      msPerBeat: status.msPerBeat,
+      runStateDurationMs: status.runStateDurationMs,
+      tapsThisState: status.tapsThisState,
+      hengeLocked: status.hengeLocked,
+    });
+
+    startAnimation();
+    refresh();
+    return;
+  }
+
+  if (msg.type === 'tick') {
+    status.netTickCount = (status.netTickCount ?? 0) + 1;
+    status.netLastTickMs = Date.now();
+
+    const prevIndex = status.index;
+
+    // START enters State 1 (index 0).
+    // First sparse checkpoint moves to State 2 (index 1).
+    status.index = Math.min(status.netTickCount, MAX_STATES - 1);
+
+    if (status.index !== prevIndex) {
+      resetConsortTapState(status);
+    }
+
+    console.log('[consort] TICK', {
+      tickCount: status.netTickCount,
+      prevIndex,
+      index: status.index,
+      maxStates: MAX_STATES,
+      tapsThisState: status.tapsThisState,
+      hengeLocked: status.hengeLocked,
+    });
+
+    refresh();
+    return;
+  }
+
+  if (msg.type === 'stop') {
+    status.netRunning = false;
+
+    const expectedTicks =
+      status.netSendTicks === false ? 0 : (MAX_STATES - 1);
+
+    console.log('[consort] STOP', {
+      receivedTicks: status.netTickCount ?? 0,
+      expectedTicks,
+      discrepancy: (status.netTickCount ?? 0) - expectedTicks,
+    });
+
+    status.running = false;
+    refresh();
+  }
+}
+/*
+function handleClockMsg(msg, status) {
+  if (status.role !== 'consort') return;
+
+  if (msg.type === 'config') {
+    status.netMode = msg.mode || 'concert';
+    status.netSendTicks = msg.sendTicks !== false;
+    status.netCheckpointEveryBeats =
+      Number(msg.checkpointEveryBeats ?? STATE_DUR);
+
+    status.msPerBeat =
+      status.netMode === 'preview' ? PREVIEW_CLK : CONCERT_CLK;
+
+    console.log('[consort] CONFIG', {
+      mode: status.netMode,
+      sendTicks: status.netSendTicks,
+      checkpointEveryBeats: status.netCheckpointEveryBeats,
+      msPerBeat: status.msPerBeat,
+    });
+    return;
+  }
+
+  if (msg.type === 'start') {
+    status.netRunning = true;
+    status.netTickCount = 0;
+    status.netLastTickMs = Date.now();
+
+    status.modeChosen = status.netMode || 'concert';
+    status.lastConfirmedMode = status.modeChosen;
+    status.modeConfirmed = true;
+
+    status.running = true;
+    status.isEndScreen = false;
+    status.index = 0;
+
+    status.startWall = performance.now();
+    status.runStateDurationMs = MAX_STATES * STATE_DUR * status.msPerBeat;
+
+    console.log('[consort] START', {
+      mode: status.modeChosen,
+      msPerBeat: status.msPerBeat,
+      runStateDurationMs: status.runStateDurationMs,
+    });
+
+    // Start the same local animation loop used by leader clock-tap.
+//    startAnimation(status);
+    startAnimation();
+
+    refresh?.();
+    return;
+  }
+
+  if (msg.type === 'tick') {
+    status.netTickCount = (status.netTickCount ?? 0) + 1;
+    status.netLastTickMs = Date.now();
+
+    // State 1 is entered on START (index 0).
+    // First sparse checkpoint should correspond to State 2 (index 1).
+    status.index = Math.min(status.netTickCount, MAX_STATES - 1);
+
+    console.log('[consort] TICK', {
+      tickCount: status.netTickCount,
+      index: status.index,
+      maxStates: MAX_STATES,
+    });
+
+    refresh?.();
+    return;
+  }
+
+  if (msg.type === 'stop') {
+    status.netRunning = false;
+
+    const expectedTicks =
+      status.netSendTicks === false ? 0 : (MAX_STATES - 1);
+
+    console.log('[consort] STOP', {
+      receivedTicks: status.netTickCount ?? 0,
+      expectedTicks,
+      discrepancy: (status.netTickCount ?? 0) - expectedTicks,
+    });
+
+    status.running = false;
+    refresh?.();
+  }
+}
+*/
+
 // Create the initial status object: all process/runtime flags live here.
 function initStatus(ctx) {
   const roleAtLaunch = window.location.pathname.includes('leader')
     ? 'leader'
     : 'consort';
 
+  const statusId = Math.random().toString(16).slice(2);
+
   console.log('[main] role =', roleAtLaunch);
 
   return {
+  statusId,
+
 // Role
     role: 				roleAtLaunch,		// 'leader' or 'consort'
 
 // Animation state
+	clockBus: 			null,
+	netRunning: 		false,				// instead of _clockRunning
+	netTickCount: 		0,					// instead of tickCount
+	netLastTickMs: 		null,				// instead of lastTickMs
+
     running:    		false,    			// true in Running View
     index: 				0,					// increments in Running View
     isEndScreen:		false,    			// true in End View
@@ -198,12 +488,12 @@ function initStatus(ctx) {
 	hengeLocked: 		false,
 	showHenge: 			true,    // required for gate rendering
 
-
 	lightsDownDone: 	false,    	// start-view fade fired?
 	lightsUpDone:   	false,   	// end-view fade fired?
 	stopAfterFade:  	false,  	// stop RAF when fade finishes
   };
 }
+
 
 function installResizeHandler(ctxB, status) {
   // debounce state (kept inside the handler closure)
@@ -271,23 +561,81 @@ function drawKeyDebugOverlay(ctxF, ctxP, status) {
   ctxF.restore();
 }
 
-const bus = makeClockBus({
-  role: 'leader',
-  onMsg: (msg) => {
-    // leaders usually won't receive broadcasts (server sends to consorts),
-    // but leaving this here is useful during debugging
-    if (msg?.type) console.log('[leader bus rx]', msg);
-  },
-});
 
-// Optional: send "start" once you enter Running View (or when clock tapped)
-function leaderStartClock() {
-  bus.send({ type: 'start', bpm: Math.round(60000 / status.msPerBeat) });
-  bus.startTicking(() => status.msPerBeat);      // <- uses your GUI timing
-}
+/*
+function handleClockMsg(msg, status) {
+  if (status.role !== 'consort') return;
 
-// Optional: stop
-function leaderStopClock() {
-  bus.stopTicking();
-  bus.send({ type: 'stop' });
+  if (msg.type === 'config') {
+    status.netMode = msg.mode || 'concert';
+    status.netSendTicks = msg.sendTicks !== false;
+    status.netCheckpointEveryBeats =
+      Number(msg.checkpointEveryBeats ?? STATE_DUR);
+
+    status.msPerBeat =
+      status.netMode === 'preview' ? PREVIEW_CLK : CONCERT_CLK;
+
+    console.log('[consort] CONFIG', {
+      mode: status.netMode,
+      sendTicks: status.netSendTicks,
+      checkpointEveryBeats: status.netCheckpointEveryBeats,
+      msPerBeat: status.msPerBeat,
+    });
+    return;
+  }
+
+  if (msg.type === 'start') {
+    status.netRunning = true;
+    status.netTickCount = 0;
+    status.netLastTickMs = Date.now();
+
+    status.modeChosen = status.netMode || 'concert';
+    status.lastConfirmedMode = status.modeChosen;
+    status.modeConfirmed = true;
+
+    status.running = true;
+    status.isEndScreen = false;
+    status.index = 0;
+
+    status.startWall = performance.now();
+    status.runStateDurationMs = MAX_STATES * STATE_DUR * status.msPerBeat;
+
+    console.log('[consort] START', {
+      mode: status.modeChosen,
+      msPerBeat: status.msPerBeat,
+      runStateDurationMs: status.runStateDurationMs,
+    });
+
+    refresh?.();
+    return;
+  }
+
+  if (msg.type === 'tick') {
+    status.netTickCount = (status.netTickCount ?? 0) + 1;
+    status.netLastTickMs = Date.now();
+
+    console.log('[consort] TICK', {
+      tickCount: status.netTickCount,
+      maxStates: MAX_STATES,
+    });
+
+    return;
+  }
+
+  if (msg.type === 'stop') {
+    status.netRunning = false;
+
+    const expectedTicks =
+      status.netSendTicks === false ? 0 : MAX_STATES;
+
+    console.log('[consort] STOP', {
+      receivedTicks: status.netTickCount ?? 0,
+      expectedTicks,
+      discrepancy: (status.netTickCount ?? 0) - expectedTicks,
+    });
+
+    status.running = false;
+    refresh?.();
+  }
 }
+*/
