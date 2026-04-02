@@ -8,6 +8,7 @@ import {
   arrT, 
   getSlots 
 } from './canvasUtils.js';
+
 import { 
   prepareAndRenderBackground, 
   selectAndRenderBackground, 
@@ -16,11 +17,12 @@ import {
 } from './canvasUtils.js';
 import {
   renderStartLeader,
-  renderStartBoth,
+  renderStartConsort,
+  renderReadyToPlay,
   renderRunning,
   renderEnd,
   chooseTextColorForBackground,
-  renderModeSelectLeader,
+  renderEntryLeader,
 } from './text.js';
 import { 
   FamilyIndex, 
@@ -123,14 +125,21 @@ function clearTextLayer(ctxT) {
 // —— View detection ——
 // =====================
 
-const VIEW_MODE  = 'mode';
+const VIEW_ENTRY = 'entry';
 const VIEW_START = 'start';
 const VIEW_RUN   = 'run';
 const VIEW_END   = 'end';
 
 // 3.1 Decide which view we are in (layman: “what screen should the leader see?”)
+//function currentView(status) {
+//  if (status.role === 'leader' && !status.modeConfirmed) return VIEW_MODE;
+//  if (status.isEndScreen) return VIEW_END;
+//  if (status.running) return VIEW_RUN;
+//  return VIEW_START;
+//}
+
 function currentView(status) {
-  if (status.role === 'leader' && !status.modeConfirmed) return VIEW_MODE;
+  if (isEntryView(status)) return VIEW_ENTRY;
   if (status.isEndScreen) return VIEW_END;
   if (status.running) return VIEW_RUN;
   return VIEW_START;
@@ -171,7 +180,7 @@ function startHouseLightsUpOnce(status, ctxB) {
 
 // 4) Run entry actions when we arrive at a new view
 function onEnterView(status, view, ctxB) {
-  if (view === VIEW_MODE) {
+  if (view === VIEW_ENTRY) {
     // new cycle begins
     status.lightsDownDone = false;
     status.lightsUpDone   = false;
@@ -197,23 +206,33 @@ function onEnterView(status, view, ctxB) {
 
 
 // ===========================
-// —— Mode Select View ——
+// —— Entry View ——
 // ===========================
 
-function isModeSelectView(status) {
-  return status.role === 'leader' && !status.modeConfirmed;
+function isEntryView(status) {
+  if (status.role === 'leader') return !status.modeConfirmed;
+  if (status.role === 'consort') return !status.running && !status.isEndScreen;
+  return false;
 }
 
-function renderModeSelectView(ctxT, ctxS, status) {
-  // Keep whatever tempo you want while in mode-select (preview is fine)
-  if (!status.running) status.msPerBeat = status.previewClock;
+function renderEntryView(ctxT, ctxS, status) {
+  ctxT.clearRect(0, 0, ctxT.w, ctxT.h);
 
-  // ✅ IMPORTANT: do NOT call renderStartLeader() here.
-  // Mode Select must never show AUDIO READY.
-  renderModeSelectLeader(ctxT, status);
+  if (status.role === 'consort') {
+    const ctxB = arrB[0].ctx;
+    status.bgFamily = ColorFamily.NONE;
+    status.bgFamilyTarget = ColorFamily.NONE;
+    prepareAndRenderBackground(ctxB, status);
+    renderSpritesLayer(status.fullHenge, { maskBits: [1, 1, 1, 1, 1] });
+    renderStartConsort(ctxT, status);
+    composeFrame({ drawB: true, drawS: true, drawT: true });
+    return;
+  }
 
+  renderEntryLeader(ctxT, status);
   composeFrame({ drawB: true, drawS: false, drawT: true });
 }
+
 
 // =======================
 // —— Running View ——
@@ -318,7 +337,7 @@ function renderTextLayer(ctxT, status, elapsedMs) {
   const { mins, secs } = clockify(clockMs);
 
   if (status.running) renderRunning(ctxT, { status, mins, secs });
-  else renderStartBoth(ctxT, status);
+  else renderReadyToPlay(ctxT, status);
 }
 
 
@@ -346,8 +365,8 @@ export function frameRender(status) {
   clearTextLayer(ctxT);
 
   // 3) Mode Select View (leader only)
-  if (isModeSelectView(status)) {
-    renderModeSelectView(ctxT, ctxS, status);
+  if (isEntryView(status)) {
+    renderEntryView(ctxT, ctxS, status);
     return;
   }
 
@@ -385,19 +404,19 @@ function renderPhonesLayer(ctxS, status) {
 
   // 2) End view
   if (status.isEndScreen) {
-    syncPhonesToSpritesLayer(status.index, { maskBits: [0, 0, 0, 0, 0] });
+    renderSpritesLayer(status.index, { maskBits: [0, 0, 0, 0, 0] });
     return;
   }
 
   // 3) Start view
   if (!status.running) {
-    syncPhonesToSpritesLayer(status.fullHenge, { maskBits: [1, 1, 1, 1, 1] });
+    renderSpritesLayer(status.fullHenge, { maskBits: [1, 1, 1, 1, 1] });
     return;
   }
 
   // 4) Running view
 	if (status.running && !status.showHenge) return;
-  syncPhonesToSpritesLayer(status.index);
+  renderSpritesLayer(status.index);
 }
 
 // - CONCERT: real time - PREVIEW: fast-forward.
@@ -418,7 +437,7 @@ function computeClockMs(status, elapsedMs) {
 
 
 // Paint one MLS state into the SPRITES layer.
-export function syncPhonesToSpritesLayer(stateIndex, { maskBits = null } = {}) {
+export function renderSpritesLayer(stateIndex, { maskBits = null } = {}) {
   const slots = getSlots();
   if (!slots?.length) return;
 

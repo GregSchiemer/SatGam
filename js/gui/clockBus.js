@@ -102,19 +102,6 @@ startTicking(getMsPerBeat, {
 	bus.tickTimer = setTimeout(loop, firstMs);
   },
 
-/*
-    startTicking(getMsPerBeat, { forceMs = null } = {}) {
-      // Recursive setTimeout lets the interval adapt if msPerBeat changes mid-run.
-      bus.stopTicking();
-      const loop = () => {
-        const ms = forceMs ?? Math.max(10, Number(getMsPerBeat?.() ?? 1000));
-        bus.send({ type: 'tick', n: bus.tickCount++, t: Date.now(), ms });
-        bus.tickTimer = setTimeout(loop, ms);
-      };
-      loop();
-    },
-*/
-
     stopTicking() {
       if (bus.tickTimer) clearTimeout(bus.tickTimer);
       bus.tickTimer = null;

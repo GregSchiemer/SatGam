@@ -21,7 +21,8 @@ import {
 
 import {
   renderStartLeader,
-  renderStartBoth,
+  renderStartConsort,
+  renderReadyToPlay,
   renderRunning,
   renderDebug,
   renderEnd,
@@ -342,95 +343,65 @@ function handleClockMsg(msg, status) {
 
     status.running = false;
     refresh();
-  }
-}
-/*
-function handleClockMsg(msg, status) {
-  if (status.role !== 'consort') return;
-
-  if (msg.type === 'config') {
-    status.netMode = msg.mode || 'concert';
-    status.netSendTicks = msg.sendTicks !== false;
-    status.netCheckpointEveryBeats =
-      Number(msg.checkpointEveryBeats ?? STATE_DUR);
-
-    status.msPerBeat =
-      status.netMode === 'preview' ? PREVIEW_CLK : CONCERT_CLK;
-
-    console.log('[consort] CONFIG', {
-      mode: status.netMode,
-      sendTicks: status.netSendTicks,
-      checkpointEveryBeats: status.netCheckpointEveryBeats,
-      msPerBeat: status.msPerBeat,
-    });
     return;
   }
 
-  if (msg.type === 'start') {
-    status.netRunning = true;
-    status.netTickCount = 0;
-    status.netLastTickMs = Date.now();
+  if (msg.type === 'reset') {
+    console.log('[consort] RESET -> returning to waiting/start state');
 
-    status.modeChosen = status.netMode || 'concert';
-    status.lastConfirmedMode = status.modeChosen;
-    status.modeConfirmed = true;
+    // Make absolutely sure the consort is no longer ticking
+    stopAnimation();
 
-    status.running = true;
-    status.isEndScreen = false;
-    status.index = 0;
-
-    status.startWall = performance.now();
-    status.runStateDurationMs = MAX_STATES * STATE_DUR * status.msPerBeat;
-
-    console.log('[consort] START', {
-      mode: status.modeChosen,
-      msPerBeat: status.msPerBeat,
-      runStateDurationMs: status.runStateDurationMs,
-    });
-
-    // Start the same local animation loop used by leader clock-tap.
-//    startAnimation(status);
-    startAnimation();
-
-    refresh?.();
-    return;
-  }
-
-  if (msg.type === 'tick') {
-    status.netTickCount = (status.netTickCount ?? 0) + 1;
-    status.netLastTickMs = Date.now();
-
-    // State 1 is entered on START (index 0).
-    // First sparse checkpoint should correspond to State 2 (index 1).
-    status.index = Math.min(status.netTickCount, MAX_STATES - 1);
-
-    console.log('[consort] TICK', {
-      tickCount: status.netTickCount,
-      index: status.index,
-      maxStates: MAX_STATES,
-    });
-
-    refresh?.();
-    return;
-  }
-
-  if (msg.type === 'stop') {
     status.netRunning = false;
-
-    const expectedTicks =
-      status.netSendTicks === false ? 0 : (MAX_STATES - 1);
-
-    console.log('[consort] STOP', {
-      receivedTicks: status.netTickCount ?? 0,
-      expectedTicks,
-      discrepancy: (status.netTickCount ?? 0) - expectedTicks,
-    });
+    status.netTickCount = 0;
+    status.netLastTickMs = null;
 
     status.running = false;
-    refresh?.();
+    status.isEndScreen = false;
+    status.startWall = 0;
+    status.runStateDurationMs = null;
+    status.index = 0;
+
+    status.lastKeyIndex = null;
+
+    // Clear per-state tap bookkeeping
+    resetConsortTapState(status);
+
+    // Preserve the most recently confirmed mode.
+    // This avoids dropping the consort back to an arbitrary default.
+    status.modeChosen =
+      status.lastConfirmedMode ??
+      status.modeChosen ??
+      status.netMode ??
+      'concert';
+
+    status.netMode = status.modeChosen;
+
+    status.msPerBeat =
+      status.modeChosen === 'preview'
+        ? status.previewClock
+        : status.concertClock;
+
+    // Important:
+    // keep modeConfirmed true on the consort so it stays aligned
+    // with the last confirmed mode rather than reverting to a
+    // leader-only mode-select/default state.
+    status.modeConfirmed = true;
+
+    console.log('[consort] RESET applied', {
+      modeChosen: status.modeChosen,
+      msPerBeat: status.msPerBeat,
+      modeConfirmed: status.modeConfirmed,
+      running: status.running,
+      isEndScreen: status.isEndScreen,
+      index: status.index,
+    });
+
+    refresh();
+    return;
   }
 }
-*/
+
 
 // Create the initial status object: all process/runtime flags live here.
 function initStatus(ctx) {
@@ -484,7 +455,7 @@ function initStatus(ctx) {
 	textColor: 			'white',
 
 	tapsThisState: 		0,     	// tap counter
-	tapLimit: 			3,
+	tapLimit: 			5,
 	hengeLocked: 		false,
 	showHenge: 			true,    // required for gate rendering
 
@@ -560,82 +531,3 @@ function drawKeyDebugOverlay(ctxF, ctxP, status) {
 
   ctxF.restore();
 }
-
-
-/*
-function handleClockMsg(msg, status) {
-  if (status.role !== 'consort') return;
-
-  if (msg.type === 'config') {
-    status.netMode = msg.mode || 'concert';
-    status.netSendTicks = msg.sendTicks !== false;
-    status.netCheckpointEveryBeats =
-      Number(msg.checkpointEveryBeats ?? STATE_DUR);
-
-    status.msPerBeat =
-      status.netMode === 'preview' ? PREVIEW_CLK : CONCERT_CLK;
-
-    console.log('[consort] CONFIG', {
-      mode: status.netMode,
-      sendTicks: status.netSendTicks,
-      checkpointEveryBeats: status.netCheckpointEveryBeats,
-      msPerBeat: status.msPerBeat,
-    });
-    return;
-  }
-
-  if (msg.type === 'start') {
-    status.netRunning = true;
-    status.netTickCount = 0;
-    status.netLastTickMs = Date.now();
-
-    status.modeChosen = status.netMode || 'concert';
-    status.lastConfirmedMode = status.modeChosen;
-    status.modeConfirmed = true;
-
-    status.running = true;
-    status.isEndScreen = false;
-    status.index = 0;
-
-    status.startWall = performance.now();
-    status.runStateDurationMs = MAX_STATES * STATE_DUR * status.msPerBeat;
-
-    console.log('[consort] START', {
-      mode: status.modeChosen,
-      msPerBeat: status.msPerBeat,
-      runStateDurationMs: status.runStateDurationMs,
-    });
-
-    refresh?.();
-    return;
-  }
-
-  if (msg.type === 'tick') {
-    status.netTickCount = (status.netTickCount ?? 0) + 1;
-    status.netLastTickMs = Date.now();
-
-    console.log('[consort] TICK', {
-      tickCount: status.netTickCount,
-      maxStates: MAX_STATES,
-    });
-
-    return;
-  }
-
-  if (msg.type === 'stop') {
-    status.netRunning = false;
-
-    const expectedTicks =
-      status.netSendTicks === false ? 0 : MAX_STATES;
-
-    console.log('[consort] STOP', {
-      receivedTicks: status.netTickCount ?? 0,
-      expectedTicks,
-      discrepancy: (status.netTickCount ?? 0) - expectedTicks,
-    });
-
-    status.running = false;
-    refresh?.();
-  }
-}
-*/

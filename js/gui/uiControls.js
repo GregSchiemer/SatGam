@@ -17,8 +17,9 @@ import {
 } from './sprites.js';
 
 import { 
-  renderStartLeader, 
-  renderStartBoth 
+  renderStartLeader,
+  renderStartConsort, 
+  renderReadyToPlay, 
 } from './text.js';
 
 import { 
@@ -49,7 +50,7 @@ function isLeader(status) {
 //  PUBLIC ENTRY POINT
 // ---------------------------------------------
 export function installUIHandlers(ctx, canvas, status, audio) {
-  installLeaderModeSelectHandler(ctx, canvas, status);
+  installLeaderEntryHandler(ctx, canvas, status);
   installLeaderModeConfirmHandler(ctx, canvas, status, audio);
   installClockStartHandler(ctx, canvas, status);
   installEndScreenTapHandler(ctx, canvas, status);
@@ -78,10 +79,15 @@ function eventToDesignPoint(ev, canvas, ctx) {
   return { x: cssX * scaleX, y: cssY * scaleY };
 }
 
+function mayPlayPhoneTap(status) {
+  if (status.modeChosen === 'preview') return !status.running;
+  if (status.modeChosen === 'concert') return !!status.running;
+  return false;
+}
 // ---------------------------------------------------------------------------
 //  Leader: choose PREVIEW/CONCERT by tapping left/right hot spots
 // ---------------------------------------------------------------------------
-export function installLeaderModeSelectHandler(ctx, canvas, status) {
+export function installLeaderEntryHandler(ctx, canvas, status) {
   canvas.addEventListener('pointerup', (ev) => {
     if (status.role !== 'leader') return;
     if (status.modeConfirmed) return;
@@ -111,7 +117,7 @@ export function installLeaderModeSelectHandler(ctx, canvas, status) {
       console.log('[mode] CONCERT selected to be confirmed, msPerBeat =', status.msPerBeat);
     }
 
-    console.log('[Mode Select View] unconfirmed state after mode selection:', {
+    console.log('[Entry View] unconfirmed state after mode selection:', {
       modeChosen: status.modeChosen,
       msPerBeat: status.msPerBeat
     });
@@ -151,7 +157,7 @@ function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
     // Lock tempo to chosen mode
     if (status.modeChosen === 'preview') {
       status.msPerBeat = status.previewClock;
-      console.log('[Mode Select View] lastConfirmedMode will be PREVIEW MODE');
+      console.log('[Entry View] lastConfirmedMode will be PREVIEW MODE');
 
       // Preview mode enters Start View immediately
       status.audioReady = false;
@@ -170,7 +176,7 @@ function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
 
     // Concert mode: prepare audio BEFORE entering Start View
     status.msPerBeat = status.concertClock;
-    console.log('[Mode Select View] lastConfirmedMode will be CONCERT MODE');
+    console.log('[Entry View] lastConfirmedMode will be CONCERT MODE');
 
     console.log('[confirm] status at confirm tap', {
       modeChosen: status.modeChosen,
@@ -181,7 +187,7 @@ function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
     status.confirmPending = true;
     status.audioReady = false;
 
-    // Optional: use this in Mode Select View to show "PREPARING AUDIO..."
+    // Optional: use this in Entry View to show "PREPARING AUDIO..."
     status.audioStage = 'loading';
     refresh();
 
@@ -212,7 +218,7 @@ function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
       status.audioStage = 'failed';
       console.error('❌ Csound prime/beep failed:', e);
 
-      // Stay in Mode Select View so leader can retry
+      // Stay in Entry View so leader can retry
       refresh();
     } finally {
       status.confirmPending = false;
@@ -246,7 +252,7 @@ function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
     // Lock tempo to chosen mode
     if (status.modeChosen === 'preview') {
       status.msPerBeat = status.previewClock;
-      console.log('[Mode Select View] lastConfirmedMode will be PREVIEW MODE');
+      console.log('[Entry View] lastConfirmedMode will be PREVIEW MODE');
 
       status.audioReady = false;
       status.csoundPrimed = false;
@@ -265,7 +271,7 @@ function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
 
     // Concert mode: enter Start View immediately, then prepare audio
     status.msPerBeat = status.concertClock;
-    console.log('[Mode Select View] lastConfirmedMode will be CONCERT MODE');
+    console.log('[Entry View] lastConfirmedMode will be CONCERT MODE');
 
     console.log('[confirm] status at confirm tap', {
       modeChosen: status.modeChosen,
@@ -448,8 +454,11 @@ export function installEndScreenTapHandler(ctx, canvas, status) {
       status.msPerBeat = status.concertClock;
       console.log('[End View] lastConfirmedMode was CONCERT MODE');
     }
-// Return leader to Mode Select View
+// Return leader to Entry View
     status.modeConfirmed = false;
+
+// Tell consorts to leave End View too
+	status.clockBus?.send?.({ type: 'reset' });
 
     refresh();
   }, { capture: true });
@@ -464,9 +473,6 @@ function installCsoundHandler(ctx, canvas, status, audio) {
   canvas.addEventListener('pointerup', (ev) => {
     // Ignore taps until leader has confirmed mode
     if (status.role === 'leader' && !status.modeConfirmed) return;
-
-    // No henge tap actions in preview mode
-    if (status.modeChosen === 'preview') return;
 
     // Ignore end screen
     if (status.isEndScreen) return;
@@ -498,55 +504,62 @@ function installCsoundHandler(ctx, canvas, status, audio) {
     const tapFamily = familyForIndex(tapI);
     const keyID = tapI + 1; // 1..25
 
+    // Central permission gate:
+    // preview  + !running => playable
+    // preview  +  running => silent
+    // concert  + !running => silent
+    // concert  +  running => playable
+    const mayPlay = mayPlayPhoneTap(status);
+
+    logStatusProbe("[tap/permission]", status, { keyID, tapFamily, mayPlay });
+
+    if (!mayPlay) return;
+
     // Debug/status bookkeeping
     status.debugTap = { x, y, tapI, tapFamily };
-    status.tapFamily = tapFamily;      // ✅ keep real family (no modulo / no .length)
-    status.lastKeyIndex = keyID;       // ✅ used by Start View "Key N" message
+    status.tapFamily = tapFamily;   // keep real family
+    status.lastKeyIndex = keyID;    // used by Start View "Key N" message
 
-    // Optional probe (safe to remove later)
     logStatusProbe("[tap/pre-branch]", status, { keyID, tapFamily });
 
     console.log('[installCsoundHandler] tapped key :', keyID);
 
-	const dur       = status.noteDur   ?? 24.0;
-	const formalOct = status.formalOct ?? 0;
-	const nNotes    = status.nNotes    ?? 5;
-	const mode      = status.chordMode ?? 0;
+    const dur       = status.noteDur   ?? 24.0;
+    const formalOct = status.formalOct ?? 0;
+    const nNotes    = status.nNotes    ?? 5;
+    const mode      = status.chordMode ?? 0;
 
-	// Only enforce the tap limit during Running View
-	if (status.running) {
-	  // If already locked, ignore henge taps
-	  if (status.hengeLocked) return;
-	
-	  status.tapsThisState = (status.tapsThisState ?? 0) + 1;
-	
-	  if (status.tapsThisState > status.tapLimit) {
-		status.hengeLocked = true;
-//		status.showHenge = false;     // hide for remainder of state
-		refresh();                    // update visuals + subtext
-		return;
-	  }
-	}
-		
-	audio.noteOn({ keyID, dur, formalOct, nNotes, mode })
-	  .catch(e => console.error("❌ noteOn failed:", e));
+    // Only enforce the tap limit during Running View
+    if (status.running) {
+      if (status.hengeLocked) return;
 
-    // ✅ Start View: repaint immediately so "Key N" updates without DevTools
+      status.tapsThisState = (status.tapsThisState ?? 0) + 1;
+
+      if (status.tapsThisState > status.tapLimit) {
+        status.hengeLocked = true;
+//      status.showHenge = false;   // hide for remainder of state
+        refresh();                  // update visuals + subtext
+        return;
+      }
+    }
+
+    audio.noteOn({ keyID, dur, formalOct, nNotes, mode })
+      .catch(e => console.error("❌ noteOn failed:", e));
+
+    // PREVIEW Start View lands here: repaint immediately so "Key N" updates
     if (!status.running) {
       refresh();
       return;
     }
 
-    // ✅ Running View: only allow active family taps for this state
+    // CONCERT Running View lands here
     const familyOn = isFamilyOnInState(tapFamily, status.index);
 
-    // Optional probe (safe to remove later)
     logStatusProbe("[tap/run gate]", status, { keyID, tapFamily, familyOn });
 
+    // Keep your existing running-view visual behaviour unchanged
     if (!familyOn) return;
 
-    // ✅ Trigger background colour change / crossfade during running view
-    // Adjust duration to taste (e.g. 240..480ms)
     const ctxB = arrB?.[0]?.ctx;
     if (ctxB) {
       beginBackgroundCrossfade(status, ctxB, tapFamily, 5320);
@@ -554,6 +567,7 @@ function installCsoundHandler(ctx, canvas, status, audio) {
 
   }, { capture: true });
 }
+
 
 function installHengeHandler(ctx, canvas, status) {
   canvas.addEventListener('pointerup', (ev) => {
