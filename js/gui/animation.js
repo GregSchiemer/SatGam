@@ -4,10 +4,6 @@ import { rt, renderFrame } from './runTime.js';
 // Optional end-of-sequence callback, supplied by main.js
 let onEndCallback = null;
 
-/**
- * Allow main.js (or whoever owns the UI) to decide what happens
- * when the animation sequence finishes.
- */
 export function setOnEndCallback(fn) {
   onEndCallback = (typeof fn === 'function') ? fn : null;
 }
@@ -22,8 +18,6 @@ function tick() {
   // Ask the current renderer to draw a frame based on time.
   renderFrame();
 
-  // The renderer (or other code) may have turned ticking off
-  // to signal "sequence finished".
   if (!rt.ticking) {
     if (onEndCallback) {
       // Let main.js decide how to show the end screen.
@@ -37,16 +31,28 @@ function tick() {
 }
 
 export function startAnimation() {
-  if (rt.ticking) return;           // already running
+  // If an old RAF somehow survived, cancel it first.
+  if (rt.rafId) {
+    cancelAnimationFrame(rt.rafId);
+    rt.rafId = 0;
+  }
+
+  // Always start from a clean runtime state.
   rt.ticking = true;
+  rt.frame = 0;
+
   rt.rafId = requestAnimationFrame(tick);
 }
 
 export function stopAnimation() {
   rt.ticking = false;
+
   if (rt.rafId) {
     cancelAnimationFrame(rt.rafId);
     rt.rafId = 0;
   }
+
+  // Clear frame count so the next run starts cleanly.
+  rt.frame = 0;
 }
 

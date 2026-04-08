@@ -249,107 +249,89 @@ function resetConsortTapState(status) {
   status.hengeLocked = false;
 }
 
-function handleClockMsg(msg, status) {
+
+export function handleClockMsg(msg, status) {
   if (status.role !== 'consort') return;
 
   if (msg.type === 'config') {
-    status.netMode = msg.mode || 'concert';
-    status.netSendTicks = msg.sendTicks !== false;
-    status.netCheckpointEveryBeats =
-      Number(msg.checkpointEveryBeats ?? STATE_DUR);
+    const mode = msg.mode || 'concert';
 
-    status.msPerBeat =
-      status.netMode === 'preview' ? PREVIEW_CLK : CONCERT_CLK;
+    status.netMode = mode;
+    status.netSendTicks = (msg.sendTicks !== false);
+    status.netCheckpointEveryBeats =
+      Number(msg.checkpointEveryBeats ?? status.STATE_DUR ?? 24);
+
+    status.msPerBeat = (mode === 'preview') ? PREVIEW_CLK : CONCERT_CLK;
+
+    status.modeChosen = mode;
+    status.lastConfirmedMode = mode;
+    status.modeConfirmed = true;
+    status.leaderModeConfirmed = true;
+
+    // These drive the renderer’s Start View gating
+    status.cuedToStart = true;
+    status.running = false;
+    status.isEndScreen = false;
+    status.index = 0;
+    status.view = 'start';
 
     console.log('[consort] CONFIG', {
       mode: status.netMode,
-      sendTicks: status.netSendTicks,
-      checkpointEveryBeats: status.netCheckpointEveryBeats,
+      modeChosen: status.modeChosen,
+      modeConfirmed: status.modeConfirmed,
+      leaderModeConfirmed: status.leaderModeConfirmed,
+      cuedToStart: status.cuedToStart,
       msPerBeat: status.msPerBeat,
+      view: status.view,
+      index: status.index,
     });
+
+    refresh();
     return;
   }
 
   if (msg.type === 'start') {
     status.netRunning = true;
     status.netTickCount = 0;
-    status.netLastTickMs = Date.now();
 
-    status.modeChosen = status.netMode || 'concert';
-    status.lastConfirmedMode = status.modeChosen;
-    status.modeConfirmed = true;
+    const now = initialiseRunState(status);
+    status.netLastTickMs = now;
 
-    status.running = true;
-    status.isEndScreen = false;
-    status.index = 0;
-
-    status.startWall = performance.now();
-    status.runStateDurationMs = MAX_STATES * STATE_DUR * status.msPerBeat;
-
-    // State 1 begins here.
-    resetConsortTapState(status);
-
-    console.log('[consort] START', {
-      mode: status.modeChosen,
+    console.log('[consort] START before startAnimation()', {
+      modeChosen: status.modeChosen,
+      modeConfirmed: status.modeConfirmed,
       msPerBeat: status.msPerBeat,
+      STATE_DUR: status.STATE_DUR,
+      view: status.view,
+      index: status.index,
+      cuedToStart: status.cuedToStart,
+      running: status.running,
+      isEndScreen: status.isEndScreen,
+      startWall: status.startWall,
       runStateDurationMs: status.runStateDurationMs,
-      tapsThisState: status.tapsThisState,
-      hengeLocked: status.hengeLocked,
     });
 
-    startAnimation();
     refresh();
+    startAnimation();
     return;
   }
 
   if (msg.type === 'tick') {
-    status.netTickCount = (status.netTickCount ?? 0) + 1;
-    status.netLastTickMs = Date.now();
+    if (!status.netRunning) return;
 
-    const prevIndex = status.index;
-
-    // START enters State 1 (index 0).
-    // First sparse checkpoint moves to State 2 (index 1).
-    status.index = Math.min(status.netTickCount, MAX_STATES - 1);
-
-    if (status.index !== prevIndex) {
-      resetConsortTapState(status);
-    }
-
-    console.log('[consort] TICK', {
-      tickCount: status.netTickCount,
-      prevIndex,
-      index: status.index,
-      maxStates: MAX_STATES,
-      tapsThisState: status.tapsThisState,
-      hengeLocked: status.hengeLocked,
-    });
-
-    refresh();
+    status.netTickCount = msg.count ?? (status.netTickCount + 1);
+    status.netLastTickMs = performance.now();
     return;
   }
 
   if (msg.type === 'stop') {
     status.netRunning = false;
-
-    const expectedTicks =
-      status.netSendTicks === false ? 0 : (MAX_STATES - 1);
-
-    console.log('[consort] STOP', {
-      receivedTicks: status.netTickCount ?? 0,
-      expectedTicks,
-      discrepancy: (status.netTickCount ?? 0) - expectedTicks,
-    });
-
     status.running = false;
     refresh();
     return;
   }
 
   if (msg.type === 'reset') {
-    console.log('[consort] RESET -> returning to waiting/start state');
-
-    // Make absolutely sure the consort is no longer ticking
     stopAnimation();
 
     status.netRunning = false;
@@ -358,42 +340,33 @@ function handleClockMsg(msg, status) {
 
     status.running = false;
     status.isEndScreen = false;
-    status.startWall = 0;
-    status.runStateDurationMs = null;
-    status.index = 0;
+    status.modeConfirmed = false;
+    status.leaderModeConfirmed = false;
+    status.cuedToStart = false;
 
+    status.startWall = null;
+    status.runStateDurationMs = null;
+
+    status.index = 0;
     status.lastKeyIndex = null;
 
-    // Clear per-state tap bookkeeping
-    resetConsortTapState(status);
+    status.modeChosen = msg.mode || status.lastConfirmedMode || status.modeChosen || 'concert';
+    status.view = 'entry';
 
-    // Preserve the most recently confirmed mode.
-    // This avoids dropping the consort back to an arbitrary default.
-    status.modeChosen =
-      status.lastConfirmedMode ??
-      status.modeChosen ??
-      status.netMode ??
-      'concert';
+    if (status.modeChosen === 'preview') {
+      status.msPerBeat = status.previewClock;
+    } else {
+      status.msPerBeat = status.concertClock;
+    }
 
-    status.netMode = status.modeChosen;
-
-    status.msPerBeat =
-      status.modeChosen === 'preview'
-        ? status.previewClock
-        : status.concertClock;
-
-    // Important:
-    // keep modeConfirmed true on the consort so it stays aligned
-    // with the last confirmed mode rather than reverting to a
-    // leader-only mode-select/default state.
-    status.modeConfirmed = true;
-
-    console.log('[consort] RESET applied', {
+    console.log('[consort] RESET', {
       modeChosen: status.modeChosen,
-      msPerBeat: status.msPerBeat,
       modeConfirmed: status.modeConfirmed,
+      leaderModeConfirmed: status.leaderModeConfirmed,
+      cuedToStart: status.cuedToStart,
       running: status.running,
       isEndScreen: status.isEndScreen,
+      view: status.view,
       index: status.index,
     });
 
@@ -402,66 +375,198 @@ function handleClockMsg(msg, status) {
   }
 }
 
+/*
+export function handleClockMsg(msg, status) {
+  if (status.role !== 'consort') return;
 
-// Create the initial status object: all process/runtime flags live here.
+  if (msg.type === 'config') {
+    const mode = msg.mode || 'concert';
+
+    status.netMode = mode;
+    status.netSendTicks = (msg.sendTicks !== false);
+    status.netCheckpointEveryBeats =
+      Number(msg.checkpointEveryBeats ?? STATE_DUR);
+
+    status.msPerBeat = (mode === 'preview') ? PREVIEW_CLK : CONCERT_CLK;
+
+    status.modeChosen = mode;
+    status.lastConfirmedMode = mode;
+    status.modeConfirmed = true;
+    status.leaderModeConfirmed = true;
+
+    // These drive the renderer’s Start View gating
+    status.cuedToStart = true;
+    status.running = false;
+    status.isEndScreen = false;
+    status.index = 0;
+    status.view = 'start';
+
+    console.log('[consort] CONFIG', {
+      mode: status.netMode,
+      modeChosen: status.modeChosen,
+      modeConfirmed: status.modeConfirmed,
+      leaderModeConfirmed: status.leaderModeConfirmed,
+      cuedToStart: status.cuedToStart,
+      msPerBeat: status.msPerBeat,
+      view: status.view,
+      index: status.index,
+    });
+
+    refresh();   // <-- force immediate repaint to Start View
+    return;
+  }
+
+if (msg.type === 'start') {
+  status.netRunning = true;
+  status.netTickCount = 0;
+
+  const now = initialiseRunState(status);
+  status.netLastTickMs = now;
+
+  console.log('[consort] START before startAnimation()', {
+    modeChosen: status.modeChosen,
+    modeConfirmed: status.modeConfirmed,
+    msPerBeat: status.msPerBeat,
+    STATE_DUR: status.STATE_DUR,
+    view: status.view,
+    index: status.index,
+    cuedToStart: status.cuedToStart,
+    running: status.running,
+    isEndScreen: status.isEndScreen,
+    startWall: status.startWall,
+    runStateDurationMs: status.runStateDurationMs,
+  });
+
+  refresh();
+  startAnimation();
+  return;
+}
+
+
+  if (msg.type === 'tick') {
+    if (!status.netRunning) return;
+
+    status.netTickCount = msg.count ?? (status.netTickCount + 1);
+    status.netLastTickMs = performance.now();
+    return;
+  }
+
+  if (msg.type === 'stop') {
+    status.netRunning = false;
+    status.running = false;
+    refresh();
+    return;
+  }
+}
+*/
+
+
+function initialiseRunState(status) {
+  const now = performance.now();
+
+  status.index = 0;
+  status.cuedToStart = false;
+  status.running = true;
+  status.isEndScreen = false;
+  status.view = 'running';
+
+  // Start-of-run timing
+//  status.startWall = now;
+//  status.runStateDurationMs = status.STATE_DUR * status.msPerBeat;
+
+  status.startWall = now;
+  status.runStateDurationMs = (status.STATE_DUR ?? 24) * status.msPerBeat;
+  status.nextStateWallMs = status.startWall + status.runStateDurationMs;
+
+  return now;
+}
+
 function initStatus(ctx) {
   const roleAtLaunch = window.location.pathname.includes('leader')
     ? 'leader'
     : 'consort';
 
-  const statusId = Math.random().toString(16).slice(2);
+  const marker = Math.random().toString(16).slice(2);
 
   console.log('[main] role =', roleAtLaunch);
 
   return {
-  statusId,
+    // =========================
+    // Identity / fixed facts
+    // =========================
+    statusId: marker,
+    role: roleAtLaunch,              // 'leader' | 'consort'
+    roleConfirmed: true,             // role is known at launch; kept only as a legacy field
 
-// Role
-    role: 				roleAtLaunch,		// 'leader' or 'consort'
+    // =========================
+    // Leader mode workflow
+    // =========================
+    modeChosen: 'concert',           // current selected mode
+    lastConfirmedMode: 'concert',    // last mode confirmed by leader
+    modeConfirmed: false,            // leader only: Entry View has been confirmed
+    confirmPending: false,           // leader confirm in progress
+	leaderModeConfirmed: false,
+	
+    // =========================
+    // Consort / NetBus workflow
+    // =========================
+    clockBus: null,
+    cuedToStart: false,              // consort only: got CONFIG, waiting for START
+    netMode: 'concert',
+    netRunning: false,
+    netTickCount: 0,
+    netLastTickMs: null,
+    netSendTicks: true,
+    netCheckpointEveryBeats: STATE_DUR,
 
-// Animation state
-	clockBus: 			null,
-	netRunning: 		false,				// instead of _clockRunning
-	netTickCount: 		0,					// instead of tickCount
-	netLastTickMs: 		null,				// instead of lastTickMs
+    // =========================
+    // Shared performance state
+    // =========================
+    running: false,                  // true only in Running View
+    isEndScreen: false,              // true only in End View
+    index: 0,                        // current MLS state index
+    fullHenge: FULL_HENGE,           // static full-henge preset index
+    lastKeyIndex: null,              // most recent tapped key number
+    tapsThisState: 0,
+    tapLimit: 5,
+    hengeLocked: false,
+    showHenge: true,
 
-    running:    		false,    			// true in Running View
-    index: 				0,					// increments in Running View
-    isEndScreen:		false,    			// true in End View
-    concertClock:		CONCERT_CLK, 		// 1000 ms/beat		
-    previewClock:		PREVIEW_CLK, 		// 42.8 ms/beat
-    msPerBeat:     		CONCERT_CLK,		// default : concert
-    fullHenge: 	   		FULL_HENGE,			// pre-start state index (18)
+    // =========================
+    // Timing
+    // =========================
+    concertClock: CONCERT_CLK,
+    previewClock: PREVIEW_CLK,
+    msPerBeat: CONCERT_CLK,          // default mode timing
+    STATE_DUR: STATE_DUR,            // kept as a convenience mirror of the global
+    startWall: null,                 // performance.now() at run start
+    runStateDurationMs: null,        // duration of one rendered state block
+    nextStateWallMs: null,           // next state boundary for local timing
 
-	STATE_DUR: 			STATE_DUR,			// clock ticks per state
-	startWall:			null,				// performance.now()
-	runStateDurationMs: null,				// current duration
-	audioReady:			false,
-	testToneEnabled: 	false,
-	debugKeys:			false,
+    // =========================
+    // Audio
+    // =========================
+    audioReady: false,
+    audioStage: 'idle',              // 'idle' | 'loading' | 'prepared' | 'failed'
+    csoundPrimed: false,
+    testToneEnabled: false,			 // debug only
+    debugKeys: false,				 // debug only
 
-// Mode state
-    modeChosen:    		'concert', 			// 'concert' or 'preview'
+    // =========================
+    // Rendering / view state
+    // =========================
+    _view: null,                     // 'entry' | 'start' | 'run' | 'end'
+    textColor: 'white',
 
-// Role state
-    roleConfirmed: 		(roleAtLaunch === 'consort'),	// 'leader' or 'consort'
+    bgFamily: ColorFamily.NONE,
+    bgFamilyTarget: ColorFamily.NONE,
+    bgFade: null,
+    _bgFade: null,
 
-// Animation/Stage lighting
-	_view: null,              				// tracks current 1 of 4 views
-	endFadeStarted: 	false,
-	stopAfterFade:  	false,
-    bgFamily:			ColorFamily.NONE,	// none selected
-	bgFamilyTarget: 	ColorFamily.NONE,
-	textColor: 			'white',
-
-	tapsThisState: 		0,     	// tap counter
-	tapLimit: 			5,
-	hengeLocked: 		false,
-	showHenge: 			true,    // required for gate rendering
-
-	lightsDownDone: 	false,    	// start-view fade fired?
-	lightsUpDone:   	false,   	// end-view fade fired?
-	stopAfterFade:  	false,  	// stop RAF when fade finishes
+    lightsDownDone: false,
+    lightsUpDone: false,
+    endFadeStarted: false,
+    stopAfterFade: false,
   };
 }
 

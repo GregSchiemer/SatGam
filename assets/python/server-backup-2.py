@@ -128,10 +128,7 @@ def preflight(root):
         if has_import:
             print(f"✅ {msg}")
         else:
-            print(
-                f"⚠️ {msg} (static check)."
-                f"\nIf you see [ws] connections later, WS is wired at runtime."
-            )
+            print(f"⚠️ {msg} (static check). If you see [ws] connections later, WS is wired at runtime.")
 
     print("———— End preflight ————")
     return ok
@@ -173,92 +170,52 @@ LEADERS = set()
 CONSORTS = set()
 
 
-def _peer_name(websocket):
-    try:
-        host, port = websocket.remote_address[:2]
-        return f"{host}:{port}"
-    except Exception:
-        return "unknown-peer"
-
-
 async def ws_handler(websocket):
     role = "consort"
-    peer = _peer_name(websocket)
-
     try:
         first = await asyncio.wait_for(websocket.recv(), timeout=5)
-        try:
-            msg = json.loads(first)
-        except Exception as e:
-            print(f"[ws] bad JSON during register from {peer}: {first!r} ({e})")
-            msg = {}
-
+        msg = json.loads(first)
         if msg.get("type") == "register":
             role = "leader" if msg.get("role") == "leader" else "consort"
-            print(f"[ws] register from {peer}: {msg}")
-        else:
-            print(f"[ws] first message from {peer} was not register: {msg}")
-    except Exception as e:
-        print(f"[ws] register timeout/fallback for {peer}: {e}")
+    except Exception:
+        pass
 
     group = LEADERS if role == "leader" else CONSORTS
     group.add(websocket)
-    print(f"[ws] +{role} connected from {peer} (leaders={len(LEADERS)} consorts={len(CONSORTS)})")
+    print(f"[ws] +{role} connected (leaders={len(LEADERS)} consorts={len(CONSORTS)})")
 
     try:
         async for raw in websocket:
             try:
                 data = json.loads(raw)
-            except Exception as e:
-                print(f"[ws] bad JSON from {role} {peer}: {raw!r} ({e})")
+            except Exception:
                 continue
 
             kind = data.get("type")
-
-            if kind != "tick":
-                print(f"[ws] recv from {role} {peer}: {data}")
-
-            # Leader messages relayed to all consorts
-            if role == "leader" and kind in ("config", "start", "tick", "stop", "reset"):
-                payload = dict(data)
-                payload["_server_t"] = datetime.now(timezone.utc).isoformat()
-
+            if role == "leader" and kind in ("config", "start", "tick", "stop"):
+                payload = {"type": kind}
+            
+                if kind == "config":
+                    if "mode" in data:
+                        payload["mode"] = data["mode"]
+                    if "sendTicks" in data:
+                        payload["sendTicks"] = data["sendTicks"]
+                    if "checkpointEveryBeats" in data:
+                        payload["checkpointEveryBeats"] = data["checkpointEveryBeats"]
+            
                 if CONSORTS:
-                    if kind != "tick":
-                        print(
-                            f"[ws] leader -> consorts {kind} "
-                            f"(count={len(CONSORTS)}) payload={payload}"
-                        )
-
-                    results = await asyncio.gather(
+                    print(f"[ws] leader -> consorts {kind} (count={len(CONSORTS)})")
+                    await asyncio.gather(
                         *(c.send(json.dumps(payload)) for c in list(CONSORTS)),
                         return_exceptions=True
                     )
-
-                    if kind != "tick":
-                        for i, result in enumerate(results):
-                            if isinstance(result, Exception):
-                                print(f"[ws] relay error to consort[{i}] for {kind}: {result}")
-                else:
-                    if kind != "tick":
-                        print(f"[ws] leader sent {kind}, but no consorts are connected")
-
-            # Optional visibility for consort-originated traffic
-            elif role == "consort":
-                if kind != "tick":
-                    print(f"[ws] consort message ignored for relay: {data}")
-
-            else:
-                if kind != "tick":
-                    print(f"[ws] leader message ignored (unknown type): {data}")
-
     except websockets.exceptions.ConnectionClosedError as e:
-        print(f"[ws] connection reset/closed for {role} {peer}: {e}")
+        print(f"[ws] connection reset/closed: {e}")
     except websockets.exceptions.ConnectionClosedOK:
         pass
     finally:
         group.discard(websocket)
-        print(f"[ws] -{role} disconnected from {peer} (leaders={len(LEADERS)} consorts={len(CONSORTS)})")
+        print(f"[ws] -{role} disconnected (leaders={len(LEADERS)} consorts={len(CONSORTS)})")
 
 
 async def run_ws(host: str, port: int, ssl_ctx=None, label="ws"):
@@ -311,11 +268,7 @@ def main():
     ap.add_argument("--no-preflight", action="store_true", help="Skip preflight checks")
     ap.add_argument("--preflight-only", action="store_true", help="Run preflight and exit")
     ap.add_argument("--fail-on-preflight", action="store_true", help="Exit 1 if preflight fails")
-    ap.add_argument(
-        "--open-leader",
-        action="store_true",
-        help="Auto-open leader.html in local browser after startup"
-    )
+    ap.add_argument("--open-leader", action="store_true", help="Auto-open leader.html in local browser after startup")
     args = ap.parse_args()
 
     root = os.path.abspath(args.root)
@@ -330,7 +283,7 @@ def main():
     ssl_ctx = None
     if args.tls:
         if not args.cert_file or not args.key_file:
-            print("â --tls requires --cert-file and --key-file")
+            print("❌ --tls requires --cert-file and --key-file")
             sys.exit(1)
         ssl_ctx = build_ssl_context(args.cert_file, args.key_file)
 
@@ -348,7 +301,7 @@ def main():
         try:
             asyncio.run(run_ws(args.host, args.ws_port, None, "ws"))
         except KeyboardInterrupt:
-            print("\nShutting downâŠ")
+            print("\nShutting down…")
         return
 
     # Mode B: HTTPS + WSS
@@ -364,7 +317,7 @@ def main():
     try:
         asyncio.run(run_ws(args.host, args.wss_port, ssl_ctx, "wss"))
     except KeyboardInterrupt:
-        print("\nShutting downâŠ")
+        print("\nShutting down…")
 
 
 if __name__ == "__main__":

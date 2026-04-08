@@ -42,6 +42,15 @@ import { primeAudioContext, enableCsound, playTestTone } from "./csoundInit.js";
 
 import { startPerformanceWakeLock } from './wakeLock.js';
 
+import { 
+//  MAX_STATES, 
+  STATE_DUR, 
+//  MAX_DUR, 
+//  CONCERT_CLK, 
+//  PREVIEW_CLK,
+//  FULL_HENGE
+} from './globals.js';
+
 function isLeader(status) {
   return status.role === 'leader';
 }
@@ -90,7 +99,7 @@ function mayPlayPhoneTap(status) {
 export function installLeaderEntryHandler(ctx, canvas, status) {
   canvas.addEventListener('pointerup', (ev) => {
     if (status.role !== 'leader') return;
-    if (status.modeConfirmed) return;
+    if (status.leaderModeConfirmed) return;
 
     const { x, y } = eventToCtxPoint(ev, canvas, ctx);
 
@@ -130,106 +139,11 @@ export function installLeaderEntryHandler(ctx, canvas, status) {
 //  Leader: confirm by tapping bottom text hot spot (ctx.low)
 // ---------------------------------------------------------------------------
 
-/*
+
 function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
   canvas.addEventListener('pointerup', async (ev) => {
     if (status.role !== 'leader') return;
-    if (status.modeConfirmed) return;
-    if (status.confirmPending) return;   // prevent double taps while priming
-
-    const { x, y } = eventToCtxPoint(ev, canvas, ctx);
-
-    const x1 = ctx.low.x;
-    const y1 = ctx.low.y;
-    const r  = ctx.tapRadius;
-
-    console.log('[confirm] pointer', { x, y, x1, y1, r });
-
-    const tapConfirm = isInsideCircle(x, y, x1, y1, r);
-    if (!tapConfirm) return;
-
-    status.running = false;
-    status.isEndScreen = false;
-    status.lastConfirmedMode = status.modeChosen;
-    status.startWall = null;
-    status.runStateDurationMs = null;
-
-    // Lock tempo to chosen mode
-    if (status.modeChosen === 'preview') {
-      status.msPerBeat = status.previewClock;
-      console.log('[Entry View] lastConfirmedMode will be PREVIEW MODE');
-
-      // Preview mode enters Start View immediately
-      status.audioReady = false;
-      status.csoundPrimed = false;
-      status.modeConfirmed = true;
-
-      console.log('[confirm] status at confirm tap', {
-        modeChosen: status.modeChosen,
-        msPerBeat: status.msPerBeat,
-        audioReady: status.audioReady
-      });
-
-      refresh();
-      return;
-    }
-
-    // Concert mode: prepare audio BEFORE entering Start View
-    status.msPerBeat = status.concertClock;
-    console.log('[Entry View] lastConfirmedMode will be CONCERT MODE');
-
-    console.log('[confirm] status at confirm tap', {
-      modeChosen: status.modeChosen,
-      msPerBeat: status.msPerBeat,
-      audioReady: status.audioReady
-    });
-
-    status.confirmPending = true;
-    status.audioReady = false;
-
-    // Optional: use this in Entry View to show "PREPARING AUDIO..."
-    status.audioStage = 'loading';
-    refresh();
-
-    try {
-      if (!status.csoundPrimed) {
-        console.log('[confirm] priming Csound + test beep');
-        await audio.prime({ beep: true });
-        status.csoundPrimed = true;
-      }
-
-      status.audioReady = true;
-      status.audioStage = 'prepared';
-
-      // Only NOW enter Start View
-      status.modeConfirmed = true;
-
-      console.log('[confirm] concert audio prepared; entering Start View', {
-        modeChosen: status.modeChosen,
-        msPerBeat: status.msPerBeat,
-        audioReady: status.audioReady,
-        csoundPrimed: status.csoundPrimed
-      });
-
-      refresh();
-    } catch (e) {
-      status.csoundPrimed = false;
-      status.audioReady = false;
-      status.audioStage = 'failed';
-      console.error('❌ Csound prime/beep failed:', e);
-
-      // Stay in Entry View so leader can retry
-      refresh();
-    } finally {
-      status.confirmPending = false;
-    }
-  }, { capture: true });
-}
-*/
-function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
-  canvas.addEventListener('pointerup', async (ev) => {
-    if (status.role !== 'leader') return;
-    if (status.modeConfirmed) return;
+    if (status.leaderModeConfirmed) return;
     if (status.confirmPending) return;
 
     const { x, y } = eventToCtxPoint(ev, canvas, ctx);
@@ -243,13 +157,26 @@ function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
     const tapConfirm = isInsideCircle(x, y, x1, y1, r);
     if (!tapConfirm) return;
 
+    console.log('[leader confirm] tapped confirm hotspot', {
+      role: status.role,
+      modeChosen: status.modeChosen,
+      leaderModeConfirmed: status.leaderModeConfirmed,
+      confirmPending: status.confirmPending,
+      hasClockBus: !!status.clockBus,
+      busKeys: status.clockBus ? Object.keys(status.clockBus) : [],
+      busHasSend: !!status.clockBus?.send,
+      busHasPost: !!status.clockBus?.post,
+      busHasEmit: !!status.clockBus?.emit,
+      busHasSendConfig: !!status.clockBus?.sendConfig,
+      busHasStart: !!status.clockBus?.start,
+    });
+
     status.running = false;
     status.isEndScreen = false;
     status.lastConfirmedMode = status.modeChosen;
     status.startWall = null;
     status.runStateDurationMs = null;
 
-    // Lock tempo to chosen mode
     if (status.modeChosen === 'preview') {
       status.msPerBeat = status.previewClock;
       console.log('[Entry View] lastConfirmedMode will be PREVIEW MODE');
@@ -257,34 +184,78 @@ function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
       status.audioReady = false;
       status.csoundPrimed = false;
       status.audioStage = 'idle';
-      status.modeConfirmed = true;
+      status.leaderModeConfirmed = true;
+
+      if (!status.clockBus?.send) {
+        console.error('[leader] cannot send CONFIG on confirm: clockBus.send missing', {
+          hasClockBus: !!status.clockBus,
+          busKeys: status.clockBus ? Object.keys(status.clockBus) : [],
+        });
+      } else {
+        const msg = {
+          type: 'config',
+          mode: status.modeChosen,
+          sendTicks: true,
+          checkpointEveryBeats: STATE_DUR,
+        };
+        console.log('[leader] sending CONFIG from confirm', msg);
+        status.clockBus.send(msg);
+      }
 
       console.log('[confirm] preview mode entering Start View', {
         modeChosen: status.modeChosen,
         msPerBeat: status.msPerBeat,
-        audioReady: status.audioReady
+        audioReady: status.audioReady,
+        leaderModeConfirmed: status.leaderModeConfirmed,
       });
 
       refresh();
       return;
     }
 
-    // Concert mode: enter Start View immediately, then prepare audio
     status.msPerBeat = status.concertClock;
     console.log('[Entry View] lastConfirmedMode will be CONCERT MODE');
 
     console.log('[confirm] status at confirm tap', {
       modeChosen: status.modeChosen,
       msPerBeat: status.msPerBeat,
-      audioReady: status.audioReady
+      audioReady: status.audioReady,
+      leaderModeConfirmed: status.leaderModeConfirmed,
+      hasClockBus: !!status.clockBus,
+      busKeys: status.clockBus ? Object.keys(status.clockBus) : [],
+      busHasSend: !!status.clockBus?.send,
+      busHasPost: !!status.clockBus?.post,
+      busHasEmit: !!status.clockBus?.emit,
+      busHasSendConfig: !!status.clockBus?.sendConfig,
+      busHasStart: !!status.clockBus?.start,
     });
 
-    status.modeConfirmed = true;      // <-- enter Start View now
+    status.leaderModeConfirmed = true;
     status.confirmPending = true;
     status.audioReady = false;
     status.audioStage = 'loading';
 
-    console.log('[confirm] concert mode entering Start View; preparing audio');
+    if (!status.clockBus?.send) {
+      console.error('[leader] cannot send CONFIG on confirm: clockBus.send missing', {
+        hasClockBus: !!status.clockBus,
+        busKeys: status.clockBus ? Object.keys(status.clockBus) : [],
+      });
+    } else {
+      const msg = {
+        type: 'config',
+        mode: status.modeChosen,
+        sendTicks: true,
+        checkpointEveryBeats: STATE_DUR,
+      };
+      console.log('[leader] sending CONFIG from confirm', msg);
+      status.clockBus.send(msg);
+    }
+
+    console.log('[confirm] concert mode entering Start View; preparing audio', {
+      leaderModeConfirmed: status.leaderModeConfirmed,
+      confirmPending: status.confirmPending,
+      audioStage: status.audioStage,
+    });
 
     refresh();
 
@@ -302,7 +273,8 @@ function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
         modeChosen: status.modeChosen,
         msPerBeat: status.msPerBeat,
         audioReady: status.audioReady,
-        csoundPrimed: status.csoundPrimed
+        csoundPrimed: status.csoundPrimed,
+        leaderModeConfirmed: status.leaderModeConfirmed,
       });
 
       refresh();
@@ -312,15 +284,22 @@ function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
       status.audioStage = 'failed';
 
       console.error('❌ Csound prime/beep failed:', e);
-
-      // Stay in Start View, but mark audio as failed/not ready
       refresh();
     } finally {
       status.confirmPending = false;
+
+      console.log('[confirm] finally', {
+        confirmPending: status.confirmPending,
+        leaderModeConfirmed: status.leaderModeConfirmed,
+        audioStage: status.audioStage,
+        audioReady: status.audioReady,
+      });
+
       refresh();
     }
   }, { capture: true });
 }
+
 
 // ---------------------------------------------------------------------------
 //  Leader: stop while running (tap TOP text hot spot)
@@ -356,7 +335,7 @@ export function installLeaderStopHandler(ctx, canvas, status) {
 
 export function installClockStartHandler(ctx, canvas, status) {
   canvas.addEventListener('pointerup', (ev) => {
-    if (status.role === 'leader' && !status.modeConfirmed) return;
+    if (status.role === 'leader' && !status.leaderModeConfirmed) return;
 
     // 🔧 Use the same coordinate space as installHengeHandler
     const { x, y } = eventToCtxPoint(ev, canvas, ctx);
@@ -421,6 +400,7 @@ export function installClockStartHandler(ctx, canvas, status) {
 // ---------------------------------------------------------------------------
 //  End screen: leader can tap clock to reselect mode (back to mode-select)
 // ---------------------------------------------------------------------------
+
 export function installEndScreenTapHandler(ctx, canvas, status) {
   canvas.addEventListener('pointerup', (ev) => {
     if (status.role !== 'leader') return;
@@ -434,18 +414,47 @@ export function installEndScreenTapHandler(ctx, canvas, status) {
       return;
     }
 
-    console.log('[end] reselect: returning to mode select');
+    console.log('[end] reselect: returning to Entry View');
 
-    // Stop anything still ticking
+    // Stop local animation first
     stopAnimation();
 
-	status.running = false;
-	status.isEndScreen = false;
-	status.startWall = 0;
-	status.index = 0;
+    // Stop leader-side ticking on the bus, but do not hide failure.
+    if (!status.clockBus) {
+      console.error('[end] status.clockBus is missing at end-screen reset', {
+        role: status.role,
+        modeChosen: status.modeChosen,
+      });
+    } else if (typeof status.clockBus.stopTicking !== 'function') {
+      console.error('[end] clockBus.stopTicking is missing', {
+        busKeys: Object.keys(status.clockBus),
+      });
+    } else {
+      console.log('[end] stopping clockBus ticking', {
+        busKeys: Object.keys(status.clockBus),
+      });
+      status.clockBus.stopTicking();
+    }
 
-	status.lastKeyIndex = null;
-	status.modeChosen = status.lastConfirmedMode ?? status.modeChosen ?? 'concert';
+    // Return leader to Entry View flags
+    status.running = false;
+    status.netRunning = false;
+    status.isEndScreen = false;
+    status.leaderModeConfirmed = false;
+    status.modeConfirmed = false;
+    status.cuedToStart = false;
+
+    status.startWall = null;
+    status.runStateDurationMs = null;
+
+    status.index = 0;
+    status.lastKeyIndex = null;
+
+    status.netTickCount = 0;
+    status.netLastTickMs = null;
+
+    // Keep the last confirmed mode selected in Entry View
+    status.modeChosen = status.lastConfirmedMode ?? status.modeChosen ?? 'concert';
 
     if (status.modeChosen === 'preview') {
       status.msPerBeat = status.previewClock;
@@ -454,15 +463,103 @@ export function installEndScreenTapHandler(ctx, canvas, status) {
       status.msPerBeat = status.concertClock;
       console.log('[End View] lastConfirmedMode was CONCERT MODE');
     }
-// Return leader to Entry View
-    status.modeConfirmed = false;
 
-// Tell consorts to leave End View too
-	status.clockBus?.send?.({ type: 'reset' });
+    status.view = 'entry';
+
+    const resetMsg = {
+      type: 'reset',
+      mode: status.modeChosen,
+    };
+
+    console.log('[end] leader reset pre-send', {
+      hasClockBus: !!status.clockBus,
+      busKeys: status.clockBus ? Object.keys(status.clockBus) : [],
+      hasSend: !!(status.clockBus && typeof status.clockBus.send === 'function'),
+      modeChosen: status.modeChosen,
+      resetMsg,
+    });
+
+	if (typeof status.clockBus?.send !== 'function') {
+	  console.error('[leader] RESET not sent: clockBus.send unavailable', {
+		hasClockBus: !!status.clockBus,
+		busKeys: status.clockBus ? Object.keys(status.clockBus) : [],
+		resetMsg,
+	  });
+	} else {
+	  console.log('[leader] sending RESET', resetMsg);
+	  status.clockBus.send(resetMsg);
+	}
+	
+    refresh();
+  }, { capture: true });
+}
+
+/*
+export function installEndScreenTapHandler(ctx, canvas, status) {
+  canvas.addEventListener('pointerup', (ev) => {
+    if (status.role !== 'leader') return;
+    if (!status.isEndScreen) return;
+
+    const { x, y } = eventToCtxPoint(ev, canvas, ctx);
+
+    const reSelect = isInsideCircle(x, y, ctx.mid.x, ctx.mid.y, ctx.tapRadius);
+    if (!reSelect) {
+      console.log('[end] ignored: outside end screen hot spot');
+      return;
+    }
+
+    console.log('[end] reselect: returning to Entry View');
+
+    // Stop local animation first
+    stopAnimation();
+
+    // Stop any leader-side ticking on the bus too
+    status.clockBus?.stopTicking?.();
+
+    // Return leader to Entry View flags
+    status.running = false;
+    status.netRunning = false;
+    status.isEndScreen = false;
+    status.leaderModeConfirmed = false;
+    status.modeConfirmed = false;
+    status.cuedToStart = false;
+
+    status.startWall = null;
+    status.runStateDurationMs = null;
+
+    status.index = 0;
+    status.lastKeyIndex = null;
+
+    status.netTickCount = 0;
+    status.netLastTickMs = null;
+
+    // Keep the last confirmed mode selected in Entry View
+    status.modeChosen = status.lastConfirmedMode ?? status.modeChosen ?? 'concert';
+
+    if (status.modeChosen === 'preview') {
+      status.msPerBeat = status.previewClock;
+      console.log('[End View] lastConfirmedMode was PREVIEW MODE');
+    } else {
+      status.msPerBeat = status.concertClock;
+      console.log('[End View] lastConfirmedMode was CONCERT MODE');
+    }
+
+    // Optional but useful for debugging
+    status.view = 'entry';
+
+    // Tell consorts to leave End View too
+    const resetMsg = {
+      type: 'reset',
+      mode: status.modeChosen,
+    };
+
+    console.log('[leader] sending RESET', resetMsg);
+    status.clockBus?.send?.(resetMsg);
 
     refresh();
   }, { capture: true });
 }
+*/
 
 
 // ---------------------------------------------------------------------------
@@ -472,7 +569,7 @@ export function installEndScreenTapHandler(ctx, canvas, status) {
 function installCsoundHandler(ctx, canvas, status, audio) {
   canvas.addEventListener('pointerup', (ev) => {
     // Ignore taps until leader has confirmed mode
-    if (status.role === 'leader' && !status.modeConfirmed) return;
+    if (status.role === 'leader' && !status.leaderModeConfirmed) return;
 
     // Ignore end screen
     if (status.isEndScreen) return;
@@ -571,7 +668,7 @@ function installCsoundHandler(ctx, canvas, status, audio) {
 
 function installHengeHandler(ctx, canvas, status) {
   canvas.addEventListener('pointerup', (ev) => {
-    if (status.role === 'leader' && !status.modeConfirmed) return;
+    if (status.role === 'leader' && !status.leaderModeConfirmed) return;
     if (status.modeChosen === 'preview') return;
     if (status.isEndScreen) return;
 
@@ -631,7 +728,7 @@ function installHengeHandler(ctx, canvas, status) {
 
 function installPingHandler(ctx, canvas, status) {
   canvas.addEventListener('pointerup', async (ev) => {
-    if (status.role === 'leader' && !status.modeConfirmed) return;
+    if (status.role === 'leader' && !status.leaderModeConfirmed) return;
     if (status.modeChosen === 'preview') return;
     if (status.isEndScreen) return;
 
@@ -689,7 +786,7 @@ function installPingHandler(ctx, canvas, status) {
 export function installFadeToBlackHandler(ctx, canvas, status) {
   canvas.addEventListener('pointerup', (ev) => {
     if (!status.running) return;                 // only mid-performance
-    if (status.role === 'leader' && !status.modeConfirmed) return;
+    if (status.role === 'leader' && !status.leaderModeConfirmed) return;
     if (status.isEndScreen) return;
 
     const { x, y } = eventToCtxPoint(ev, canvas, ctx);

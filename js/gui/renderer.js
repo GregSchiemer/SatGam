@@ -130,14 +130,6 @@ const VIEW_START = 'start';
 const VIEW_RUN   = 'run';
 const VIEW_END   = 'end';
 
-// 3.1 Decide which view we are in (layman: “what screen should the leader see?”)
-//function currentView(status) {
-//  if (status.role === 'leader' && !status.modeConfirmed) return VIEW_MODE;
-//  if (status.isEndScreen) return VIEW_END;
-//  if (status.running) return VIEW_RUN;
-//  return VIEW_START;
-//}
-
 function currentView(status) {
   if (isEntryView(status)) return VIEW_ENTRY;
   if (status.isEndScreen) return VIEW_END;
@@ -180,13 +172,14 @@ function startHouseLightsUpOnce(status, ctxB) {
 
 // 4) Run entry actions when we arrive at a new view
 function onEnterView(status, view, ctxB) {
-  if (view === VIEW_ENTRY) {
-    // new cycle begins
-    status.lightsDownDone = false;
-    status.lightsUpDone   = false;
-    status.stopAfterFade  = false;
-    return;
-  }
+if (view === VIEW_ENTRY) {
+  status.lightsDownDone = false;
+  status.lightsUpDone   = false;
+  status.stopAfterFade  = false;
+  status.bgFamily = ColorFamily.NONE;
+  status.bgFamilyTarget = ColorFamily.NONE;
+  return;
+}
 
   // ✅ Auto fades only in CONCERT mode
   if (!isConcertMode(status)) return;
@@ -210,8 +203,10 @@ function onEnterView(status, view, ctxB) {
 // ===========================
 
 function isEntryView(status) {
-  if (status.role === 'leader') return !status.modeConfirmed;
-  if (status.role === 'consort') return !status.running && !status.isEndScreen;
+  if (status.role === 'leader') return !status.leaderModeConfirmed;
+  if (status.role === 'consort') {
+    return !status.running && !status.isEndScreen && !status.cuedToStart;
+  }
   return false;
 }
 
@@ -220,8 +215,6 @@ function renderEntryView(ctxT, ctxS, status) {
 
   if (status.role === 'consort') {
     const ctxB = arrB[0].ctx;
-    status.bgFamily = ColorFamily.NONE;
-    status.bgFamilyTarget = ColorFamily.NONE;
     prepareAndRenderBackground(ctxB, status);
     renderSpritesLayer(status.fullHenge, { maskBits: [1, 1, 1, 1, 1] });
     renderStartConsort(ctxT, status);
@@ -264,9 +257,19 @@ function computeElapsedMs(status, nowMs) {
   return nowMs - status.startWall;
 }
 
+/*
 function ensureNextBoundaryIsInitialised(status) {
   if (typeof status.nextStateWallMs === 'number') return;
   status.nextStateWallMs = status.startWall + status.runStateDurationMs;
+}
+*/
+function ensureNextBoundaryIsInitialised(status) {
+  const expected = status.startWall + status.runStateDurationMs;
+
+  if (typeof status.nextStateWallMs !== 'number' ||
+      status.nextStateWallMs < expected) {
+    status.nextStateWallMs = expected;
+  }
 }
 
 function applyBoundaryStepIfDue(status, nowMs) {
@@ -351,46 +354,47 @@ export function frameRender(status) {
   const ctxT = arrT[0].ctx;
   const cnvB = arrB[0].canvas;
 
-  // 0) Decide view + run “enter view” actions once
   const view = currentView(status);
+
+const dbg = `${view}|${status.leaderModeConfirmed}|${status.cuedToStart}|${status.running}|${status.isEndScreen}`;
+if (dbg !== status._lastViewDbg) {
+  console.log('[frameRender/view]', {
+    role: status.role,
+    view,
+    leaderModeConfirmed: status.leaderModeConfirmed,
+    cuedToStart: status.cuedToStart,
+    running: status.running,
+    isEndScreen: status.isEndScreen,
+    modeChosen: status.modeChosen,
+  });
+  status._lastViewDbg = dbg;
+}
+  
   if (didEnterNewView(status, view)) {
     rememberCurrentView(status, view);
     onEnterView(status, view, ctxB);
   }
 
-  // 1) Render background (fade playback or steady paint)
-  renderBackgroundLayer(ctxB, cnvB, status);
-
-  // 2) Clear text layer for fresh draw
-  clearTextLayer(ctxT);
-
-  // 3) Mode Select View (leader only)
-  if (isEntryView(status)) {
+  if (view === VIEW_ENTRY) {
     renderEntryView(ctxT, ctxS, status);
     return;
   }
 
-  // 4) If slots missing, render what we can and exit
+  renderBackgroundLayer(ctxB, cnvB, status);
+  clearTextLayer(ctxT);
+
   if (!slotsReady()) {
     renderWithoutSlots(ctxS, status);
     return;
   }
 
-  // 5) Advance show state (only when running)
   let elapsedMs = 0;
   if (status.running) elapsedMs = advanceRunningState(status, performance.now(), MAX_STATES);
   else applyIdleIndex(status);
 
-  // 6) Keep state index in range
   clampIndex(status, MAX_STATES);
-
-  // 7) Render phones/sprites for this view/state
   renderPhonesLayer(ctxS, status);
-
-  // 8) Render text overlay (start/running/end)
   renderTextLayer(ctxT, status, elapsedMs);
-
-  // 9) Composite layers to pane
   composeFrame({ drawB: true, drawS: true, drawT: true });
 }
 
@@ -400,7 +404,7 @@ function renderPhonesLayer(ctxS, status) {
   ctxS.clearRect(0, 0, ctxS.w, ctxS.h);
 
   // 1) Mode select view
-  if (status.role === 'leader' && !status.modeConfirmed) return;
+  if (status.role === 'leader' && !status.leaderModeConfirmed) return;
 
   // 2) End view
   if (status.isEndScreen) {
@@ -434,7 +438,6 @@ function computeClockMs(status, elapsedMs) {
   // Concert mode: show true elapsed time
   return elapsedMs;
 }
-
 
 // Paint one MLS state into the SPRITES layer.
 export function renderSpritesLayer(stateIndex, { maskBits = null } = {}) {

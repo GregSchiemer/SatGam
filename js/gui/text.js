@@ -119,13 +119,13 @@ export function renderDebug(ctxT, { status, mins, secs, bitPattern = '' }) {
 }
 
 function isStartView(status) {
-  return status.modeConfirmed && !status.running && !status.isEndScreen;
+  return status.leaderModeConfirmed && !status.running && !status.isEndScreen;
 }
 
 function lowStartLine(status) {
 
 //console.log('[lowStartLine probe]', {
-//  modeConfirmed: status.modeConfirmed,
+//  leaderModeConfirmed: status.leaderModeConfirmed,
 //  running: status.running,
 //  isEndScreen: status.isEndScreen,
 //  modeChosen: status.modeCh/osen,
