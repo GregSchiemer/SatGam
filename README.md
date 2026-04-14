@@ -14,7 +14,6 @@ This project renders a synchronised multiplayer interface using ES6 canvas anima
 - 🔁 Collaborative GUI for a consort players synchronised by a lead player
 
 ## 📁 Project Structure
-## Current project tree
 
 Actual `.pem` certificate files are omitted here for clarity.
 
