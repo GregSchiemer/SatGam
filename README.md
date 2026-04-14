@@ -62,7 +62,6 @@ Actual `.pem` certificate files are omitted here for clarity.
 │   │   ├── net.js
 │   │   ├── renderer.js
 │   │   ├── runTime.js
-│   │   ├── satgamPing.js
 │   │   ├── sequence.js
 │   │   ├── sprites.js
 │   │   ├── text.js
