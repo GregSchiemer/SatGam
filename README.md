@@ -81,6 +81,27 @@ Actual `.pem` certificate files are omitted here for clarity.
 16 directories, 58 files
 ## Getting Started
 
-1. Serve the files using a local HTTP server:
-   ```bash
-   python3 -m http.server
+# How to create and use SatGam HTTPS certificates on the MacBook server for the AX73 concert network
+
+SatGam’s browser audio path uses secure-context web features, so for phone deployment the app should be served over **HTTPS** with **WSS** for WebSockets.
+
+These certificates are **not** for the TP-Link AX73 router itself.  
+They are for the **SatGam server running on the MacBook Pro**, which phones reach through the AX73 network.
+
+In this setup:
+
+- the **MacBook Pro** runs `server.py`
+- the **AX73 router** provides the private LAN and Wi-Fi
+- the **phones** connect to the MacBook through the AX73 network
+- `mkcert` creates the local CA and the SatGam server certificate
+
+---
+
+## Assumptions
+
+This guide assumes:
+
+- SatGam lives at:
+
+  ```bash
+  /Users/gs/Developer/SG/SatGam
