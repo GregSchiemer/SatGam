@@ -82,7 +82,7 @@ Actual `.pem` certificate files are omitted here for clarity.
 
 # Getting Started
 
-# How to create and use SatGam HTTPS certificates on the MacBook server for the AX73 concert network
+## How to create and use SatGam HTTPS certificates on the MacBook server for the AX73 concert network
 
 SatGam’s browser audio path uses secure-context web features, so for phone deployment the app should be served over **HTTPS** with **WSS** for WebSockets.
 
