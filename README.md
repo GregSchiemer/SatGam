@@ -105,5 +105,4 @@ This guide assumes:
 - SatGam lives at:
 
   /Users/gs/Developer/SG/SatGam
-
-  ```
+```
