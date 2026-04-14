@@ -79,6 +79,7 @@ Actual `.pem` certificate files are omitted here for clarity.
 └── README.md
 
 16 directories, 58 files
+
 ## Getting Started
 
 # How to create and use SatGam HTTPS certificates on the MacBook server for the AX73 concert network
@@ -103,5 +104,6 @@ This guide assumes:
 
 - SatGam lives at:
 
-  ```bash
   /Users/gs/Developer/SG/SatGam
+
+  ```
