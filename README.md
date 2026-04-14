@@ -17,7 +17,7 @@ This project renders a synchronised multiplayer interface using ES6 canvas anima
 
 Actual `.pem` certificate files are omitted here for clarity.
 
-```text
+```
 .
 ├── apple-touch-icon-precomposed.png
 ├── apple-touch-icon.png
