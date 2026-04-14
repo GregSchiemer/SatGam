@@ -79,14 +79,13 @@ Actual `.pem` certificate files are omitted here for clarity.
 
 16 directories, 58 files
 
-## Getting Started
+# Getting Started
 
 # How to create and use SatGam HTTPS certificates on the MacBook server for the AX73 concert network
 
 SatGam’s browser audio path uses secure-context web features, so for phone deployment the app should be served over **HTTPS** with **WSS** for WebSockets.
 
-These certificates are **not** for the TP-Link AX73 router itself.  
-They are for the **SatGam server running on the MacBook Pro**, which phones reach through the AX73 network.
+To this end certificates are created for the **SatGam server running on the MacBook Pro**, which phones reach through the AX73 network.
 
 In this setup:
 
