@@ -78,6 +78,7 @@ Actual `.pem` certificate files are omitted here for clarity.
 └── README.md
 
 16 directories, 58 files
+```
 
 # Getting Started
 
