@@ -1,10 +1,10 @@
 # Phonehenge
 
-This project renders a synchronised multiplayer interface using ES6 canvas animation and gesture-triggered audio synthesised via Csound WebAssembly. It was designed principally for performing microtonal music created by the developer. The UI is designed for a portrait-mode mobile screen (`390×844`) and shared between:
+This project renders a synchronised multiplayer interface using ES6 canvas animation and gesture-triggered audio synthesised via Csound WebAssembly. It was designed principally to perform microtonal music created by the developer, specifically *Phonehenge* by *Greg Schiemer*. The UI is designed for a portrait-mode mobile screen (`390×844`) and shared between:
 
 - **Lead player** (`leader.html`) — lead player starts animation by tapping clock
 - **Consort** (`consort.html`) — all players trigger sounds by tapping sprites enabled by the animation
-- Both versions display the same 25-phone layout and interactive clock
+- Both versions display the same 25-key layout and interactive clock
 
 ## Features
 
