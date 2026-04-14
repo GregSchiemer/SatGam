@@ -14,37 +14,7 @@ This project renders a synchronised 25-phone interface using ES6 canvas animatio
 - 🔁 Identical GUI for conductor and players
 
 ## 📁 Project Structure
-```text
-.
-├── assets
-│   └── python
-│       └── generate_qr.py
-├── css
-│   └── bootstrap.min.css
-├── favicon.ico
-├── js
-│   ├── gui
-│   │   ├── animation.js
-│   │   ├── canvasExtensions.js
-│   │   ├── canvasUtils.js
-│   │   ├── color.js
-│   │   ├── enableKeys.js
-│   │   ├── helpers.js
-│   │   ├── henge.js
-│   │   ├── main.js
-│   │   ├── runTime.js
-│   │   ├── sequence.js
-│   │   └── text.js
-│   └── Synth
-│       ├── csound-init.js
-│       ├── csound.js
-│       ├── csound.wasm
-│       └── csound.worklet.js
-├── LICENSE
-├── README.md
-├── sg-es6-cs.html
-├── sg-es6-go.html
-└── sg-es6-gui.html
+```md ## Current project tree Actual `.pem` certificate files are omitted here for clarity. ```text . ├── apple-touch-icon-precomposed.png ├── apple-touch-icon.png ├── assets │ ├── bash │ │ └── zshrc │ ├── certs │ ├── csd │ │ ├── phonehenge-0.csd │ │ ├── phonehenge-1.csd │ │ ├── phonehenge-2.csd │ │ ├── phonehenge-3.csd │ │ ├── phonehenge-4.csd │ │ ├── sprite-chords.orc │ │ ├── sprite-single.csd │ │ └── sprite-single.orc │ ├── python │ │ ├── make-qr.py │ │ └── server.py │ └── qr-images │ ├── qr-consort.png │ └── qr-leader.png ├── consort.html ├── css │ └── bootstrap.min.css ├── favicon.ico ├── js │ ├── gui │ │ ├── animation.js │ │ ├── audioEngine.js │ │ ├── canvasExtensions.js │ │ ├── canvasUtils.js │ │ ├── clockBus.js │ │ ├── clockTransport.js │ │ ├── color.js │ │ ├── csoundInit.js │ │ ├── globals.js │ │ ├── helpers.js │ │ ├── henge.js │ │ ├── main.js │ │ ├── net.js │ │ ├── renderer.js │ │ ├── runTime.js │ │ ├── satgamPing.js │ │ ├── sequence.js │ │ ├── sprites.js │ │ ├── text.js │ │ ├── uiControls.js │ │ └── wakeLock.js │ └── synth │ ├── csound6 │ │ ├── csound.js │ │ └── csound.js.map │ └── csound7 │ ├── csound.js │ └── csound.js.map ├── leader.html ├── LICENSE └── README.md 16 directories, 58 files ``` ```
 ```
 
 
