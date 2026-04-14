@@ -1,4 +1,4 @@
-# Phonehenge ES6
+# Phonehenge
 
 This project renders a synchronised 25-phone interface using ES6 canvas animation and gesture-triggered audio via Csound WebAssembly. The UI is designed for a portrait-mode mobile screen (`390×844`) and shared between:
 
