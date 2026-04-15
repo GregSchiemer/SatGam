@@ -100,12 +100,12 @@ Certificates must be created for the **SatGam server running on the MacBook Pro*
 In this setup:
 
 - **MacBook Pro** runs `server.py'
-- **AX73 router** provides the private LAN and Wi-Fi
+- **AX73 wireless router** provides the private LAN and Wi-Fi
 - **phones** connect to the MacBook through the AX73 network
 - `mkcert` creates the SatGam server certificate and its local certificate authority (CA) 
 
-[This video shows how to set up the AS73 router](url
-)
+[This video shows how to set up the AX73 Wireless router]([(https://www.tp-link.com/au/support/setup-video/#wi-fi-routers)]).
+
 This guide assumes SatGam lives at:
 ```
 		/Users/gs/Developer/SG/SatGam
