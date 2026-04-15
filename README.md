@@ -136,13 +136,13 @@ The server listens for phones as each player launches the app by scanning a QR c
 Open a Terminal window and run the following commands.
 
 1.	**Go to the SatGam folder**
-
-	`cd /Users/gs/Developer/SG/SatGam’
-
+```
+	cd /Users/gs/Developer/SG/SatGam
+```
 2.	**Create and install a fresh local CA**
-
-	`mkcert -install`
-
+```
+	mkcert -install
+```
 Expected output will be similar to:
 
 ```
