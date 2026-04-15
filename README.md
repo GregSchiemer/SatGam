@@ -219,7 +219,9 @@ Open a **new Terminal window** and leave the certificate window available.
 	  --key-file assets/certs/SatGam-key.pem \
 	  -r .
 ```
+
 Expected output will be similar to:
+
 ```
 	——— Preflight ———
 	✅ no auto-start in main.js
