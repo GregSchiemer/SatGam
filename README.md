@@ -122,10 +122,10 @@ python3 assets/python/server.py \
 ```
 The app has 2 entry points launched by different html files:
 
-    `leader.html`
+    `leader.html` -- used by 1 player
 
-    `consort.html`
+    `consort.html` -- used by other players
     
-The server uses WebSockets to listen for consorts
+The server listen for phones as each player launches the app by scanning a QR code on their phone
 
 ```
