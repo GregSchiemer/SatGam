@@ -93,12 +93,13 @@ In this setup:
 - **MacBook Pro** runs `server.py`
 - **AX73 router** provides the private LAN and Wi-Fi
 - **phones** connect to the MacBook through the AX73 network
-- `mkcert` creates the local CA and the SatGam server certificate
+- `mkcert` creates the SatGam server certificate and its local certificate authority (CA) 
 
 This guide assumes SatGam lives at:
 
-  `/Users/gs/Developer/SG/SatGam`
+    `/Users/gs/Developer/SG/SatGam`
 
 The MacBook Pro has a fixed AX73-side IP address:
 
+    `192.168.1.10`
 ```
