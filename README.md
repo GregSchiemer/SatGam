@@ -2,6 +2,13 @@
 
 This project renders a synchronised multiplayer interface using ES6 canvas animation and gesture-triggered audio synthesised via Csound WebAssembly. It was designed principally as a concert app and written in javaScript as a replacement for an earlier version written in Objective-C. The UI is designed for a portrait-mode mobile screen (`390×844`).
 
+## Features
+
+- 🎨 Canvas-based layout and animation in pure ES6 modules
+- 🎵 Csound audio synthesis via dynamic gesture-triggered loading
+- ✅ Mobile-friendly, multi-player, autoplay-policy compliant
+- 🔁 Collaborative GUI for a consort players synchronised by a lead player
+
 The app can be launched using 1 of 2 html files depending on the role :
 
 - **Lead player** (`leader.html`) — lead player taps the clock to start the animation sequence
@@ -15,14 +22,6 @@ The leader's role is:
 - **PREVIEW** : plays 'fast-forward' giving players an overview of the changing UI 
 - **CONCERT** : plays in real-time and lasts between 12:24 and 12:48 seconds 
 
-
-
-## Features
-
-- 🎨 Canvas-based layout and animation in pure ES6 modules
-- 🎵 Csound audio synthesis via dynamic gesture-triggered loading
-- ✅ Mobile-friendly, multi-player, autoplay-policy compliant
-- 🔁 Collaborative GUI for a consort players synchronised by a lead player
 
 ## 📁 Project Structure
 
