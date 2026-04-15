@@ -96,10 +96,24 @@ In this setup:
 - `mkcert` creates the SatGam server certificate and its local certificate authority (CA) 
 
 This guide assumes SatGam lives at:
-
     `/Users/gs/Developer/SG/SatGam`
 
 The MacBook Pro has a fixed AX73-side IP address:
-
     `192.168.1.10`
+    
+The secure ports are:
+    `HTTPS: 8443
+    WSS: 8444`
+
+The secure ports are:
+    ``
+The secure ports are:
+    ``
+The secure ports are:
+    ``
+The secure ports are:
+    ``
+The secure ports are:
+    ``
+
 ```
