@@ -1,6 +1,6 @@
-# Phonehenge
+# Satellite Gamelan
 
-This project renders a synchronised multiplayer interface using ES6 canvas animation and gesture-triggered audio synthesised via Csound WebAssembly. It was designed principally as a concert app to perform microtonal music called *Phonehenge*, created by the developer, *Greg Schiemer*. The UI is designed for a portrait-mode mobile screen (`390×844`) and shared between:
+This project renders a synchronised multiplayer interface using ES6 canvas animation and gesture-triggered audio synthesised via Csound WebAssembly. It was designed principally as a concert app and written in javaScript as a replacement for an earlier version written in Objective-C. The UI is designed for a portrait-mode mobile screen (`390×844`) and shared between:
 
 - **Lead player** (`leader.html`) — lead player starts animation by tapping clock
 - **Consort** (`consort.html`) — all players trigger sounds by tapping sprites enabled by the animation
@@ -109,7 +109,7 @@ The secure ports are:
 
     `WSS: 8444`
 
-The secure ports are:
+This version of the app to perform microtonal music called *Phonehenge*, created by the developer, *Greg Schiemer* :
     ``
 The secure ports are:
     ``
