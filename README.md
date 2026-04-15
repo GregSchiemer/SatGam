@@ -86,23 +86,21 @@ Actual `.pem` certificate files are omitted here for clarity.
 
 SatGam’s browser audio path uses secure-context web features, so for phone deployment it must be served over **HTTPS** with **WSS** for WebSockets.
 
-Certificates must be created for the **SatGam server running on the MacBook Pro**. Phones reach the server through a concert network using a Wi-Fi 6 Router (Tp-link AX73).
+Certificates must be created for the **SatGam server running on the MacBook Pro**. Phones reach the server through a concert network using a **tp-link AX73 Wi-Fi 6 Router**.
 
 In this setup:
 
-- the **MacBook Pro** runs `server.py`
-- the **AX73 router** provides the private LAN and Wi-Fi
-- the **phones** connect to the MacBook through the AX73 network
+- **MacBook Pro** runs `server.py`
+- **AX73 router** provides the private LAN and Wi-Fi
+- **phones** connect to the MacBook through the AX73 network
 - `mkcert` creates the local CA and the SatGam server certificate
-
-**Assumptions**
 
 This guide assumes:
 
 - SatGam lives at:
 
-  /Users/gs/Developer/SG/SatGam
----
+  `/Users/gs/Developer/SG/SatGam`
 
+The MacBook Pro has a fixed AX73-side IP address:
 
 ```
