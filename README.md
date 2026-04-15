@@ -257,7 +257,6 @@ Open another Terminal window if needed.
 ```
 
 	Expected output will be similar to:
-
 ```
 	QR font file: /System/Library/Fonts/Supplemental/Arial.ttf
 	QR font name: ('Arial', 'Regular')
@@ -278,7 +277,6 @@ Open another Terminal window if needed.
 ```
 
 Expected files:
-
 ```
 	qr-leader.png
 	qr-consort.png
@@ -290,10 +288,10 @@ The QR codes should now point to:
 
 - **Leader**
 
-	'https://192.168.1.10:8443/leader.html?wsPort=8444'
+'https://192.168.1.10:8443/leader.html?wsPort=8444'
 
 - **Consort**
 
-	'https://192.168.1.10:8443/consort.html?wsPort=8444'
+'https://192.168.1.10:8443/consort.html?wsPort=8444'
 
 ```
