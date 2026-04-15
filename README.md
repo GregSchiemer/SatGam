@@ -80,9 +80,9 @@ Actual `.pem` certificate files are omitted here for clarity.
 16 directories, 58 files
 ```
 
-# Getting Started
+## Getting Started
 
-## How to create and use SatGam HTTPS certificates on the MacBook server
+### How to create and use SatGam HTTPS certificates on the MacBook server for the AX73 concert network
 
 SatGam’s browser audio path uses secure-context web features, so for phone deployment it must be served over **HTTPS** with **WSS** for WebSockets.
 
