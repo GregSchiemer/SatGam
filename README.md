@@ -131,5 +131,160 @@ python3 assets/python/server.py \
 ```
 The server listens for phones as each player launches the app by scanning a QR code on their phone
 
+###Part 1 — Create and install the SatGam certificates
+
+Open a Terminal window and run the following commands.
+
+**1. Go to the SatGam folder**
+
+	`cd /Users/gs/Developer/SG/SatGam’
+
+**2. Create and install a fresh local CA*
+
+	`mkcert -install`
+
+Expected output will be similar to:
+
+	```Created a new local CA 💥
+	Sudo password:
+	The local CA is now installed in the system trust store! ⚡️
+	The local CA is now installed in the Firefox trust store (requires browser restart)! 🦊```
+
+If Firefox is open, restart it after this step.
+
+**3. Create the SatGam server certificate and private key**
+
+	```mkcert \
+  	-cert-file assets/certs/SatGam.pem \
+  	-key-file assets/certs/SatGam-key.pem \
+  	192.168.1.10 MacBook-Pro-2.local localhost 127.0.0.1```
+
+Expected output will be similar to:
+
+	``` Created a new certificate valid for the following names 📜
+ - “192.168.1.10"
+ - "MacBook-Pro-2.local"
+ - "localhost"
+ - "127.0.0.1"
+
+The certificate is at "assets/certs/SatGam.pem" and the key at "assets/certs/SatGam-key.pem" ✅```
+
+**4. Copy the root CA certificate for performer-phone installation**
+
+`cp "$(mkcert -CAROOT)/rootCA.pem" assets/certs/SatGam-rootCA.pem`
+
+This creates a clearly named copy of the mkcert root CA certificate for distribution to performers.
+
+**5. Validate the certificate files**
+
+`ls -l assets/certs`
+
+Expected files:
+
+```SatGam.pem
+SatGam-key.pem
+SatGam-rootCA.pem
+```
+
+Example:
+
+```
+total 24
+-rw-------  1 gs  staff  1708 14 Apr 08:18 SatGam-key.pem
+-rw-r--r--  1 gs  staff  1781 14 Apr 08:18 SatGam-rootCA.pem
+-rw-r--r--  1 gs  staff  1614 14 Apr 08:18 SatGam.pem
+```
+
+###Part 2 — Launch the secure SatGam server
+
+Open a **new Terminal window** and leave the certificate window available.
+
+**6. Launch server.py using the SatGam certificate and key**
+
+```
+cd /Users/gs/Developer/SG/SatGam
+python3 assets/python/server.py \
+  --tls \
+  --https-port 8443 \
+  --wss-port 8444 \
+  --cert-file assets/certs/SatGam.pem \
+  --key-file assets/certs/SatGam-key.pem \
+  -r .
+```
+
+Expected output will be similar to:
+
+```
+——— Preflight ———
+✅ no auto-start in main.js
+✅ robust wsPort parsing present (qsPort)
+⚠️ leader.html did not show a direct import during preflight (static check).
+If you see [ws] connections later, WS is wired at runtime.
+⚠️ consort.html did not show a direct import during preflight (static check).
+If you see [ws] connections later, WS is wired at runtime.
+———— End preflight ————
+[wss] Listening on wss://0.0.0.0:8444
+[https] Serving /Users/gs/Developer/SG/SatGam on https://0.0.0.0:8443
+```
+
+**Note**
+0.0.0.0 means the server is listening on all local interfaces, including:
+* localhost
+* the home-side interface
+* the AX73-side interface
+* 192.168.1.10
+
+###Part 3 — Create Leader and Consort QR codes
+
+Open another Terminal window if needed.
+
+**7. Generate the QR codes**
+
+```
+cd /Users/gs/Developer/SG/SatGam
+python3 assets/python/make-qr.py \
+  --scheme https \
+  --host 192.168.1.10 \
+  --http-port 8443 \
+  --ws-port 8444
+```
+
+Expected output will be similar to:
+
+```
+QR font file: /System/Library/Fonts/Supplemental/Arial.ttf
+QR font name: ('Arial', 'Regular')
+LABEL ROLE = 'Phonehenge - Leader'
+LABEL ROLE = 'Phonehenge - Consort'
+Base URL: https://192.168.1.10:8443
+WebSocket port: 8444
+Font size: 18
+Leader  → assets/qr-images/qr-leader.png -> https://192.168.1.10:8443/leader.html?wsPort=8444
+Consort → assets/qr-images/qr-consort.png -> https://192.168.1.10:8443/consort.html?wsPort=8444
+Scan from phones while the server is running on the same Wi-Fi.
+```
+
+**8. Validate the QR image files**
+
+```ls -l assets/qr-images```
+
+Expected files:
+
+```
+qr-leader.png
+qr-consort.png
+```
+
+**Resulting secure URLs**
+
+The QR codes should now point to:
+
+- **Leader**
+
+`https://192.168.1.10:8443/leader.html?wsPort=8444`
+
+- **Consort**
+
+`https://192.168.1.10:8443/consort.html?wsPort=8444`
 
 ```
