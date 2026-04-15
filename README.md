@@ -184,13 +184,11 @@ Expected output will be similar to:
 This creates a clearly named copy of the mkcert root CA certificate for distribution to performers.
 
 5.	**Validate the certificate files**
-
 ```
 	ls -l assets/certs
 ```
 
 Expected files:
-
 ```
 	SatGam.pem
 	SatGam-key.pem
@@ -198,7 +196,6 @@ Expected files:
 ```
 
 Example:
-
 ```
 	total 24
 	-rw-------  1 gs  staff  1708 14 Apr 08:18 SatGam-key.pem
@@ -222,9 +219,7 @@ Open a **new Terminal window** and leave the certificate window available.
 	  --key-file assets/certs/SatGam-key.pem \
 	  -r .
 ```
-
 Expected output will be similar to:
-
 ```
 	——— Preflight ———
 	✅ no auto-start in main.js
