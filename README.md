@@ -133,10 +133,8 @@ The leader's role is:
 - to select the playing mode.
 
 There are 2 playing modes : 
-- **PREVIEW**
-plays rapidly to give players an overview of the changing UI 
-- **CONCERT**
-plays in real-time and lasts between 12:24 and 12:48 seconds 
+- **PREVIEW** : plays 'fast-forward' giving players an overview of the changing UI 
+- **CONCERT** : plays in real-time and lasts between 12:24 and 12:48 seconds 
 
 
 ```
