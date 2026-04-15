@@ -99,7 +99,7 @@ Certificates must be created for the **SatGam server running on the MacBook Pro*
 
 In this setup:
 
-- **MacBook Pro** runs `server.py`
+- **MacBook Pro** runs `server.py'
 - **AX73 router** provides the private LAN and Wi-Fi
 - **phones** connect to the MacBook through the AX73 network
 - `mkcert` creates the SatGam server certificate and its local certificate authority (CA) 
@@ -110,13 +110,13 @@ This guide assumes SatGam lives at:
 ```
 The MacBook Pro has a fixed AX73-side IP address:
 ```
-		192.168.1.10`
+		192.168.1.10
 ```
     
 The secure ports are:
 ```
 		HTTPS: 8443
-`		WSS: 8444
+		WSS: 8444
 ```
 
 The server is run from Terminal using the following commands:
