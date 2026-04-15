@@ -299,7 +299,7 @@ The QR codes should now point to:
 	https://192.168.1.10:8443/consort.html?wsPort=8444
 ```
 
-# Installing SatGam Root Certificate on Performer Phones
+## Installing SatGam Root Certificate on Performer Phones
 
 To allow performer phones to connect to the SatGam HTTPS server without certificate warnings, each device must install and trust the local certificate authority (CA).
 
@@ -309,7 +309,8 @@ The file to install is:
 		assets/certs/SatGam-rootCA.pem
 ```
 
-iPhone (iOS) Installation
+###iPhone (iOS) Installation
+
 Step 1 — Transfer the certificate to the iPhone
 Use one of the following methods:
 * AirDrop (recommended)
@@ -345,7 +346,8 @@ If installed correctly:
 * no certificate warning appears
 * the page loads normally
 
-Android Installation
+###Android Installation
+
 Steps vary slightly depending on Android version and manufacturer.
 
 Step 1 — Transfer the certificate
