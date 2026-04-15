@@ -256,8 +256,8 @@ Open another Terminal window if needed.
   	--http-port 8443 \
   	--ws-port 8444
 ```
+Expected output will be similar to:
 
-	Expected output will be similar to:
 ```
 	QR font file: /System/Library/Fonts/Supplemental/Arial.ttf
 	QR font name: ('Arial', 'Regular')
