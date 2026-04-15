@@ -1,6 +1,6 @@
 # Satellite Gamelan
 
-This project renders a synchronised multiplayer interface using ES6 canvas animation and gesture-triggered audio synthesised via Csound WebAssembly. It was designed principally as a [concert app](https://satellitegamelan.com) to perform microtonal music created by the [developer](https://www.xenharmonikon.org/2024/09/13/an-extended-interview-with-greg-schiemer/), a 
+This project renders a synchronised multiplayer interface using ES6 canvas animation and gesture-triggered audio. It was designed principally as a [concert app](https://satellitegamelan.com) to perform microtonal music created by the [developer](https://www.xenharmonikon.org/2024/09/13/an-extended-interview-with-greg-schiemer/), a 
 [composer and builder of bespoke electronic instruments](https://satellitegamelan.com/gallery.php). The combination of javaScript and Csound WebAssembly is intended as an eventual replacement of the original version written app in Objective-C. The UI is designed for a portrait-mode mobile screen (`390×844`).
 
 ## Features
