@@ -120,12 +120,18 @@ python3 assets/python/server.py \
   --key-file assets/certs/SatGam-key.pem \
   -r .
 ```
-The app has 2 entry points launched by different html files:
+The app can be launched using 1 of 2 html files depending on the role :
 
-    `[leader.html]` -- used by the lead player -- `(https://macbook-pro-2.local:8443/leader.html?wsPort=8444)`
+    `[leader.html] (https://macbook-pro-2.local:8443/leader.html?wsPort=8444)`
 
-    `[consort.html](https://macbook-pro-2.local:8443/consort.html?wsPort=8444)` -- used by other players
-    
+    `[consort.html] (https://macbook-pro-2.local:8443/consort.html?wsPort=8444)` -- used by other players
+
+The leader's role is: 
+1. to start the animation in sync on all phones;
+2. to select play mode.
+
+There are 2 modes : **CONCERT** (real-time) and **PREVIEW** (fast forward)  
+
 The server listens for phones as each player launches the app by scanning a QR code on their phone
 
 ```
