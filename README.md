@@ -156,20 +156,23 @@ If Firefox is open, restart it after this step.
 
 3.	**Create the SatGam server certificate and private key**
 
-	```mkcert \
+	```
+ mkcert \
   	-cert-file assets/certs/SatGam.pem \
   	-key-file assets/certs/SatGam-key.pem \
-  	192.168.1.10 MacBook-Pro-2.local localhost 127.0.0.1```
+  	192.168.1.10 MacBook-Pro-2.local localhost 127.0.0.1
+	```
 
 Expected output will be similar to:
 
-	``` Created a new certificate valid for the following names 📜
+	``` 
+	Created a new certificate valid for the following names 📜
 	“192.168.1.10"
 	"MacBook-Pro-2.local"
 	"localhost"
 	"127.0.0.1"
 
-The certificate is at "assets/certs/SatGam.pem" and the key at "assets/certs/SatGam-key.pem" ✅
+	The certificate is at "assets/certs/SatGam.pem" and the key at "assets/certs/SatGam-key.pem" ✅
 ```
 
 4.	**Copy the root CA certificate for performer-phone installation**
