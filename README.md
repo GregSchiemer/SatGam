@@ -118,6 +118,6 @@ python3 assets/python/server.py \
   --wss-port 8444 \
   --cert-file assets/certs/SatGam.pem \
   --key-file assets/certs/SatGam-key.pem \
-  -r .```
+  -r .
 
 ```
