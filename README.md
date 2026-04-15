@@ -1,6 +1,6 @@
 # Satellite Gamelan
 
-This project renders a synchronised multiplayer interface using ES6 canvas animation and gesture-triggered audio synthesised via Csound WebAssembly. It was designed principally as a concert app and written in javaScript as a replacement for an earlier version written in Objective-C. The UI is designed for a portrait-mode mobile screen (`390×844`).
+This project renders a synchronised multiplayer interface using ES6 canvas animation and gesture-triggered audio synthesised via Csound WebAssembly. It was designed principally as a concert app and written in javaScript as a replacement for an earlier version of the app written in Objective-C. The UI is designed for a portrait-mode mobile screen (`390×844`).
 
 ## Features
 
@@ -19,8 +19,8 @@ The leader's role is:
 - to start the animation sequence in sync on all phones;
 - to select 1 of 2 playing modes:
 
-    1. **PREVIEW** : plays 'fast-forward' giving players an overview of the changing UI
-    2. **CONCERT** : plays in real-time and lasts between 12:24 and 12:48 seconds 
+    1. **PREVIEW** : plays the animation sequence 'fast-forward' giving players an overview of the changing UI
+    2. **CONCERT** : plays it in real-time and lasts between 12:24 and 12:48 seconds 
 
 ## 📁 Project Structure
 
