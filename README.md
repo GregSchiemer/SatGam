@@ -292,10 +292,11 @@ The QR codes should now point to:
 
 - **Leader**
 
-`	https://192.168.1.10:8443/leader.html?wsPort=8444`
-
+```
+	https://192.168.1.10:8443/leader.html?wsPort=8444
+```
 - **Consort**
-
-`	https://192.168.1.10:8443/consort.html?wsPort=8444`
-
+```
+	https://192.168.1.10:8443/consort.html?wsPort=8444
+```
 ```
