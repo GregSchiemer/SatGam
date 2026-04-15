@@ -311,33 +311,34 @@ The file to install is:
 
 **iPhone (iOS) Installation**
 
-Step 1 — Transfer the certificate to the iPhone
+1. Transfer the certificate to the iPhone
 Use one of the following methods:
 * AirDrop (recommended)
 * Email attachment
 * Host the file temporarily on the SatGam server and open it in Safari
 
-Step 2 — Install the profile
-1. Open the .pem file on the iPhone
-2. You will see a message: “Profile Downloaded”
-3. Open Settings
-4. Tap Profile Downloaded
-5. Tap Install
-6. Enter passcode if prompted
-7. Tap Install again to confirm
+2. Install the profile
+- Open the .pem file on the iPhone
+- You will see a message: “Profile Downloaded”
+- Open Settings
+- Tap Profile Downloaded
+- Tap Install
+- Enter passcode if prompted
+- Tap Install again to confirm
 
-Step 3 — Enable full trust (CRITICAL)
+3. Enable full trust (CRITICAL)
 This step is required on iOS.
-1. Go to: Settings → General → About → Certificate Trust Settings
-2. Under Enable Full Trust for Root Certificates, find:
+- Go to: Settings → General → About → Certificate Trust Settings
+- Under Enable Full Trust for Root Certificates, find:
 
 `	SatGam-rootCA`
 
 	(or similar name)
-3. Toggle it ON
-4. Confirm when prompted
+	
+- Toggle it ON
+- Confirm when prompted
 
-Step 4 — Verify
+4. Verify
 Open Safari and test:
 
 `	https://192.168.1.10:8443/leader.html?wsPort=8444`
@@ -350,31 +351,33 @@ If installed correctly:
 
 Steps vary slightly depending on Android version and manufacturer.
 
-1. — Transfer the certificate
+1. Transfer the certificate
 * Email
 * USB
 * AirDrop equivalent
 * Download from server
 
-2. — Install the certificate
-1. Open Settings
-2. Go to:
+2. Install the certificate
+- Open Settings
+- Go to:
 
-`	Security → Encryption & credentials → Install a certificate`
+```
+	Security → Encryption & credentials → Install a certificate
+```
 
 	(or search for “Install certificate”)
 
-3. Select:
+- Select:
 
 `	CA certificate`
 
-4. Locate and accept
+- Locate and accept
 
 `	SatGam-rootCA.pem`
 
-5. Confirm installation
+- Confirm installation
 
-Step 3 — Accept warning
+3. Accept warning
 Android will warn that:
 
 `	“Your network traffic may be monitored”`
@@ -382,7 +385,7 @@ Android will warn that:
 This is expected for a user-installed CA.
 Tap Install anyway.
 
-Step 4 — Verify
+4. Verify
 Open Chrome and test:
 
 `	https://192.168.1.10:8443/leader.html?wsPort=8444`
