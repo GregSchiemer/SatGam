@@ -26,7 +26,8 @@ The leader's role is:
 
 Actual `.pem` certificate files are omitted here for clarity.
 
-```.
+```
+.
 ├── apple-touch-icon-precomposed.png
 ├── apple-touch-icon.png
 ├── assets
