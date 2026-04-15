@@ -168,9 +168,9 @@ Expected output will be similar to:
 	"MacBook-Pro-2.local"
 	"localhost"
 	"127.0.0.1"
-```
 
-The certificate is at "assets/certs/SatGam.pem" and the key at "assets/certs/SatGam-key.pem" ✅```
+The certificate is at "assets/certs/SatGam.pem" and the key at "assets/certs/SatGam-key.pem" ✅
+```
 
 4.	**Copy the root CA certificate for performer-phone installation**
 
