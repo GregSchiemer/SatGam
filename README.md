@@ -132,7 +132,7 @@ The server is run from Terminal using the following commands:
 	  	-r .
 ```
 The server listens for phones as each player launches the app by scanning a QR code on their phone
-
+---
 **Part 1 — Create and install the SatGam certificates**
 
 Open a Terminal window and run the following commands.
@@ -205,7 +205,7 @@ Example:
 	-rw-r--r--  1 gs  staff  1781 14 Apr 08:18 SatGam-rootCA.pem
 	-rw-r--r--  1 gs  staff  1614 14 Apr 08:18 SatGam.pem
 ```
-
+---
 **Part 2 — Launch the secure SatGam server**
 
 Open a **new Terminal window** and leave the certificate window available.
@@ -243,7 +243,7 @@ Expected output will be similar to:
 * the home-side interface
 * the AX73-side interface
 * 192.168.1.10
-
+---
 **Part 3 — Create Leader and Consort QR codes**
 
 Open another Terminal window if needed.
@@ -298,7 +298,7 @@ The QR codes should now point to:
 ```
 	https://192.168.1.10:8443/consort.html?wsPort=8444
 ```
-
+---
 ## Installing SatGam Root Certificate on Performer Phones
 
 To allow performer phones to connect to the SatGam HTTPS server without certificate warnings, each device must install and trust the local certificate authority (CA).
@@ -308,7 +308,7 @@ The file to install is:
 ```
 		assets/certs/SatGam-rootCA.pem
 ```
-
+---
 **iPhone (iOS) Installation**
 
 1. Transfer the certificate to the iPhone
@@ -346,7 +346,7 @@ Open Safari and test:
 If installed correctly:
 * no certificate warning appears
 * the page loads normally
-
+---
 **Android Installation**
 
 Steps vary slightly depending on Android version and manufacturer.
