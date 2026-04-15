@@ -122,9 +122,9 @@ python3 assets/python/server.py \
 ```
 The app has 2 entry points launched by different html files:
 
-    `leader.html` -- used by the lead player
+    `[leader.html](https://macbook-pro-2.local:8443/leader.html?wsPort=8444)` -- used by the lead player
 
-    `consort.html` -- used by other players
+    `[consort.html](https://macbook-pro-2.local:8443/consort.html?wsPort=8444)` -- used by other players
     
 The server listens for phones as each player launches the app by scanning a QR code on their phone
 
