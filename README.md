@@ -169,13 +169,13 @@ Expected output will be similar to:
 
 The certificate is at "assets/certs/SatGam.pem" and the key at "assets/certs/SatGam-key.pem" ✅```
 
-**4 Copy the root CA certificate for performer-phone installation**
+4.	**Copy the root CA certificate for performer-phone installation**
 
 `cp "$(mkcert -CAROOT)/rootCA.pem" assets/certs/SatGam-rootCA.pem`
 
 This creates a clearly named copy of the mkcert root CA certificate for distribution to performers.
 
-**5 Validate the certificate files**
+5.	**Validate the certificate files**
 
 `ls -l assets/certs`
 
@@ -195,11 +195,11 @@ total 24
 -rw-r--r--  1 gs  staff  1614 14 Apr 08:18 SatGam.pem
 ```
 
-##Part 2 — Launch the secure SatGam server
+**Part 2 — Launch the secure SatGam server**
 
 Open a **new Terminal window** and leave the certificate window available.
 
-**6 Launch server.py using the SatGam certificate and key**
+6.	**Launch server.py using the SatGam certificate and key**
 
 ```
 cd /Users/gs/Developer/SG/SatGam
@@ -234,11 +234,11 @@ If you see [ws] connections later, WS is wired at runtime.
 * the AX73-side interface
 * 192.168.1.10
 
-##Part 3 — Create Leader and Consort QR codes
+**Part 3 — Create Leader and Consort QR codes**
 
 Open another Terminal window if needed.
 
-**7 Generate the QR codes**
+7.	**Generate the QR codes**
 
 ```
 cd /Users/gs/Developer/SG/SatGam
@@ -264,7 +264,7 @@ Consort → assets/qr-images/qr-consort.png -> https://192.168.1.10:8443/consort
 Scan from phones while the server is running on the same Wi-Fi.
 ```
 
-	**8 Validate the QR image files**
+8.	**Validate the QR image files**
 
 ```ls -l assets/qr-images```
 
