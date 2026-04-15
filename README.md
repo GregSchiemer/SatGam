@@ -146,18 +146,18 @@ Open a Terminal window and run the following commands.
 Expected output will be similar to:
 
 ```
-Created a new local CA 💥
-Sudo password:
-The local CA is now installed in the system trust store! ⚡️
-The local CA is now installed in the Firefox trust store (requires browser restart)! 🦊
+	Created a new local CA 💥
+	Sudo password:
+	The local CA is now installed in the system trust store! ⚡️
+	The local CA is now installed in the Firefox trust store (requires browser restart)! 🦊
 
-If Firefox is open, restart it after this step.
+	If Firefox is open, restart it after this step.
 ```
 
 3.	**Create the SatGam server certificate and private key**
 
 ```
- mkcert \
+ 	mkcert \
 	  -cert-file assets/certs/SatGam.pem \
 	  -key-file assets/certs/SatGam-key.pem \
 	  192.168.1.10 MacBook-Pro-2.local localhost 127.0.0.1
@@ -177,13 +177,17 @@ Expected output will be similar to:
 
 4.	**Copy the root CA certificate for performer-phone installation**
 
-`	cp "$(mkcert -CAROOT)/rootCA.pem" assets/certs/SatGam-rootCA.pem`
+```
+	cp "$(mkcert -CAROOT)/rootCA.pem" assets/certs/SatGam-rootCA.pem
+```
 
 This creates a clearly named copy of the mkcert root CA certificate for distribution to performers.
 
 5.	**Validate the certificate files**
 
-`	ls -l assets/certs`
+```
+	ls -l assets/certs
+```
 
 Expected files:
 
