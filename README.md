@@ -131,8 +131,9 @@ The server is run from Terminal using the following commands:
 	  	--key-file assets/certs/SatGam-key.pem \
 	  	-r .
 ```
-The server listens for phones as each player launches the app by scanning a QR code on their phone
 ---
+The server listens for phones as each player launches the app by scanning a QR code on their phone
+
 **Part 1 — Create and install the SatGam certificates**
 
 Open a Terminal window and run the following commands.
