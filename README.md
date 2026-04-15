@@ -11,7 +11,7 @@ This project renders a synchronised multiplayer interface using ES6 canvas anima
 
 The app can be launched using 1 of 2 html files depending on the role :
 
-- **Lead player** (`leader.html`) — lead player taps the clock to start the animation sequence
+-=- **Lead player** (`leader.html`) — lead player taps the clock to start the animation sequence
 - **Consort** (`consort.html`) — all players trigger sounds by tapping sprites enabled by the animation sequence
 - Both versions display the same 25-key layout and interactive clock
 
@@ -19,8 +19,8 @@ The leader's role is:
 - to start the animation sequence in sync on all phones;
 - to select 1 of 2 playing modes:
 
-- **PREVIEW** : plays 'fast-forward' giving players an overview of the changing UI 
-- **CONCERT** : plays in real-time and lasts between 12:24 and 12:48 seconds 
+-- **PREVIEW** : plays 'fast-forward' giving players an overview of the changing UI 
+-- **CONCERT** : plays in real-time and lasts between 12:24 and 12:48 seconds 
 
 
 ## 📁 Project Structure
