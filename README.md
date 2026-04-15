@@ -112,14 +112,15 @@ The secure ports are:
     ``
 The server is run from terminal using the following commands:
 
-    `gs@MacBook-Pro-2 ~ % cd /Users/gs/Developer/SG/SatGam`
-    `python3 assets/python/server.py \`
-    `--tls \`
-    `--https-port 8443 \`
-    `--wss-port 8444 \`
-    `--cert-file assets/certs/SatGam.pem \`
-    `--key-file assets/certs/SatGam-key.pem \`
-    `-r .`
+```gs@MacBook-Pro-2 ~ % cd /Users/gs/Developer/SG/SatGam
+python3 assets/python/server.py \
+  --tls \
+  --https-port 8443 \
+  --wss-port 8444 \
+  --cert-file assets/certs/SatGam.pem \
+  --key-file assets/certs/SatGam-key.pem \
+  -r .```
+
 The secure ports are:
     ``
 The secure ports are:
