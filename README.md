@@ -135,11 +135,11 @@ The server listens for phones as each player launches the app by scanning a QR c
 
 Open a Terminal window and run the following commands.
 
-	1.	**Go to the SatGam folder**
+1.	**Go to the SatGam folder**
 
 	`cd /Users/gs/Developer/SG/SatGam’
 
-	2.	**Create and install a fresh local CA**
+2.	**Create and install a fresh local CA**
 
 	`mkcert -install`
 
@@ -152,7 +152,7 @@ Expected output will be similar to:
 
 If Firefox is open, restart it after this step.
 
-	3.	**Create the SatGam server certificate and private key**
+3.	**Create the SatGam server certificate and private key**
 
 	```mkcert \
   	-cert-file assets/certs/SatGam.pem \
