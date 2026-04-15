@@ -106,29 +106,29 @@ In this setup:
 
 This guide assumes SatGam lives at:
 
-`	/Users/gs/Developer/SG/SatGam`
+`		/Users/gs/Developer/SG/SatGam`
 
 The MacBook Pro has a fixed AX73-side IP address:
 
-`	192.168.1.10`
+`		192.168.1.10`
     
 The secure ports are:
 
-`	HTTPS: 8443`
+`		HTTPS: 8443`
 
-`	WSS: 8444`
+`		WSS: 8444`
 
 The server is run from Terminal using the following commands:
 
 ```
 	gs@MacBook-Pro-2 ~ % cd /Users/gs/Developer/SG/SatGam
 	python3 assets/python/server.py \
-	  --tls \
-	  --https-port 8443 \
-	  --wss-port 8444 \
-	  --cert-file assets/certs/SatGam.pem \
-	  --key-file assets/certs/SatGam-key.pem \
-	  -r .
+		--tls \
+	  	--https-port 8443 \
+	  	--wss-port 8444 \
+	  	--cert-file assets/certs/SatGam.pem \
+	  	--key-file assets/certs/SatGam-key.pem \
+	  	-r .
 ```
 The server listens for phones as each player launches the app by scanning a QR code on their phone
 
