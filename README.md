@@ -131,15 +131,15 @@ python3 assets/python/server.py \
 ```
 The server listens for phones as each player launches the app by scanning a QR code on their phone
 
-###Part 1 — Create and install the SatGam certificates
+##Part 1 — Create and install the SatGam certificates
 
 Open a Terminal window and run the following commands.
 
-**1 Go to the SatGam folder**
+- **1 Go to the SatGam folder**
 
 	`cd /Users/gs/Developer/SG/SatGam’
 
-**2 Create and install a fresh local CA**
+- **2 Create and install a fresh local CA**
 
 	`mkcert -install`
 
@@ -152,7 +152,7 @@ Expected output will be similar to:
 
 If Firefox is open, restart it after this step.
 
-**3 Create the SatGam server certificate and private key**
+- **3 Create the SatGam server certificate and private key**
 
 	```mkcert \
   	-cert-file assets/certs/SatGam.pem \
@@ -195,7 +195,7 @@ total 24
 -rw-r--r--  1 gs  staff  1614 14 Apr 08:18 SatGam.pem
 ```
 
-###Part 2 — Launch the secure SatGam server
+##Part 2 — Launch the secure SatGam server
 
 Open a **new Terminal window** and leave the certificate window available.
 
