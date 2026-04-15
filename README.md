@@ -119,5 +119,13 @@ python3 assets/python/server.py \
   --cert-file assets/certs/SatGam.pem \
   --key-file assets/certs/SatGam-key.pem \
   -r .
+```
+The app has 2 entry points launched by different html files:
+
+    `leader.html`
+
+    `consort.html`
+    
+The server uses WebSockets to listen for consorts
 
 ```
