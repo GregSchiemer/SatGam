@@ -145,12 +145,14 @@ Open a Terminal window and run the following commands.
 
 Expected output will be similar to:
 
-	```Created a new local CA 💥
-	Sudo password:
-	The local CA is now installed in the system trust store! ⚡️
-	The local CA is now installed in the Firefox trust store (requires browser restart)! 🦊```
+```
+Created a new local CA 💥
+Sudo password:
+The local CA is now installed in the system trust store! ⚡️
+The local CA is now installed in the Firefox trust store (requires browser restart)! 🦊
 
 If Firefox is open, restart it after this step.
+```
 
 3.	**Create the SatGam server certificate and private key**
 
