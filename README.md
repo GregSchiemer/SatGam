@@ -104,8 +104,8 @@ In this setup:
 - **phones** connect to the MacBook through the AX73 network
 - `mkcert` creates the SatGam server certificate and its local certificate authority (CA) 
 
-To set up AS73 [TP-Link setup video](https://www.tp-link.com/au/support/setup-video/#wi-fi-routers)
-
+[This video shows how to set up the AS73 router](url
+)
 This guide assumes SatGam lives at:
 ```
 		/Users/gs/Developer/SG/SatGam
