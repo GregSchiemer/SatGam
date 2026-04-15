@@ -298,4 +298,96 @@ The QR codes should now point to:
 ```
 	https://192.168.1.10:8443/consort.html?wsPort=8444
 ```
+
+# Installing SatGam Root Certificate on Performer Phones
+
+To allow performer phones to connect to the SatGam HTTPS server without certificate warnings, each device must install and trust the local certificate authority (CA).
+
+The file to install is:
+
+```
+		assets/certs/SatGam-rootCA.pem
+```
+
+iPhone (iOS) Installation
+Step 1 — Transfer the certificate to the iPhone
+Use one of the following methods:
+* AirDrop (recommended)
+* Email attachment
+* Host the file temporarily on the SatGam server and open it in Safari
+
+Step 2 — Install the profile
+1. Open the .pem file on the iPhone
+2. You will see a message: “Profile Downloaded”
+3. Open Settings
+4. Tap Profile Downloaded
+5. Tap Install
+6. Enter passcode if prompted
+7. Tap Install again to confirm
+
+Step 3 — Enable full trust (CRITICAL)
+This step is required on iOS.
+1. Go to: Settings → General → About → Certificate Trust Settings
+2. Under Enable Full Trust for Root Certificates, find:
+
+`	SatGam-rootCA`
+
+	(or similar name)
+3. Toggle it ON
+4. Confirm when prompted
+
+Step 4 — Verify
+Open Safari and test:
+
+`	https://192.168.1.10:8443/leader.html?wsPort=8444`
+
+If installed correctly:
+* no certificate warning appears
+* the page loads normally
+
+Android Installation
+Steps vary slightly depending on Android version and manufacturer.
+
+Step 1 — Transfer the certificate
+* Email
+* USB
+* AirDrop equivalent
+* Download from server
+
+Step 2 — Install the certificate
+1. Open Settings
+2. Go to:
+
+`	Security → Encryption & credentials → Install a certificate`
+
+	(or search for “Install certificate”)
+
+3. Select:
+
+`	CA certificate`
+
+4. Locate and accept
+
+`	SatGam-rootCA.pem`
+
+5. Confirm installation
+
+Step 3 — Accept warning
+Android will warn that:
+
+`	“Your network traffic may be monitored”`
+
+This is expected for a user-installed CA.
+Tap Install anyway.
+
+Step 4 — Verify
+Open Chrome and test:
+
+`	https://192.168.1.10:8443/leader.html?wsPort=8444`
+
+If installed correctly:
+* no certificate warning appears
+* the page loads normally
+
+
 ```
