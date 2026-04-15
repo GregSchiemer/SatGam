@@ -309,7 +309,7 @@ The file to install is:
 		assets/certs/SatGam-rootCA.pem
 ```
 
-###iPhone (iOS) Installation
+**iPhone (iOS) Installation**
 
 Step 1 — Transfer the certificate to the iPhone
 Use one of the following methods:
@@ -346,17 +346,17 @@ If installed correctly:
 * no certificate warning appears
 * the page loads normally
 
-###Android Installation
+**Android Installation**
 
 Steps vary slightly depending on Android version and manufacturer.
 
-Step 1 — Transfer the certificate
+1. — Transfer the certificate
 * Email
 * USB
 * AirDrop equivalent
 * Download from server
 
-Step 2 — Install the certificate
+2. — Install the certificate
 1. Open Settings
 2. Go to:
 
