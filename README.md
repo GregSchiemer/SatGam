@@ -158,9 +158,9 @@ If Firefox is open, restart it after this step.
 
 ```
  mkcert \
-  -cert-file assets/certs/SatGam.pem \
-  -key-file assets/certs/SatGam-key.pem \
-  192.168.1.10 MacBook-Pro-2.local localhost 127.0.0.1
+	  -cert-file assets/certs/SatGam.pem \
+	  -key-file assets/certs/SatGam-key.pem \
+	  192.168.1.10 MacBook-Pro-2.local localhost 127.0.0.1
 ```
 
 Expected output will be similar to:
@@ -177,28 +177,29 @@ Expected output will be similar to:
 
 4.	**Copy the root CA certificate for performer-phone installation**
 
-`cp "$(mkcert -CAROOT)/rootCA.pem" assets/certs/SatGam-rootCA.pem`
+`	cp "$(mkcert -CAROOT)/rootCA.pem" assets/certs/SatGam-rootCA.pem`
 
 This creates a clearly named copy of the mkcert root CA certificate for distribution to performers.
 
 5.	**Validate the certificate files**
 
-`ls -l assets/certs`
+`	ls -l assets/certs`
 
 Expected files:
 
-```SatGam.pem
-SatGam-key.pem
-SatGam-rootCA.pem
+```
+	SatGam.pem
+	SatGam-key.pem
+	SatGam-rootCA.pem
 ```
 
 Example:
 
 ```
-total 24
--rw-------  1 gs  staff  1708 14 Apr 08:18 SatGam-key.pem
--rw-r--r--  1 gs  staff  1781 14 Apr 08:18 SatGam-rootCA.pem
--rw-r--r--  1 gs  staff  1614 14 Apr 08:18 SatGam.pem
+	total 24
+	-rw-------  1 gs  staff  1708 14 Apr 08:18 SatGam-key.pem
+	-rw-r--r--  1 gs  staff  1781 14 Apr 08:18 SatGam-rootCA.pem
+	-rw-r--r--  1 gs  staff  1614 14 Apr 08:18 SatGam.pem
 ```
 
 **Part 2 — Launch the secure SatGam server**
@@ -208,29 +209,29 @@ Open a **new Terminal window** and leave the certificate window available.
 6.	**Launch server.py using the SatGam certificate and key**
 
 ```
-cd /Users/gs/Developer/SG/SatGam
-python3 assets/python/server.py \
-  --tls \
-  --https-port 8443 \
-  --wss-port 8444 \
-  --cert-file assets/certs/SatGam.pem \
-  --key-file assets/certs/SatGam-key.pem \
-  -r .
+	cd /Users/gs/Developer/SG/SatGam
+	python3 assets/python/server.py \
+	  --tls \
+	  --https-port 8443 \
+	  --wss-port 8444 \
+	  --cert-file assets/certs/SatGam.pem \
+	  --key-file assets/certs/SatGam-key.pem \
+	  -r .
 ```
 
 Expected output will be similar to:
 
 ```
-——— Preflight ———
-✅ no auto-start in main.js
-✅ robust wsPort parsing present (qsPort)
-⚠️ leader.html did not show a direct import during preflight (static check).
-If you see [ws] connections later, WS is wired at runtime.
-⚠️ consort.html did not show a direct import during preflight (static check).
-If you see [ws] connections later, WS is wired at runtime.
-———— End preflight ————
-[wss] Listening on wss://0.0.0.0:8444
-[https] Serving /Users/gs/Developer/SG/SatGam on https://0.0.0.0:8443
+	——— Preflight ———
+	✅ no auto-start in main.js
+	✅ robust wsPort parsing present (qsPort)
+	⚠️ leader.html did not show a direct import during preflight (static check).
+	If you see [ws] connections later, WS is wired at runtime.
+	⚠️ consort.html did not show a direct import during preflight (static check).
+	If you see [ws] connections later, WS is wired at runtime.
+	———— End preflight ————
+	[wss] Listening on wss://0.0.0.0:8444
+	[https] Serving /Users/gs/Developer/SG/SatGam on https://0.0.0.0:8443
 ```
 
 **Note**
@@ -247,38 +248,38 @@ Open another Terminal window if needed.
 7.	**Generate the QR codes**
 
 ```
-cd /Users/gs/Developer/SG/SatGam
-python3 assets/python/make-qr.py \
-  --scheme https \
-  --host 192.168.1.10 \
-  --http-port 8443 \
-  --ws-port 8444
+	cd /Users/gs/Developer/SG/SatGam
+	python3 assets/python/make-qr.py \
+  	--scheme https \
+  	--host 192.168.1.10 \
+  	--http-port 8443 \
+  	--ws-port 8444
 ```
 
-Expected output will be similar to:
+	Expected output will be similar to:
 
 ```
-QR font file: /System/Library/Fonts/Supplemental/Arial.ttf
-QR font name: ('Arial', 'Regular')
-LABEL ROLE = 'Phonehenge - Leader'
-LABEL ROLE = 'Phonehenge - Consort'
-Base URL: https://192.168.1.10:8443
-WebSocket port: 8444
-Font size: 18
-Leader  → assets/qr-images/qr-leader.png -> https://192.168.1.10:8443/leader.html?wsPort=8444
-Consort → assets/qr-images/qr-consort.png -> https://192.168.1.10:8443/consort.html?wsPort=8444
-Scan from phones while the server is running on the same Wi-Fi.
+	QR font file: /System/Library/Fonts/Supplemental/Arial.ttf
+	QR font name: ('Arial', 'Regular')
+	LABEL ROLE = 'Phonehenge - Leader'
+	LABEL ROLE = 'Phonehenge - Consort'
+	Base URL: https://192.168.1.10:8443
+	WebSocket port: 8444
+	Font size: 18
+	Leader  → assets/qr-images/qr-leader.png -> https://192.168.1.10:8443/leader.html?wsPort=8444
+	Consort → assets/qr-images/qr-consort.png -> https://192.168.1.10:8443/consort.html?wsPort=8444
+	Scan from phones while the server is running on the same Wi-Fi.
 ```
 
 8.	**Validate the QR image files**
 
-```ls -l assets/qr-images```
+`	ls -l assets/qr-images`
 
 Expected files:
 
 ```
-qr-leader.png
-qr-consort.png
+	qr-leader.png
+	qr-consort.png
 ```
 
 **Resulting secure URLs**
@@ -287,10 +288,10 @@ The QR codes should now point to:
 
 - **Leader**
 
-`https://192.168.1.10:8443/leader.html?wsPort=8444`
+`	https://192.168.1.10:8443/leader.html?wsPort=8444`
 
 - **Consort**
 
-`https://192.168.1.10:8443/consort.html?wsPort=8444`
+`	https://192.168.1.10:8443/consort.html?wsPort=8444`
 
 ```
