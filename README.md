@@ -143,6 +143,7 @@ Open a Terminal window and run the following commands.
 ```
 	mkcert -install
 ```
+
 Expected output will be similar to:
 
 ```
