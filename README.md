@@ -122,7 +122,7 @@ python3 assets/python/server.py \
 ```
 The app has 2 entry points launched by different html files:
 
-    `[leader.html]` - used by the lead player ] `(https://macbook-pro-2.local:8443/leader.html?wsPort=8444)`
+    `[leader.html]` -- used by the lead player -- `(https://macbook-pro-2.local:8443/leader.html?wsPort=8444)`
 
     `[consort.html](https://macbook-pro-2.local:8443/consort.html?wsPort=8444)` -- used by other players
     
