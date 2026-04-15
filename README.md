@@ -95,13 +95,14 @@ In this setup:
 - the **phones** connect to the MacBook through the AX73 network
 - `mkcert` creates the local CA and the SatGam server certificate
 
----
-
-## Assumptions
+**Assumptions**
 
 This guide assumes:
 
 - SatGam lives at:
 
   /Users/gs/Developer/SG/SatGam
+---
+
+
 ```
