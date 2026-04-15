@@ -19,9 +19,8 @@ The leader's role is:
 - to start the animation sequence in sync on all phones;
 - to select 1 of 2 playing modes:
 
-~ **PREVIEW** : plays 'fast-forward' giving players an overview of the changing UI 
-~ **CONCERT** : plays in real-time and lasts between 12:24 and 12:48 seconds 
-
+    1. **PREVIEW** : plays 'fast-forward' giving players an overview of the changing UI
+    2. **CONCERT** : plays in real-time and lasts between 12:24 and 12:48 seconds 
 
 ## 📁 Project Structure
 
