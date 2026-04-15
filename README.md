@@ -1,10 +1,21 @@
 # Satellite Gamelan
 
-This project renders a synchronised multiplayer interface using ES6 canvas animation and gesture-triggered audio synthesised via Csound WebAssembly. It was designed principally as a concert app and written in javaScript as a replacement for an earlier version written in Objective-C. The UI is designed for a portrait-mode mobile screen (`390×844`) and shared between:
+This project renders a synchronised multiplayer interface using ES6 canvas animation and gesture-triggered audio synthesised via Csound WebAssembly. It was designed principally as a concert app and written in javaScript as a replacement for an earlier version written in Objective-C. The UI is designed for a portrait-mode mobile screen (`390×844`).
 
-- **Lead player** (`leader.html`) — lead player starts animation by tapping clock
-- **Consort** (`consort.html`) — all players trigger sounds by tapping sprites enabled by the animation
+The app can be launched using 1 of 2 html files depending on the role :
+
+- **Lead player** (`leader.html`) — lead player taps the clock to start the animation sequence
+- **Consort** (`consort.html`) — all players trigger sounds by tapping sprites enabled by the animation sequence
 - Both versions display the same 25-key layout and interactive clock
+
+The leader's role is: 
+- to start the animation sequence in sync on all phones;
+- to select 1 of 2 playing modes:
+
+- **PREVIEW** : plays 'fast-forward' giving players an overview of the changing UI 
+- **CONCERT** : plays in real-time and lasts between 12:24 and 12:48 seconds 
+
+
 
 ## Features
 
@@ -121,20 +132,6 @@ python3 assets/python/server.py \
   -r .
 ```
 The server listens for phones as each player launches the app by scanning a QR code on their phone
-
-The app can be launched using 1 of 2 html files depending on the role :
-
-    `[leader.html] (https://macbook-pro-2.local:8443/leader.html?wsPort=8444)`
-
-    `[consort.html] (https://macbook-pro-2.local:8443/consort.html?wsPort=8444)` -- used by other players
-
-The leader's role is: 
-- to start the animation sequence in sync on all phones;
-- to select the playing mode.
-
-There are 2 playing modes : 
-- **PREVIEW** : plays 'fast-forward' giving players an overview of the changing UI 
-- **CONCERT** : plays in real-time and lasts between 12:24 and 12:48 seconds 
 
 
 ```
