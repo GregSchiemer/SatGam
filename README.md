@@ -78,8 +78,8 @@ Actual `.pem` certificate files are omitted here for clarity.
 └── README.md
 
 16 directories, 58 files
-```
 
+```
 ## Getting Started
 
 ### How to create and use SatGam HTTPS certificates on the MacBook server for the AX73 concert network
@@ -122,10 +122,10 @@ python3 assets/python/server.py \
 ```
 The app has 2 entry points launched by different html files:
 
-    `leader.html` -- used by 1 player
+    `leader.html` -- used by the lead player
 
     `consort.html` -- used by other players
     
-The server listen for phones as each player launches the app by scanning a QR code on their phone
+The server listens for phones as each player launches the app by scanning a QR code on their phone
 
 ```
