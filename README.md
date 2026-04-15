@@ -132,11 +132,11 @@ The leader's role is:
 - to start the animation sequence in sync on all phones;
 - to select the playing mode.
 
-There are 2 modes : 
-- **CONCERT**
--- the sequence is played in real-time and lasts between 12:24 and 12:48 seconds 
+There are 2 playing modes : 
 - **PREVIEW**
--- the sequence is played rapidly to give players an overview of the changing UI 
+plays rapidly to give players an overview of the changing UI 
+- **CONCERT**
+plays in real-time and lasts between 12:24 and 12:48 seconds 
 
 
 ```
