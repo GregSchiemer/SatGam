@@ -93,7 +93,7 @@ Actual `.pem` certificate files are omitted here for clarity.
 
 ### How to create and use SatGam HTTPS certificates on the MacBook server for the AX73 concert network
 
-SatGam’s browser audio path uses secure-context web features associated with Csound Web Assembly, so for phone deployment it must be served over **HTTPS** with **WSS** for WebSockets.
+SatGam’s browser audio path uses secure-context web features associated with Csound WebAssembly, so for phone deployment it must be served over **HTTPS** with **WSS** for WebSockets.
 
 Certificates must be created for the **SatGam server running on the MacBook Pro**. Phones reach the server through a concert network using a **tp-link AX73 Wi-Fi 6 Router**.
 
@@ -118,7 +118,7 @@ The secure ports are:
 
     `WSS: 8444`
 
-The server is run from terminal using the following commands:
+The server is run from Terminal using the following commands:
 
 ```gs@MacBook-Pro-2 ~ % cd /Users/gs/Developer/SG/SatGam
 python3 assets/python/server.py \
@@ -288,10 +288,10 @@ The QR codes should now point to:
 
 - **Leader**
 
-'https://192.168.1.10:8443/leader.html?wsPort=8444'
+`https://192.168.1.10:8443/leader.html?wsPort=8444`
 
 - **Consort**
 
-'https://192.168.1.10:8443/consort.html?wsPort=8444'
+`https://192.168.1.10:8443/consort.html?wsPort=8444`
 
 ```
