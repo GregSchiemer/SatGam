@@ -4,13 +4,13 @@ import { arrT } from './canvasUtils.js';
 import { ColorFamily, TextColorByFamily } from './color.js';
 
 export function drawTopText(ctxT, status, text) {
-  const x = ctxT.mid.x, y = ctxT.h * 0.10;
+  const x = ctxT.mid.x, y = ctxT.top.y;
   drawText(ctxT, status, text, x, y, 30);
 }
 
 export function drawSubText(ctxT, status, text) {
-  const x = ctxT.mid.x, y = ctxT.h * 0.17;
-  drawText(ctxT, status, text, x, y, 24);
+  const x = ctxT.mid.x, y = ctxT.sub.y;
+  drawText(ctxT, status, text, x, y, 18);
 }
 
 export function drawMidText(ctxT, status, text) {
@@ -20,17 +20,17 @@ export function drawMidText(ctxT, status, text) {
 }
 
 export function drawLowText(ctxT, status, text) {
-  const x = ctxT.mid.x, y = ctxT.h * 0.90;
+  const x = ctxT.mid.x, y = ctxT.low.y;
   drawText(ctxT, status, text, x, y, 18);
 }
 
 export function drawLeftText(ctxT, status, text) {
-  const x = ctxT.left.x, y = ctxT.h * 0.50;
+  const x = ctxT.left.x, y = ctxT.mid.y;
   drawText(ctxT, status, text, x, y, 24);
 }
 
 export function drawRightText(ctxT, status, text) {
-  const x = ctxT.right.x, y = ctxT.h * 0.50;
+  const x = ctxT.right.x, y = ctxT.mid.y;
   drawText(ctxT, status, text, x, y, 24);
 }
 

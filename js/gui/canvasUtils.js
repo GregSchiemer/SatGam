@@ -19,15 +19,15 @@ function stampGeometry(ctx, designW, designH, dpr, fit) {
   ctx.designH = designH;
 
   ctx.mid = { x: designW * 0.5, y: designH * 0.5 };
-  ctx.top = { x: ctx.mid.x,     y: designH * 0.10 };
-  ctx.low = { x: ctx.mid.x,     y: designH * 0.90 };
+  ctx.top = { x: ctx.mid.x,     y: designH * 0.18 };
+  ctx.sub = { x: ctx.mid.x,     y: designH * 0.24 };
+  ctx.low = { x: ctx.mid.x,     y: designH * 0.78 };
 
   const lateralOffset = 80;
   ctx.left  = { x: ctx.mid.x - lateralOffset, y: ctx.mid.y };
   ctx.right = { x: ctx.mid.x + lateralOffset, y: ctx.mid.y };
 
   ctx.pi2 = 2 * Math.PI;
-//  ctx.orientBias = Math.PI;  // single source of truth
   ctx.tapRadius = 50;
   ctx.keyRadius = designW; //20;
   ctx.cornerRadius = 25;
