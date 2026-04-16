@@ -71,6 +71,7 @@ Actual `.pem` certificate files are omitted here for clarity.
 │   │   ├── net.js
 │   │   ├── renderer.js
 │   │   ├── runTime.js
+│   │   ├── satgamPing.js
 │   │   ├── sequence.js
 │   │   ├── sprites.js
 │   │   ├── text.js
@@ -100,7 +101,7 @@ Certificates must be created for the **SatGam server running on the MacBook Pro*
 
 In this setup:
 
-- **MacBook Pro** runs `server.py'
+- **MacBook Pro** runs `server.py`
 - **AX73 wireless router** provides the private LAN and Wi-Fi
 - **phones** connect to the MacBook through the AX73 network
 - `mkcert` creates the SatGam server certificate and its local certificate authority (CA) 
