@@ -16,8 +16,6 @@ The app can be launched using 1 of 2 html files depending on the role :
 - **Consort** (`consort.html`) — all players trigger sounds by tapping sprites enabled by the animation sequence
 - Both versions display the same 25-key layout and interactive clock
 
-![Start View](assets/md-images/md-leader-2.png)
-
 The leader's role is: 
 - to start the animation sequence in sync on all phones;
 - to select 1 of 2 playing modes:
