@@ -23,9 +23,10 @@ The leader's role is:
     1. **PREVIEW** : plays the animation sequence 'fast-forward' giving players an overview of the changing UI
     2. **CONCERT** : plays it in real-time and lasts between 12:24 and 12:48 seconds 
 
-![Phonehenge image 1](assets/md-images/ph1.PNG)
-
-![Phonehenge image 2](assets/md-images/ph2.PNG)
+<p>
+  <img src="assets/md-images/ph1.PNG" width="340" alt="Phonehenge image 1">
+  <img src="assets/md-images/ph2.PNG" width="340" alt="Phonehenge image 2">
+</p>
 
 ## 📁 Project Structure
 
