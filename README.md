@@ -23,6 +23,10 @@ The leader's role is:
     1. **PREVIEW** : plays the animation sequence 'fast-forward' giving players an overview of the changing UI
     2. **CONCERT** : plays it in real-time and lasts between 12:24 and 12:48 seconds 
 
+![Phonehenge image 1](assets/md-images/ph1.PNG)
+
+![Phonehenge image 2](assets/md-images/ph2.PNG)
+
 ## 📁 Project Structure
 
 Actual `.pem` certificate files are omitted here for clarity.
