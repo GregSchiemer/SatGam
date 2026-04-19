@@ -28,6 +28,13 @@ The leader's role is:
   <img src="assets/md-images/ph2.PNG" width="250" alt="Phonehenge image 2">
 </p>
 
+
+<p>
+  <img src="assets/md-images/ph1.PNG" width="250" alt="Phonehenge image 1">
+  <img src="assets/md-images/ph2.PNG" width="250" alt="Phonehenge image 2">
+  <img src="assets/md-images/AX73.JPG" width="250" alt="TP-Link AX73 Wi-Fi Router">
+</p>
+
 ## 📁 Project Structure
 
 Actual `.pem` certificate files are omitted here for clarity.
