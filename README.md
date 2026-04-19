@@ -120,6 +120,10 @@ In this setup:
 ---
 ### How to set up [tp-link AX73 Wi-Fi 6 Router](https://youtu.be/5nZY1M_RH-k)
 
+<p>
+  <img src="assets/md-images/tp_link_ax73_wi_fi_6_router.JPG" width="250" alt="Phonehenge image 1">
+</p>
+
 ### SatGam Router Settings
 
 **Router Information**
