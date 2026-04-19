@@ -114,7 +114,7 @@ In this setup:
 ### Router Information
 
 | Item | Value | Item | Value |
-|:------|:-------|:------|:-------|
+|:------|-------:|:------|-------:|
 | Device Name | Archer AX73 | IPv4 LAN IP | 192.168.1.1 |
 | LAN MAC Address | B8-FB-B3-ED-56-F0 | IPv6 LAN IP | FE80::BAFB:B3FF:FEED:56F0/64 |
 
