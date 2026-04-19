@@ -3,7 +3,9 @@
 The Satellite Gamelan app is designed for a large group of musicians to perform concert music using mobile phones. Performance relies on miniature speakers projecting into reverberant concert venues that were designed to project the unamplified sound of multiple hand-held instruments and a cappella voices.
 
 This project renders a synchronised multiplayer interface using ES6 canvas animation and gesture-triggered audio. It was designed principally as a [concert app](https://satellitegamelan.com) to perform microtonal music created by the [developer](https://www.xenharmonikon.org/2024/09/13/an-extended-interview-with-greg-schiemer/), a 
-[composer and builder of bespoke electronic instruments](https://satellitegamelan.com/gallery.php). The combination of javaScript and Csound WebAssembly is intended as an eventual replacement of the original version of the app written in Objective-C. The UI is designed for a portrait-mode mobile screen (`390×844`).
+[composer and builder of bespoke electronic instruments](https://satellitegamelan.com/gallery.php). The app was initially designed to perform music that explored microtonal tuning theories of Partch and Wilson. The work in this version explores harmonic properties of a tuning system with 25 equally spaced intervals, devised by Karlheinz Stockhausen for his 1954 electronic work Studie II.
+
+The combination of javaScript and Csound WebAssembly is intended as an eventual replacement of the original version of the app written in Objective-C. The UI is designed for a portrait-mode mobile screen (`390×844`).
 
 The app features instruments that are easy to play and quick to learn, enabling musicians to explore uncharted harmonic spaces rarely visited using standard musical instruments. Every phone becomes a mobile sound source in a large harmonic constellation and a hand-held stage light that enhances concert presentation. 
 
