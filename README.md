@@ -349,9 +349,9 @@ The QR codes should now point to:
 	https://192.168.1.10:8443/consort.html?wsPort=8444
 ```
 ---
-## Installing SatGam Root Certificate on Performer Phones
+## Installing SatGam Certificate Authority on Performer Phones
 
-To allow performer phones to connect to the SatGam HTTPS server without certificate warnings, each device must install and trust the local certificate authority (CA).
+To allow performer phones to connect to the SatGam HTTPS server without certificate warnings, each device must install and trust the local **Certificate Authority** (**CA**).
 
 The file to install is:
 
@@ -359,7 +359,7 @@ The file to install is:
 		assets/certs/SatGam-rootCA.pem
 ```
 ---
-**iPhone (iOS) Installation**
+**iPhone (iOS) CA Installation**
 
 1. **Transfer the certificate** to the iPhone using one of the following methods:
 * AirDrop (recommended)
@@ -396,11 +396,11 @@ If installed correctly:
 * no certificate warning appears
 * the page loads normally
 ---
-**Android Installation**
+**Android CA Installation**
 
-Steps vary slightly depending on Android version and manufacturer.
+Steps may vary slightly depending on Android version and manufacturer.
 
-1. **Transfer the certificate**
+1. **Transfer the certificate SatGam-rootCA.pem **
 * Email
 * USB
 * AirDrop equivalent
@@ -414,7 +414,7 @@ Steps vary slightly depending on Android version and manufacturer.
 	Security → Encryption & credentials → Install a certificate
 ```
 
-	(or search for “Install certificate”)
+	(or search for *Install certificate*)
 
 - **Select**
 
@@ -430,10 +430,9 @@ Steps vary slightly depending on Android version and manufacturer.
 
 Android will warn that:
 
-`	*Your network traffic may be monitored*`
+`	Your network traffic may be monitored`
 
-This is expected for a user-installed CA.
-Tap Install anyway.
+This is expected for a user-installed CA. Tap Install anyway.
 
 4. **Verify**
 
