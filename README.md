@@ -386,9 +386,7 @@ This step is required on iOS.
 - Go to: Settings → General → About → Certificate Trust Settings
 - Under Enable Full Trust for Root Certificates, find:
 
-`	SatGam-rootCA`
-
-	(or similar name)
+`	SatGam-rootCA` (or similar name)
 	
 - Toggle it ON
 - Confirm when prompted
