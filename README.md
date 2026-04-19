@@ -112,9 +112,9 @@ In this setup:
 - `mkcert` creates the SatGam server certificate and its local certificate authority (CA) 
 
 ---
-### How to set up [tp-link AX73 wireless router](https://youtu.be/5nZY1M_RH-k)**
+### How to set up [tp-link AX73 wireless router](https://youtu.be/5nZY1M_RH-k)
 
-### Settings
+### Satellite Gamelan Router Settings
 
 **Router Information**
 
