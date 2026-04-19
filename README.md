@@ -374,10 +374,10 @@ The file to install is:
 
 2. **Install the profile**
 - Open the .pem file on the iPhone
-- You will see a message: “Profile Downloaded”
-- Open Settings
-- Tap Profile Downloaded
-- Tap Install
+- You will see a message: `Profile Downloaded`
+- Open **Settings**
+- Tap `Profile Downloaded`
+- Tap **Install**
 - Enter passcode if prompted
 - Tap Install again to confirm
 
