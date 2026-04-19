@@ -400,7 +400,7 @@ If installed correctly:
 
 Steps may vary slightly depending on Android version and manufacturer.
 
-1. **Transfer the certificate SatGam-rootCA.pem **
+1. **Transfer** the certificate
 * Email
 * USB
 * AirDrop equivalent
