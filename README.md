@@ -361,13 +361,12 @@ The file to install is:
 ---
 **iPhone (iOS) Installation**
 
-1. Transfer the certificate to the iPhone
-Use one of the following methods:
+1. **Transfer the certificate** to the iPhone using one of the following methods:
 * AirDrop (recommended)
 * Email attachment
 * Host the file temporarily on the SatGam server and open it in Safari
 
-2. Install the profile
+2. **Install the profile**
 - Open the .pem file on the iPhone
 - You will see a message: “Profile Downloaded”
 - Open Settings
@@ -376,7 +375,7 @@ Use one of the following methods:
 - Enter passcode if prompted
 - Tap Install again to confirm
 
-3. Enable full trust (CRITICAL)
+3. **Enable full trust** (CRITICAL)
 This step is required on iOS.
 - Go to: Settings → General → About → Certificate Trust Settings
 - Under Enable Full Trust for Root Certificates, find:
@@ -388,7 +387,7 @@ This step is required on iOS.
 - Toggle it ON
 - Confirm when prompted
 
-4. Verify
+4. **Verify**
 Open Safari and test:
 
 `	https://192.168.1.10:8443/leader.html?wsPort=8444`
@@ -401,14 +400,14 @@ If installed correctly:
 
 Steps vary slightly depending on Android version and manufacturer.
 
-1. Transfer the certificate
+1. **Transfer the certificate**
 * Email
 * USB
 * AirDrop equivalent
 * Download from server
 
-2. Install the certificate
-- Open Settings
+2. **Install the certificate**
+- **Open Settings**
 - Go to:
 
 ```
@@ -417,17 +416,17 @@ Steps vary slightly depending on Android version and manufacturer.
 
 	(or search for “Install certificate”)
 
-- Select:
+- **Select**
 
 `	CA certificate`
 
-- Locate and accept
+- **Locate** and accept:
 
 `	SatGam-rootCA.pem`
 
-- Confirm installation
+- **Confirm** installation:
 
-3. Accept warning
+3. **Accept**
 Android will warn that:
 
 `	“Your network traffic may be monitored”`
@@ -435,7 +434,7 @@ Android will warn that:
 This is expected for a user-installed CA.
 Tap Install anyway.
 
-4. Verify
+4. **Verify**
 Open Chrome and test:
 
 `	https://192.168.1.10:8443/leader.html?wsPort=8444`
@@ -443,6 +442,5 @@ Open Chrome and test:
 If installed correctly:
 * no certificate warning appears
 * the page loads normally
-
 
 ```
