@@ -424,17 +424,19 @@ Steps vary slightly depending on Android version and manufacturer.
 
 `	SatGam-rootCA.pem`
 
-- **Confirm** installation:
+- Confirm installation:
 
 3. **Accept**
+
 Android will warn that:
 
-`	“Your network traffic may be monitored”`
+`	*Your network traffic may be monitored*`
 
 This is expected for a user-installed CA.
 Tap Install anyway.
 
 4. **Verify**
+
 Open Chrome and test:
 
 `	https://192.168.1.10:8443/leader.html?wsPort=8444`
