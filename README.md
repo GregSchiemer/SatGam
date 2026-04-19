@@ -155,13 +155,14 @@ In this setup:
 ---
 ### SatGam Server
 
-```
 The MacBook Pro has a fixed AX73-side IP address:
+
 ```
 		192.168.1.10
 ```
-    
+
 The secure ports are:
+
 ```
 		HTTPS: 8443
 		WSS: 8444
