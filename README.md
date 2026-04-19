@@ -23,6 +23,7 @@ The leader's role is:
     1. **PREVIEW** : plays the animation sequence 'fast-forward' giving players an overview of the changing UI
     2. **CONCERT** : plays it in real-time and lasts between 12:24 and 12:48 seconds 
 
+
 <p>
   <img src="assets/md-images/ph1.PNG" width="250" alt="Phonehenge image 1">
   <img src="assets/md-images/ph2.PNG" width="250" alt="Phonehenge image 2">
@@ -32,8 +33,9 @@ The leader's role is:
 <p>
   <img src="assets/md-images/ph1.PNG" width="250" alt="Phonehenge image 1">
   <img src="assets/md-images/ph2.PNG" width="250" alt="Phonehenge image 2">
-  <img src="assets/md-images/AX73.JPG" width="250" alt="TP-Link AX73 Wi-Fi Router">
+  <!--img src="assets/md-images/AX73.JPG" width="250" alt="TP-Link AX73 Wi-Fi Router"-->
 </p>
+
 
 ## 📁 Project Structure
 
