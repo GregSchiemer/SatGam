@@ -132,7 +132,7 @@ In this setup:
 **Wireless Information**
 
 | Band | Network Name (SSID) | Password | Channel | Status |
-|:------|----------------------:|:----------|---------:|--------|
+|:------|----------------------:|----------:|---------:|--------|
 | 2.4 GHz / 5 GHz | Vercoe | Stockhausen25root5 | 2.4G Auto (Current: 8) / 5G Auto (Current: 40) | ☐ |
 
 **Wireless Settings**
@@ -141,7 +141,7 @@ In this setup:
 |:---------|-------------------:|
 | **TWT** | ☐ |
 | **OFDMA / MU-MIMO** | ☐ |
-| Smart Connect | Enabled |
+| **Smart Connect** | Enabled |
 | **2.4 GHz / 5 GHz** | Enabled |
 | **Network Name (SSID)** | Vercoe |
 | **Security** | WPA2-PSK [AES] |
