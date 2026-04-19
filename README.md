@@ -27,9 +27,7 @@ The leader's role is:
 <p>
   <img src="assets/md-images/ph1.PNG" width="250" alt="Phonehenge image 1">
   <img src="assets/md-images/ph2.PNG" width="250" alt="Phonehenge image 2">
-  <img src="assets/md-images/ax73.JPG" width="250" alt="TP-Link AX73 Wi-Fi Router">
 </p>
- 32
 
 
 ## 📁 Project Structure
@@ -123,6 +121,10 @@ In this setup:
 
 ---
 ### How to set up [tp-link AX73 Wi-Fi 6 Router](https://youtu.be/5nZY1M_RH-k)
+
+<p>
+  <img src="assets/md-images/ax73.JPG" width="250" alt="TP-Link AX73 Wi-Fi Router">
+</p>
 
 ### SatGam Router Settings
 
