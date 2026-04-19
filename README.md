@@ -111,20 +111,25 @@ In this setup:
 - **phones** connect to the MacBook through the AX73 network
 - `mkcert` creates the SatGam server certificate and its local certificate authority (CA) 
 
-### Router Information
+---
+### How to set up [tp-link AX73 wireless router](https://youtu.be/5nZY1M_RH-k)**
+
+### Settings
+
+**Router Information**
 
 | Item | Value | Item | Value |
 |:------|-------:|:------|-------:|
 | Device Name | Archer AX73 | IPv4 LAN IP | 192.168.1.1 |
 | LAN MAC Address | B8-FB-B3-ED-56-F0 | IPv6 LAN IP | FE80::BAFB:B3FF:FEED:56F0/64 |
 
-### Wireless Information
+**Wireless Information**
 
 | Band | Network Name (SSID) | Password | Channel | Status |
 |:------|----------------------:|:----------|---------:|--------|
 | 2.4 GHz / 5 GHz | Vercoe | Stockhausen25root5 | 2.4G Auto (Current: 8) / 5G Auto (Current: 40) | ☐ |
 
-### Wireless Settings
+**Wireless Settings**
 
 | Setting | Value |
 |:---------|-------------------:|
@@ -141,7 +146,7 @@ In this setup:
 | 5 GHz Channel Width | 20/40/80/160 MHz |
 | 5 GHz Channel | Auto |
 
-[This video link shows how to set up the tp-link AX73 wireless router](https://youtu.be/5nZY1M_RH-k)
+---
 
 This guide assumes SatGam lives at:
 ```
