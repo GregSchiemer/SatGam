@@ -155,6 +155,7 @@ In this setup:
 ---
 ### SatGam Server
 
+Each player launches the app by scanning a QR code on their phone. The server runs on a MacBook Pro. It waits and automatically connects to each phone as it launches allowing it to download the Satellite Gamelan app from the MacBook Pro. 
 The MacBook Pro has a fixed AX73-side IP address:
 
 ```
@@ -181,9 +182,8 @@ The **server** is run from **Terminal** using the following commands:
 	  	-r .
 ```
 ---
-The server listens for phones as each player launches the app by scanning a QR code on their phone
 
-**Part 1 — Create and install the SatGam certificates**
+**Part 1 — Create and install SatGam certificates**
 
 Open a Terminal window and run the following commands.
 
