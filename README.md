@@ -100,6 +100,12 @@ Actual `.pem` certificate files are omitted here for clarity.
 
 ### How to create and use SatGam HTTPS certificates on the MacBook server for the AX73 concert network
 
+This guide assumes SatGam lives at:
+
+```
+		/Users/gs/Developer/SG/SatGam
+```
+
 SatGam’s browser audio path uses secure-context web features associated with Csound WebAssembly, so for phone deployment it must be served over **HTTPS** with **WSS** for WebSockets.
 
 Certificates must be created for the **SatGam server running on the MacBook Pro**. Phones reach the server through a concert network using a **tp-link AX73 Wi-Fi 6 Router**.
@@ -114,7 +120,7 @@ In this setup:
 ---
 ### How to set up [tp-link AX73 wireless router](https://youtu.be/5nZY1M_RH-k)
 
-### Satellite Gamelan Router Settings
+### SatGam Router Settings
 
 **Router Information**
 
@@ -147,10 +153,8 @@ In this setup:
 | 5 GHz Channel | Auto |
 
 ---
+### SatGam Router Server
 
-This guide assumes SatGam lives at:
-```
-		/Users/gs/Developer/SG/SatGam
 ```
 The MacBook Pro has a fixed AX73-side IP address:
 ```
@@ -163,7 +167,7 @@ The secure ports are:
 		WSS: 8444
 ```
 
-The server is run from Terminal using the following commands:
+The **server** is run from **Terminal** using the following commands:
 
 ```
 	gs@MacBook-Pro-2 ~ % cd /Users/gs/Developer/SG/SatGam
