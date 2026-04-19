@@ -27,14 +27,9 @@ The leader's role is:
 <p>
   <img src="assets/md-images/ph1.PNG" width="250" alt="Phonehenge image 1">
   <img src="assets/md-images/ph2.PNG" width="250" alt="Phonehenge image 2">
+  <img src="assets/md-images/ax73.JPG" width="250" alt="TP-Link AX73 Wi-Fi Router">
 </p>
-
-
-<p>
-  <img src="assets/md-images/ph1.PNG" width="250" alt="Phonehenge image 1">
-  <img src="assets/md-images/ph2.PNG" width="250" alt="Phonehenge image 2">
-  <!--img src="assets/md-images/AX73.JPG" width="250" alt="TP-Link AX73 Wi-Fi Router"-->
-</p>
+ 32
 
 
 ## 📁 Project Structure
