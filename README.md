@@ -98,7 +98,7 @@ Actual `.pem` certificate files are omitted here for clarity.
 ```
 ## Getting Started
 
-### How to create and use SatGam HTTPS certificates on the MacBook server for the AX73 concert network
+### How to create and use HTTPS certificates on the SatGam Server for the concert network
 
 This guide assumes SatGam lives at:
 
@@ -108,7 +108,7 @@ This guide assumes SatGam lives at:
 
 SatGam’s browser audio path uses secure-context web features associated with Csound WebAssembly, so for phone deployment it must be served over **HTTPS** with **WSS** for WebSockets.
 
-Certificates must be created for the **SatGam server running on the MacBook Pro**. Phones reach the server through a concert network using a **tp-link AX73 Wi-Fi 6 Router**.
+Certificates must be created for the **SatGam Server** running on the MacBook Pro. Phones reach the server through a concert network using a **tp-link AX73 Wi-Fi 6 Router**.
 
 In this setup:
 
@@ -118,7 +118,7 @@ In this setup:
 - `mkcert` creates the SatGam server certificate and its local certificate authority (CA) 
 
 ---
-### How to set up [tp-link AX73 wireless router](https://youtu.be/5nZY1M_RH-k)
+### How to set up [tp-link AX73 Wi-Fi 6 Router](https://youtu.be/5nZY1M_RH-k)
 
 ### SatGam Router Settings
 
@@ -126,8 +126,8 @@ In this setup:
 
 | Item | Value | Item | Value |
 |:------|-------:|:------|-------:|
-| Device Name | Archer AX73 | IPv4 LAN IP | 192.168.1.1 |
-| LAN MAC Address | B8-FB-B3-ED-56-F0 | IPv6 LAN IP | FE80::BAFB:B3FF:FEED:56F0/64 |
+| **Device Name** | Archer AX73 | **IPv4 LAN IP** | 192.168.1.1 |
+| **LAN MAC Address** | B8-FB-B3-ED-56-F0 | **IPv6 LAN IP** | FE80::BAFB:B3FF:FEED:56F0/64 |
 
 **Wireless Information**
 
@@ -139,21 +139,21 @@ In this setup:
 
 | Setting | Value |
 |:---------|-------------------:|
-| TWT | ☐ |
-| OFDMA / MU-MIMO | ☐ |
+| **TWT** | ☐ |
+| **OFDMA / MU-MIMO** | ☐ |
 | Smart Connect | Enabled |
-| 2.4 GHz / 5 GHz | Enabled |
-| Network Name (SSID) | Vercoe |
-| Security | WPA2-PSK [AES] |
-| Password | Stockhausen25root5 |
+| **2.4 GHz / 5 GHz** | Enabled |
+| **Network Name (SSID)** | Vercoe |
+| **Security** | WPA2-PSK [AES] |
+| **Password** | Stockhausen25root5 |
 | **2.4 GHz / 5 GHz Advanced Settings** | |
-| 2.4 GHz Channel Width | 20/40 MHz |
-| 2.4 GHz Channel | Auto |
-| 5 GHz Channel Width | 20/40/80/160 MHz |
-| 5 GHz Channel | Auto |
+| **2.4 GHz Channel Width** | 20/40 MHz |
+| **2.4 GHz Channel** | Auto |
+| **5 GHz Channel Width** | 20/40/80/160 MHz |
+| **5 GHz Channel** | Auto |
 
 ---
-### SatGam Router Server
+### SatGam Server
 
 ```
 The MacBook Pro has a fixed AX73-side IP address:
