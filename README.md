@@ -127,7 +127,7 @@ In this setup:
 ### Wireless Settings
 
 | Setting | Value |
-|:---------|:-------|
+|:---------|-------:|
 | TWT | ☐Off |
 | OFDMA / MU-MIMO | ☐ |
 | Smart Connect | Enabled |
