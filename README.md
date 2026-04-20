@@ -485,12 +485,12 @@ G. Schiemer and M. Havryliv (2005) [Pocket Gamelan: a Pure Data interface for Mo
 
 ## SatelliteGamelan.com
 
-[index](https://satellitegamelan.com/index.php)
+- [index](https://satellitegamelan.com/index.php)
 
-[concerts](https://satellitegamelan.com/concerts.php)
+- [links](https://satellitegamelan.com/links.php)
 
-[gallery](https://satellitegamelan.com/gallery.php)
+- [gallery](https://satellitegamelan.com/gallery.php)
 
-[about](https://satellitegamelan.com/about.php)
+- [about](https://satellitegamelan.com/about.php)
 
 ```
