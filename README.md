@@ -165,7 +165,7 @@ In this setup:
 ---
 ### SatGam Server
 
-Each player launches the app by scanning a QR code on their phone. The server runs on a MacBook Pro. It waits and automatically connects to each phone as it launches allowing it to download the Satellite Gamelan app from the MacBook Pro. 
+The SatGam server runs on a MacBook Pro. It is written in python allowing it to run on other platforms. Each player launches the app by scanning a QR code on their phone. The server waits and automatically connects as each phone launches allowing phones to download the Satellite Gamelan app. 
 The MacBook Pro has a fixed AX73-side IP address:
 
 ```
