@@ -454,15 +454,15 @@ If installed correctly:
 
 ## Acknowledgements
 
-[John ffitch]()
+- [John ffitch](https://csound.com/docs/manual/cpsxpch.html)
 
-[Stephen Yi]()
+- [Stephen Yi](https://ide.csound.com/profile/stevenyi)
 
-[Victor Lazzarini]()
+- [Victor Lazzarini](https://github.com/vlazzarini)
 
-[Bill Alves]()
+- [Bill Alves](chapters/02alves)
 
-[Thorin Kerr]()
+- [Thorin Kerr](https://ide.csound.com/profile/ErrorThinker)
 
 ## References
 
