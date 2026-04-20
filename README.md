@@ -462,6 +462,8 @@ Thorin Kerr
 
 ## References
 
+Xenharmonikon [developer](https://www.xenharmonikon.org/2024/09/13/an-extended-interview-with-greg-schiemer/)
+
 G. Schiemer (2016) [Satellite Gamelan: microtonal sonification using a large consort of mobile phones]
 (https://www.icad.org/icad2016/proceedings2/papers/ICAD2016_paper_51.pdf)
 
