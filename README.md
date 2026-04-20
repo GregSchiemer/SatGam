@@ -475,6 +475,6 @@ G. Schiemer (2006) [The microtonal legacy of the Pocket Gamelan](https://ro.uow.
 G. Schiemer and M. Havryliv (2006) [Pocket Gamelan: tuneable trajectories for flying sources in *Mandala 3* and *Mandala 4*](
 https://www.academia.edu/85041071)
 
-G. Schiemer and M. Havryliv (2005) [Pocket Gamelan: a Pure Data interface for Mobile phones](https://scispace.com › pdf)
+G. Schiemer and M. Havryliv (2005) [Pocket Gamelan: a Pure Data interface for Mobile phones](https://www.nime.org/proceedings/2005/nime2005_156.pdf)
 
 ```
