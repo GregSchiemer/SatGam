@@ -456,15 +456,11 @@ If installed correctly:
 
 ## Acknowledgements
 
-- [John ffitch](https://csound.com/docs/manual/cpsxpch.html)
-
-- [Stephen Yi](https://ide.csound.com/profile/stevenyi)
-
-- [Victor Lazzarini](https://github.com/vlazzarini)
-
 - [Bill Alves](https://github.com/SamKomesarook/The-Csound-Book/tree/main/chapters/02alves)
-
+- [John ffitch](https://csound.com/docs/manual/cpsxpch.html)
+- [Victor Lazzarini](https://github.com/vlazzarini)
 - [Thorin Kerr](https://ide.csound.com/profile/ErrorThinker)
+- [Stephen Yi](https://ide.csound.com/profile/stevenyi)
 
 ## References
 
