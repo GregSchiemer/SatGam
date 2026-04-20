@@ -483,7 +483,7 @@ https://www.academia.edu/85041071)
 
 G. Schiemer and M. Havryliv (2005) [Pocket Gamelan: a Pure Data interface for Mobile phones](https://www.nime.org/proceedings/2005/nime2005_156.pdf)
 
-## SatelliteGamelan.com
+## satellitegamelan.net
 
 - [index](https://satellitegamelan.com/index.php)
 
