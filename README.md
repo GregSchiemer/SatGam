@@ -452,4 +452,31 @@ If installed correctly:
 * no certificate warning appears
 * the page loads normally
 
+## Acknowledgements
+
+John ffitch
+Stephen Yi
+Victor Lazzarini
+Bill Alves 
+Thorin Kerr
+
+## References
+
+[G. Schiemer (2016) Satellite Gamelan: microtonal sonification using a large consort of mobile phones]
+(https://www.icad.org/icad2016/proceedings2/papers/ICAD2016_paper_51.pdf)
+
+[Greg Schiemer, Etienne Deleflie, Eva Cheng. Pocket Gamelan: Realizations of a Microtonal Composition on a Linux Phone Using Open Source Music Synthesis Software. Second IFIP TC 14 Entertainment Computing Symposium (ECS) / Held as Part of World Computer Congress (WCC), Sep 2010, Brisbane, Australia. pp.101-110, ⟨10.1007/978-3-642-15214-6_10⟩. ⟨hal-01056351⟩](https://inria.hal.science/hal-01056351v1/document)
+
+[G. Schiemer and M. Op de Coul (2007) Pocket Gamelan: tuning microtonal applications in Pd using Scala](https://ro.uow.edu.au/ndownloader/files/50561721)
+
+[G. Schiemer (2006) The microtonal legacy of the Pocket Gamelan]
+(The microtonal legacy of the Pocket GamelanUniversity of Wollongong Research Onlinehttps://ro.uow.edu.au › ndownloader › files)
+
+[G. Schiemer and M. Havryliv (2006) Pocket Gamelan: tuneable trajectories for flying sources in 
+*Mandala 3* and *Mandala 4*](
+https://www.academia.edu/85041071/Pocket_Gamelan_Tuneable_Trajectories_For_Flying_Sources_In_Mandala_3_And_Mandala_4)
+
+[G. Schiemer and M. Havryliv (2005) Pocket Gamelan: a Pure Data interface for Mobile phones](
+Pocket Gamelan: a Pure Data interface for mobile phonesSciSpacehttps://scispace.com › pdf)
+
 ```
