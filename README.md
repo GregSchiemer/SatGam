@@ -472,9 +472,8 @@ Thorin Kerr
 [G. Schiemer (2006) The microtonal legacy of the Pocket Gamelan]
 (The microtonal legacy of the Pocket GamelanUniversity of Wollongong Research Onlinehttps://ro.uow.edu.au › ndownloader › files)
 
-[G. Schiemer and M. Havryliv (2006) Pocket Gamelan: tuneable trajectories for flying sources in 
-*Mandala 3* and *Mandala 4*](
-https://www.academia.edu/85041071/Pocket_Gamelan_Tuneable_Trajectories_For_Flying_Sources_In_Mandala_3_And_Mandala_4)
+[G. Schiemer and M. Havryliv (2006) Pocket Gamelan: tuneable trajectories for flying sources in *Mandala 3* and *Mandala 4*](
+https://www.academia.edu/85041071)
 
 [G. Schiemer and M. Havryliv (2005) Pocket Gamelan: a Pure Data interface for Mobile phones](https://scispace.com › pdf)
 
