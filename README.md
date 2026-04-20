@@ -452,6 +452,8 @@ If installed correctly:
 * no certificate warning appears
 * the page loads normally
 
+---
+
 ## Acknowledgements
 
 - [John ffitch](https://csound.com/docs/manual/cpsxpch.html)
