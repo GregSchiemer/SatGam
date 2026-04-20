@@ -18,7 +18,8 @@ The app can be launched using 1 of 2 html files depending on the role :
 - **Lead player** (`leader.html`) — lead player taps the clock to start the animation sequence
 - **Consort** (`consort.html`) — all players trigger sounds by tapping sprites enabled by the animation sequence
 - Both versions display the same 25-key layout and interactive clock
-- The leader connects with the consort via a **tp-link AX73 Wi-Fi 6 Router**
+- The lead player syncs the consort via a **tp-link AX73 Wi-Fi 6 Router**
+- No internet connection is required
 
 The leader's role is: 
 - to start the animation sequence in sync on all phones;
@@ -27,13 +28,11 @@ The leader's role is:
     1. **PREVIEW** : plays the animation sequence 'fast-forward' giving players an overview of the changing UI
     2. **CONCERT** : plays it in real-time and lasts between 12:24 and 12:48 seconds 
 
-
 <p>
   <img src="assets/md-images/ph1.PNG" width="250" alt="Phonehenge image 1">
   <img src="assets/md-images/ph2.PNG" width="250" alt="Phonehenge image 2">
   <img src="assets/md-images/wifi.PNG" width="250" alt="Archer AX73 screen shot">
 </p>
-
 
 ## 📁 Project Structure
 
