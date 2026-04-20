@@ -460,7 +460,7 @@ If installed correctly:
 
 - [Victor Lazzarini](https://github.com/vlazzarini)
 
-- [Bill Alves](chapters/02alves)
+- [Bill Alves](https://github.com/SamKomesarook/The-Csound-Book/tree/main/chapters/02alves)
 
 - [Thorin Kerr](https://ide.csound.com/profile/ErrorThinker)
 
