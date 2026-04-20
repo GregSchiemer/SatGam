@@ -476,7 +476,6 @@ Thorin Kerr
 *Mandala 3* and *Mandala 4*](
 https://www.academia.edu/85041071/Pocket_Gamelan_Tuneable_Trajectories_For_Flying_Sources_In_Mandala_3_And_Mandala_4)
 
-[G. Schiemer and M. Havryliv (2005) Pocket Gamelan: a Pure Data interface for Mobile phones](
-Pocket Gamelan: a Pure Data interface for mobile phonesSciSpacehttps://scispace.com › pdf)
+[G. Schiemer and M. Havryliv (2005) Pocket Gamelan: a Pure Data interface for Mobile phones](https://scispace.com › pdf)
 
 ```
