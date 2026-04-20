@@ -454,11 +454,15 @@ If installed correctly:
 
 ## Acknowledgements
 
-John ffitch
-Stephen Yi
-Victor Lazzarini
-Bill Alves 
-Thorin Kerr
+[John ffitch]()
+
+[Stephen Yi]()
+
+[Victor Lazzarini]()
+
+[Bill Alves]()
+
+[Thorin Kerr]()
 
 ## References
 
