@@ -467,7 +467,7 @@ K. Grady (2024) [An Extended Interview with Greg Schiemer](https://www.xenharmon
 G. Schiemer (2016) [Satellite Gamelan: microtonal sonification using a large consort of mobile phones]
 (https://www.icad.org/icad2016/proceedings2/papers/ICAD2016_paper_51.pdf)
 
-Greg Schiemer, Etienne Deleflie, Eva Cheng (2010) [Pocket Gamelan: Realizations of a Microtonal Composition on a Linux Phone Using Open Source Music Synthesis Software](https://www.academia.edu/1073448/Pocket_Gamelan_Realizations_of_a_Microtonal_Composition_on_a_Linux_Phone_Using_Open_Source_Music_Synthesis_Software)
+G. Schiemer, E. Deleflie, E. Cheng (2010) [Pocket Gamelan: Realizations of a Microtonal Composition on a Linux Phone Using Open Source Music Synthesis Software](https://www.academia.edu/1073448/Pocket_Gamelan_Realizations_of_a_Microtonal_Composition_on_a_Linux_Phone_Using_Open_Source_Music_Synthesis_Software)
 
 G. Schiemer and M. Op de Coul (2007) [Pocket Gamelan: tuning microtonal applications in Pd using Scala](https://ro.uow.edu.au/ndownloader/files/50561721)
 
