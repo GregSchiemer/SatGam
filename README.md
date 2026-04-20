@@ -462,7 +462,7 @@ Thorin Kerr
 
 ## References
 
-[G. Schiemer (2016) Satellite Gamelan: microtonal sonification using a large consort of mobile phones]
+G. Schiemer (2016) [Satellite Gamelan: microtonal sonification using a large consort of mobile phones]
 (https://www.icad.org/icad2016/proceedings2/papers/ICAD2016_paper_51.pdf)
 
 Greg Schiemer, Etienne Deleflie, Eva Cheng (2010) [Pocket Gamelan: Realizations of a Microtonal Composition on a Linux Phone Using Open Source Music Synthesis Software. Second IFIP TC 14 Entertainment Computing Symposium (ECS) / Held as Part of World Computer Congress (WCC), Sep 2010, Brisbane, Australia. pp.101-110, ⟨10.1007/978-3-642-15214-6_10. ⟨hal-01056351⟩](https://inria.hal.science/hal-01056351v1/document)
