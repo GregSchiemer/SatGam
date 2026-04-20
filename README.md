@@ -470,7 +470,6 @@ Greg Schiemer, Etienne Deleflie, Eva Cheng (2010) [Pocket Gamelan: Realizations 
 G. Schiemer and M. Op de Coul (2007) [Pocket Gamelan: tuning microtonal applications in Pd using Scala](https://ro.uow.edu.au/ndownloader/files/50561721)
 
 G. Schiemer (2006) [The microtonal legacy of the Pocket Gamelan](https://ro.uow.edu.au/ndownloader/files/50561544)
-(The microtonal legacy of the Pocket GamelanUniversity of Wollongong Research Onlinehttps://ro.uow.edu.au › ndownloader › files)
 
 G. Schiemer and M. Havryliv (2006) [Pocket Gamelan: tuneable trajectories for flying sources in *Mandala 3* and *Mandala 4*](
 https://www.academia.edu/85041071)
