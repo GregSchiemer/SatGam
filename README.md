@@ -124,43 +124,16 @@ In this setup:
 - `mkcert` creates the SatGam server certificate and its local certificate authority (CA) 
 
 ---
-### How to set up [tp-link AX73 Wi-Fi 6 Router](https://youtu.be/5nZY1M_RH-k)
+
+### Satellite Gamelan Router Settings
 
 <p>
   <img src="assets/md-images/ax73.JPG" width="250" alt="TP-Link AX73 Wi-Fi Router">
 </p>
 
-### SatGam Router Settings
+[SatGam Router Settings PDF](satgam_router_settings.pdf)
 
-**Router Information**
-
-| Item | Value | Item | Value |
-|:------|-------:|:------|-------:|
-| **Device Name** | Archer AX73 | **IPv4 LAN IP** | 192.168.1.1 |
-| **LAN MAC Address** | B8-FB-B3-ED-56-F0 | **IPv6 LAN IP** | FE80::BAFB:B3FF:FEED:56F0/64 |
-
-**Wireless Information**
-
-| Band | Network Name (SSID) | Password | Channel | Status |
-|:------|----------------------:|----------:|---------:|--------|
-| 2.4 GHz / 5 GHz | Vercoe | Stockhausen25root5 | 2.4G Auto (Current: 8) / 5G Auto (Current: 40) | ☐ |
-
-**Wireless Settings**
-
-| Setting | Value |
-|:---------|-------------------:|
-| **TWT** | ☐ |
-| **OFDMA / MU-MIMO** | ☐ |
-| **Smart Connect** | Enabled |
-| **2.4 GHz / 5 GHz** | Enabled |
-| **Network Name (SSID)** | Vercoe |
-| **Security** | WPA2-PSK [AES] |
-| **Password** | Stockhausen25root5 |
-| **2.4 GHz / 5 GHz Advanced Settings** | |
-| **2.4 GHz Channel Width** | 20/40 MHz |
-| **2.4 GHz Channel** | Auto |
-| **5 GHz Channel Width** | 20/40/80/160 MHz |
-| **5 GHz Channel** | Auto |
+How to set up [tp-link AX73 Wi-Fi 6 Router](https://youtu.be/5nZY1M_RH-k)
 
 ---
 ### SatGam Server
