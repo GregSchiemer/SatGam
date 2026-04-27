@@ -144,3 +144,5 @@ assets/certs/*.key
 assets/certs/*-key.pem
 assets/certs-archive/
 assets/python/server-backup*.py
+
+.DS_Store
