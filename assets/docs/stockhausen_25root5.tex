@@ -1,0 +1,290 @@
+\documentclass[11pt]{article}
+
+% --- Encoding (fixes curly quotes etc.) ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage[a4paper,margin=20mm,headheight=14pt]{geometry}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage[table]{xcolor}
+\usepackage{longtable}
+\usepackage{csvsimple}
+\usepackage{siunitx}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{fancyhdr}
+\usepackage{pgfplots}
+
+% Helvetica (GitHub-ish sans)
+\usepackage[scaled=0.95]{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+
+\pgfplotsset{compat=1.12}
+
+\sisetup{
+  round-mode=places,
+  round-precision=8,
+  scientific-notation=false
+}
+\newcommand{\numEight}[1]{\num[round-precision=8]{#1}}
+\newcommand{\numThree}[1]{\num[round-precision=3]{#1}}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  urlcolor=black,
+  pdfauthor={G. Schiemer},
+  pdftitle={Stockhausen 25th Root of 5}
+}
+
+% Header/footer
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{Satellite Gamelan Microtonal Tuning}
+\rhead{\textcopyright\ 2026 G. Schiemer}
+\cfoot{\thepage}
+
+% Ensure the title page uses the same header/footer style
+\fancypagestyle{plain}{%
+  \fancyhf{}%
+  \lhead{Satellite Gamelan Microtonal Tuning}%
+  \rhead{\textcopyright\ 2026 G. Schiemer}%
+  \cfoot{\thepage}%
+}
+
+% --- Title-style heading (NORMAL weight, not bold) ---
+\newcommand{\DocTitle}[1]{%
+  \begin{center}
+    {\LARGE #1\par}
+  \end{center}
+}
+
+% --- Robust file lookup (works in LaTeXit temp dirs) ---
+\def\SATGAMROOT{/Users/gs/Developer/SG/SatGam}
+
+\newcommand{\SetFirstExistingThree}[4]{%
+  \IfFileExists{#1}{\def#4{#1}}{%
+    \IfFileExists{#2}{\def#4{#2}}{%
+      \IfFileExists{#3}{\def#4{#3}}{%
+        \def#4{#1}%
+      }%
+    }%
+  }%
+}
+
+% CSV: prefer local copy, then absolute repo path
+\SetFirstExistingThree
+  {stockhausen_25root5.csv}
+  {./stockhausen_25root5.csv}
+  {\SATGAMROOT/assets/docs/stockhausen_25root5.csv}
+  \CSVFILE
+
+% Phonehenge BONZAI image: ph2.PNG only (uppercase)
+\SetFirstExistingThree
+  {../md-images/ph2.PNG}
+  {./ph2.PNG}
+  {\SATGAMROOT/assets/md-images/ph2.PNG}
+  \PHFILE
+
+% Notation composite PNG: uppercase only in md-images
+\SetFirstExistingThree
+  {../md-images/phonehenge_notation_composite.PNG}
+  {./phonehenge_notation_composite.PNG}
+  {\SATGAMROOT/assets/md-images/phonehenge_notation_composite.PNG}
+  \NOTATIONFILE
+
+% ---- Phonehenge warm colours (RGB) ----
+\definecolor{warmY}{RGB}{235,235,0}
+\definecolor{warmR}{RGB}{255,16,64}
+\definecolor{warmG}{RGB}{64,255,0}
+\definecolor{warmB}{RGB}{0,180,255}
+\definecolor{warmM}{RGB}{255,80,255}
+
+% Cell-level colour lookup (k=0..24 repeats 5 colours; k=25 uncoloured)
+\newcommand{\cellWarmColorForK}[1]{%
+  \ifcase\numexpr#1\relax
+    \cellcolor{warmY!15}%
+  \or \cellcolor{warmR!15}%
+  \or \cellcolor{warmG!15}%
+  \or \cellcolor{warmB!15}%
+  \or \cellcolor{warmM!15}%
+  \or \cellcolor{warmY!15}%
+  \or \cellcolor{warmR!15}%
+  \or \cellcolor{warmG!15}%
+  \or \cellcolor{warmB!15}%
+  \or \cellcolor{warmM!15}%
+  \or \cellcolor{warmY!15}%
+  \or \cellcolor{warmR!15}%
+  \or \cellcolor{warmG!15}%
+  \or \cellcolor{warmB!15}%
+  \or \cellcolor{warmM!15}%
+  \or \cellcolor{warmY!15}%
+  \or \cellcolor{warmR!15}%
+  \or \cellcolor{warmG!15}%
+  \or \cellcolor{warmB!15}%
+  \or \cellcolor{warmM!15}%
+  \or \cellcolor{warmY!15}%
+  \or \cellcolor{warmR!15}%
+  \or \cellcolor{warmG!15}%
+  \or \cellcolor{warmB!15}%
+  \or \cellcolor{warmM!15}%
+  \else
+  \fi
+}
+
+% Key label: k=0..24 -> 1..25 ; k=25 -> blank
+\newcommand{\keyLabelForK}[1]{%
+  \ifcase\numexpr#1\relax
+    1\or 2\or 3\or 4\or 5\or
+    6\or 7\or 8\or 9\or 10\or
+    11\or 12\or 13\or 14\or 15\or
+    16\or 17\or 18\or 19\or 20\or
+    21\or 22\or 23\or 24\or 25%
+  \else
+  \fi
+}
+
+\title{Stockhausen$\sqrt[25]{5}$ scale: 5-limit just intonation approximations }
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+\vspace{-20mm}
+
+\begin{center}
+\small
+\begin{longtable}{r r l r r r}
+\toprule
+k &
+actual &
+ratio &
+rational &
+centsDiff &
+dist12-TET \\
+\midrule
+\endfirsthead
+
+\toprule
+k &
+actual &
+ratio &
+rational &
+centsDiff &
+dist12-TET \\
+\midrule
+\endhead
+
+\csvreader[
+  head to column names,
+  late after line=\\
+]{\CSVFILE}{}{%
+  \cellWarmColorForK{\k}\keyLabelForK{\k} &
+  \cellWarmColorForK{\k}\numEight{\actual} &
+  \cellWarmColorForK{\k}\ratio &
+  \cellWarmColorForK{\k}\numEight{\rational} &
+  \cellWarmColorForK{\k}\numThree{\centsDiff} &
+  \cellWarmColorForK{\k}\numThree{\distTET}%
+}
+
+\\ \bottomrule
+\end{longtable}
+\end{center}
+
+\vspace{-12mm}
+
+% --- Caption 2 (same style as other captions) ---
+\DocTitle{Phonehenge Keys}
+
+\begin{center}
+\includegraphics[width=0.22\textwidth]{\PHFILE}
+\end{center}
+
+\vspace{-3mm}
+
+\begin{center}
+Keys 1--25 are placed numerically clockwise starting from Key 1 at the 1 O'clock position
+\end{center}
+
+% ---------- Page 2: notation PNG + distTET plot ----------
+\newpage
+
+\DocTitle{Stockhausen$\sqrt[25]{5}$ scale: staff notation with pitch deviation in cents}
+
+\vspace{-8mm}
+\begin{center}
+\includegraphics[
+  width=0.95\textwidth,
+  keepaspectratio
+]{\NOTATIONFILE}
+\end{center}
+
+\vspace{2mm}
+
+\DocTitle{Stockhausen$\sqrt[25]{5}$ scale: proximity to nearest 12-TET pitch}
+
+\vspace{-4mm}
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+  width=16cm,
+  height=6.3cm,
+  xlabel={Scale degree $k$},
+  ylabel={dist12-TET (cents)},
+  grid=major,
+  ymin=-55, ymax=55,
+  xmin=0, xmax=25,
+  xtick={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25},
+  ytick={-50,-40,-30,-20,-10,0,10,20,30,40,50},
+  title={}
+]
+\addplot[
+  only marks,
+  mark=*,
+  mark size=2pt
+]
+table[
+  col sep=comma,
+  x=k,
+  y=distTET
+]{\CSVFILE};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+% ---------- Page 3: centsDiff plot ----------
+\newpage
+
+\DocTitle{Nearest 5-limit ratio error: centsDiff vs $k$}
+
+\vspace{-12mm}
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+  width=16cm,
+  height=7.5cm,
+  xlabel={Scale degree $k$},
+  ylabel={centsDiff (ratio vs actual)},
+  grid=major,
+  xmin=0, xmax=25,
+  xtick={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25},
+  title={}
+]
+\addplot[
+  only marks,
+  mark=*,
+  mark size=2pt
+]
+table[
+  col sep=comma,
+  x=k,
+  y=centsDiff
+]{\CSVFILE};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+\end{document}

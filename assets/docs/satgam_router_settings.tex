@@ -1,0 +1,105 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[a4paper,margin=20mm,headheight=14pt]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{textcomp}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage[table]{xcolor}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  urlcolor=black,
+  pdfauthor={G. Schiemer},
+  pdftitle={SatGam Router Settings}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{SatGam Router Settings}
+\rhead{\textcopyright\ 2026 G. Schiemer}
+\cfoot{\thepage}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\renewcommand{\arraystretch}{1.22}
+
+\newcommand{\checkbox}{%
+  \raisebox{0.1ex}{\fbox{\rule{0pt}{1.05ex}\rule{1.05ex}{0pt}}}%
+}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{R}{>{\raggedright\arraybackslash}p{0.19\textwidth}}
+\newcolumntype{V}{>{\raggedright\arraybackslash}p{0.27\textwidth}}
+
+\begin{document}
+
+{\centering
+  {\Large\bfseries SatGam Router Settings\par}
+  \vspace{2mm}
+  {\normalsize tp-link AX73 Wi-Fi 6 Router\par}
+}
+
+\vspace{3mm}
+
+\section*{Router Information}
+
+\rowcolors{2}{gray!8}{white}
+\begin{tabularx}{\textwidth}{@{} R V R V @{}}
+\toprule
+\rowcolor{gray!18}
+\textbf{Item} & \textbf{Value} & \textbf{Item} & \textbf{Value} \\
+\midrule
+\textbf{Device Name} & Archer AX73 & \textbf{IPv4 LAN IP} & 192.168.1.1 \\
+\textbf{LAN MAC Address} & B8-FB-B3-ED-56-F0 & \textbf{IPv6 LAN IP} & FE80::BAFB:B3FF:\newline FEED:56F0/64 \\
+\bottomrule
+\end{tabularx}
+
+\vspace{7mm}
+
+\section*{Wireless Information}
+
+\rowcolors{2}{gray!8}{white}
+\begin{tabularx}{\textwidth}{@{} p{0.17\textwidth} p{0.20\textwidth} p{0.22\textwidth} X p{0.10\textwidth} @{}}
+\toprule
+\rowcolor{gray!18}
+\textbf{Band} & \shortstack[l]{\textbf{Network}\\\textbf{Name}\\\textbf{(SSID)}} & \textbf{Password} & \textbf{Channel} & \textbf{Status} \\
+\midrule
+2.4 GHz / 5 GHz & Vercoe & Stockhausen25root5 & 2.4G Auto (Current: 8) / 5G Auto (Current: 40) & \checkbox{} \\
+\bottomrule
+\end{tabularx}
+
+\vspace{7mm}
+
+\section*{Wireless Settings}
+
+\rowcolors{2}{gray!8}{white}
+\begin{tabularx}{\textwidth}{@{} p{0.42\textwidth} Y @{}}
+\toprule
+\rowcolor{gray!18}
+\textbf{Setting} & \textbf{Value} \\
+\midrule
+\textbf{TWT} & \checkbox{} \\
+\textbf{OFDMA / MU-MIMO} & \checkbox{} \\
+\textbf{Smart Connect} & Enabled \\
+\textbf{2.4 GHz / 5 GHz} & Enabled \\
+\textbf{Network Name (SSID)} & Vercoe \\
+\textbf{Security} & WPA2-PSK [AES] \\
+\textbf{Password} & Stockhausen25root5 \\
+\rowcolor{gray!18}
+\textbf{2.4 GHz / 5 GHz Advanced Settings} & {} \\
+\textbf{2.4 GHz Channel Width} & 20/40 MHz \\
+\textbf{2.4 GHz Channel} & Auto \\
+\textbf{5 GHz Channel Width} & 20/40/80/160 MHz \\
+\textbf{5 GHz Channel} & Auto \\
+\bottomrule
+\end{tabularx}
+
+\end{document}
