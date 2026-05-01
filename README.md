@@ -42,9 +42,9 @@ This section is for anyone curious about why the Satellite Gamelan app sounds th
 **[Stockhausen's Scale](assets/docs/stockhausen_25root5.pdf)**
 
 This shows 
-- how the pitches of the 25 notes are calculated and mapped to 25 keys on a hand-held digital synthesiser
-- where these notes sit in comparison to notes on a standard 12th root of 2 music stave, and
-- how close these pitches are to pythagorean ratios they approximate.
+- how the 25 pitches are calculated and mapped to 25 keys on a hand-held digital synthesiser
+- where the 25 pitches sit in comparison to notes on a conventional music stave, and
+- how close they are to pythagorean ratios they approximate.
 
 ## 📁 Project Structure
 
