@@ -41,16 +41,10 @@ This section is for anyone curious about why the Satellite Gamelan app sounds th
 **Start here**
 
 - Listen to the scale played using the Satellite Gamelan app.
-- Open the main tuning document: [Satellite Gamelan Microtonal Tuning](assets/docs/stockhausen_25root5.pdf), prepared for a concert performance of *Phonehenge*.
+  
+- Open the **main tuning document**: [Satellite Gamelan Microtonal Tuning](assets/docs/stockhausen_25root5.pdf)
 
-<a href="assets/docs/stockhausen_25root5.pdf">
-  <img src="assets/md-images/ph2.PNG" width="250" alt="Preview of Phonehenge tuning document">
-</a>
-
-**Tuning resources in `assets/docs`**
-
-- [`stockhausen_25root5.pdf`](assets/docs/stockhausen_25root5.pdf)  
-  The compiled PDF document describing the 25th-root-of-5 tuning used for *Phonehenge*.
+**Other tuning resources in `assets/docs`**
 
 - [`stockhausen_25root5.csv`](assets/docs/stockhausen_25root5.csv)  
   Source data for the tuning table, including scale degrees, frequency ratios, rational approximations, and cents comparisons.
@@ -59,10 +53,7 @@ This section is for anyone curious about why the Satellite Gamelan app sounds th
   LaTeX source used to generate the tuning PDF.
 
 - [`Stockhausen_clefs.pdf`](assets/docs/Stockhausen_clefs.pdf)  
-  Supporting notation material for the Stockhausen tuning resources.
-
-- [`Stockhausen_clefs.sib`](assets/docs/Stockhausen_clefs.sib)  
-  Sibelius source file for the notation material.
+  Supporting notation material exported in pdf format from music notation software (Sibelius).
 
 Temporary LaTeX by-products are kept in [`assets/docs/sandpit`](assets/docs/sandpit).
 
