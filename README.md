@@ -34,6 +34,41 @@ The leader's role is:
   <img src="assets/md-images/wifi.PNG" width="250" alt="Archer AX73 screen shot">
 </p>
 
+## Satellite Gamelan tuning
+
+This section is for anyone curious about why the Satellite Gamelan app sounds the way it does. It shows how a scale that does not repeat at the octave can nevertheless sound surprisingly close to the familiar conventional scale that divides the octave into twelve equal intervals. Instead of dividing the octave, Stockhausen’s scale divides a much larger 5:1 harmonic span into twenty-five equal steps, producing distinctive timbral qualities unlike those of many octave-based scales used in world music. We may never know whether Karlheinz Stockhausen was fully aware of its rich harmonic vocabulary, but it is remarkable to think that he created it using the stock-in-trade of 1950s broadcast studios: magnetic tape, chinagraph pencil, splicing block, and razor blade. The tuning resources developed for the Satellite Gamelan can also be reused by musicians who would like to explore other musical scales.
+
+**Start here**
+
+- Listen to the scale played using the Satellite Gamelan app.
+- Open the main tuning document: [Satellite Gamelan Microtonal Tuning](assets/docs/stockhausen_25root5.pdf), prepared for a concert performance of *Phonehenge*.
+
+<a href="assets/docs/stockhausen_25root5.pdf">
+  <img src="assets/md-images/ph2.PNG" width="250" alt="Preview of Phonehenge tuning document">
+</a>
+
+**Tuning resources in `assets/docs`**
+
+- [`stockhausen_25root5.pdf`](assets/docs/stockhausen_25root5.pdf)  
+  The compiled PDF document describing the 25th-root-of-5 tuning used for *Phonehenge*.
+
+- [`stockhausen_25root5.csv`](assets/docs/stockhausen_25root5.csv)  
+  Source data for the tuning table, including scale degrees, frequency ratios, rational approximations, and cents comparisons.
+
+- [`stockhausen_25root5.tex`](assets/docs/stockhausen_25root5.tex)  
+  LaTeX source used to generate the tuning PDF.
+
+- [`Stockhausen_clefs.pdf`](assets/docs/Stockhausen_clefs.pdf)  
+  Supporting notation material for the Stockhausen tuning resources.
+
+- [`Stockhausen_clefs.sib`](assets/docs/Stockhausen_clefs.sib)  
+  Sibelius source file for the notation material.
+
+Temporary LaTeX by-products are kept in [`assets/docs/sandpit`](assets/docs/sandpit).
+
+For further tuning resources, visit the [Scala Scale Archive](https://www.huygens-fokker.org/docs/scalesdir.txt).
+
+
 ## 📁 Project Structure
 
 Actual `.pem` certificate files are omitted here for clarity.
