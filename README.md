@@ -36,7 +36,7 @@ The leader's role is:
 
 ## Satellite Gamelan tuning
 
-This section is for anyone curious about why the Satellite Gamelan app sounds the way it does. It shows how a scale that does not repeat at the octave can nevertheless sound surprisingly close to the familiar conventional scale that divides the octave into twelve equal intervals. Instead of dividing the octave, Stockhausen’s scale divides a much larger 5:1 harmonic span into twenty-five equal steps, producing distinctive timbral qualities unlike those of many octave-based scales used in world music. We may never know whether Karlheinz Stockhausen was fully aware of its rich harmonic vocabulary, but it is remarkable to think that he created it using the stock-in-trade of 1950s broadcast studios: magnetic tape, chinagraph pencil, splicing block, and razor blade. The tuning resources developed for the Satellite Gamelan can also be reused by musicians who would like to explore other musical scales.
+This section is for anyone curious about why the Satellite Gamelan app sounds the way it does. It shows how a scale that does not repeat at the octave can nevertheless sound surprisingly close to the familiar conventional scale that divides the octave into twelve equal intervals. Stockhausen’s scale divides a much larger 5:1 harmonic span into twenty-five equal steps, producing distinctive timbral qualities unlike those of many octave-based scales used in world music. We may never know whether he was fully aware of its rich harmonic vocabulary, but it is remarkable to think he created it using the stock-in-trade of 1950s broadcast studios: magnetic tape, chinagraph pencil, splicing block, and razor blade. Tuning resources developed for the Satellite Gamelan now make it accessible for experimentation by other musicians. They can also be reused by those who would like to explore other musical scales.
 
 **Start here**
 
@@ -455,10 +455,14 @@ If installed correctly:
 
 ## Acknowledgements
 
+- Australian Tax Payers
+- Australian Research Council, 2003-2005 Discovery Project, project title : Tuning Musical Applications for Wireless Internet 
 - [Bill Alves](https://github.com/SamKomesarook/The-Csound-Book/tree/main/chapters/02alves)
+- [Richard Boulanger](https://archive.org/details/csoundbookperspe0000unse)
 - [John ffitch](https://csound.com/docs/manual/cpsxpch.html)
 - [Victor Lazzarini](https://github.com/vlazzarini)
 - [Thorin Kerr](https://ide.csound.com/profile/ErrorThinker)
+- [Stephen Taylor](http://thesonicsky.com)
 - [Stephen Yi](https://ide.csound.com/profile/stevenyi)
 
 ## References
