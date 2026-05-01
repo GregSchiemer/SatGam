@@ -36,29 +36,15 @@ The leader's role is:
 
 ## Satellite Gamelan tuning
 
-This section is for anyone curious about why the Satellite Gamelan app sounds the way it does. It shows how a scale that does not repeat at the octave can nevertheless sound surprisingly close to the familiar conventional scale that divides the octave into twelve equal intervals. Stockhausen’s scale divides a much larger 5:1 harmonic span into twenty-five equal steps, producing distinctive timbral qualities unlike those of many octave-based scales used in world music. We may never know whether he was fully aware of its rich harmonic vocabulary, but it is remarkable to think he created it using the stock-in-trade of 1950s broadcast studios: magnetic tape, chinagraph pencil, splicing block, and razor blade. Tuning resources developed for the Satellite Gamelan now make it accessible for experimentation by other musicians. They can also be reused by those who would like to explore other musical scales.
+This section is for anyone curious about why the Satellite Gamelan app sounds the way it does. It shows how a scale that does not repeat at the octave can nevertheless sound surprisingly close to the familiar conventional scale that divides the octave into twelve equal intervals. Stockhausen’s scale divides a much larger 5:1 harmonic span into twenty-five equal steps, producing distinctive timbral qualities unlike those of many octave-based scales used in world music. We may never know whether he was fully aware of its rich harmonic vocabulary, but it is remarkable to think he created it using the stock-in-trade of 1950s broadcast studios: magnetic tape, chinagraph pencil, splicing block, and razor blade. Tuning resources developed in Csound now make this scale accessible for experimentation by other musicians. These resources have been adopted for the Satellite Gamelan app and can also be reused by users of hand-held mobile synthesisers who would like to explore other musical scales.
 
-**Start here**
 
-- Listen to the scale played using the Satellite Gamelan app.
-  
-- Open the **main tuning document**: [Satellite Gamelan Microtonal Tuning](assets/docs/stockhausen_25root5.pdf)
+**[Stockhausen's Scale](assets/docs/stockhausen_25root5.pdf)**
 
-**Other tuning resources in `assets/docs`**
-
-- [`stockhausen_25root5.csv`](assets/docs/stockhausen_25root5.csv)  
-  Source data for the tuning table, including scale degrees, frequency ratios, rational approximations, and cents comparisons.
-
-- [`stockhausen_25root5.tex`](assets/docs/stockhausen_25root5.tex)  
-  LaTeX source used to generate the tuning PDF.
-
-- [`Stockhausen_clefs.pdf`](assets/docs/Stockhausen_clefs.pdf)  
-  Supporting notation material exported in pdf format from music notation software (Sibelius).
-
-Temporary LaTeX by-products are kept in [`assets/docs/sandpit`](assets/docs/sandpit).
-
-For further tuning resources, visit the [Scala Scale Archive](https://www.huygens-fokker.org/docs/scalesdir.txt).
-
+This shows 
+- how the pitches of the 25 notes are calculated and mapped to 25 keys on a hand-held digital synthesiser
+- where these notes sit in comparison to notes on a standard 12th root of 2 music stave, and
+- how close these pitches are to pythagorean ratios they approximate.
 
 ## 📁 Project Structure
 
