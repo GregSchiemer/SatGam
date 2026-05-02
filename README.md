@@ -443,6 +443,7 @@ If installed correctly:
 
 - Australian Tax Payers
 - Australian Research Council, 2003-2005 Discovery Project, project title : Tuning Musical Applications for Wireless Internet 
+- [Bill Alves](alves_csound_book_entry.pdf)
 - [Bill Alves](https://github.com/SamKomesarook/The-Csound-Book/tree/main/chapters/02alves)
 - [Richard Boulanger](https://archive.org/details/csoundbookperspe0000unse)
 - [John ffitch](https://csound.com/docs/manual/cpsxpch.html)
