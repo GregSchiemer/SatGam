@@ -442,7 +442,7 @@ If installed correctly:
 ## Acknowledgements
 
 - Australian Tax Payers
-- Australian Research Council, 2003-2005 Discovery Project, project title : Tuning Musical Applications for Wireless Internet 
+- Australian Research Council, 2003-2005 Discovery Project, project title : *Tuning Musical Applications for Wireless Internet* 
 - [Bill Alves](assets/docs/alves_csound_book_entry.pdf)
 - [Richard Boulanger](https://archive.org/details/csoundbookperspe0000unse)
 - [John ffitch](https://csound.com/docs/manual/cpsxpch.html)
