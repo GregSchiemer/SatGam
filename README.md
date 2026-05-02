@@ -448,7 +448,6 @@ If installed correctly:
 - [John ffitch](https://csound.com/docs/manual/cpsxpch.html)
 - [Victor Lazzarini](https://github.com/vlazzarini)
 - [Thorin Kerr](https://ide.csound.com/profile/ErrorThinker)
-- [Stephen Taylor](http://thesonicsky.com)
 - [Stephen Yi](https://ide.csound.com/profile/stevenyi)
 
 ## References
@@ -460,6 +459,7 @@ If installed correctly:
 - G. Schiemer (2006) [The microtonal legacy of the Pocket Gamelan](https://ro.uow.edu.au/ndownloader/files/50561544)
 - G. Schiemer and M. Havryliv (2006) [Pocket Gamelan: tuneable trajectories for flying sources in *Mandala 3* and *Mandala 4*](https://www.academia.edu/85041071)
 - G. Schiemer and M. Havryliv (2005) [Pocket Gamelan: a Pure Data interface for Mobile phones](https://www.nime.org/proceedings/2005/nime2005_156.pdf)
+- [S. Taylor (2011) The Sonic Sky](http://thesonicsky.com)
 
 ## satellitegamelan.net
 
