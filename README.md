@@ -30,13 +30,14 @@ The leader's role is:
 
 ## Satellite Gamelan player instructions
 
-The Satellite Gamelan has an animated sequence of states where coloured keys appear and disappear at various times during the performance. 
+The Satellite Gamelan has an animated sequence of states where 25 coloured keys appear and disappear at various times during the performance. 
 
-- the sequence starts when the lead player taps the digital clock readout. 
+- the sequence starts when the lead player taps the digital clock readout 
 
-- all players tap keys as they appear. 
+- all players start a note by tapping keys as they appear
 
-- each player may play uo to 5 notes In each state. 
+- in each state a player may play up to 5 notes
+
 
 <p>
   <img src="assets/md-images/ph1.PNG" width="250" alt="Phonehenge image 1">
