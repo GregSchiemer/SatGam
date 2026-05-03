@@ -28,13 +28,13 @@ The leader's role is:
     1. **PREVIEW** : plays the animation sequence 'fast-forward' giving players an overview of the changing UI
     2. **CONCERT** : plays it in real-time and lasts between 12:24 and 12:48 seconds 
 
-## Satellite Gamelan player instructions
+## Player instructions
 
-The Satellite Gamelan has an animated sequence of states where 25 coloured keys appear and disappear at various times during the performance. 
+The Satellite Gamelan app has an animated sequence of states where 25 coloured keys appear and disappear at various times during the performance. 
 
 - the sequence starts when the lead player taps the digital clock readout 
 
-- all players start a note by tapping keys as they appear
+- all players start a note by tapping a key as it appears
 
 - in each state a player may play up to 5 notes
 
@@ -45,7 +45,7 @@ The Satellite Gamelan has an animated sequence of states where 25 coloured keys 
   <img src="assets/md-images/wifi.PNG" width="250" alt="Archer AX73 screen shot">
 </p>
 
-## Satellite Gamelan tuning
+## Tuning
 
 This section is for anyone curious about why the Satellite Gamelan app sounds the way it does. It shows how a scale that does not repeat at the octave can nevertheless sound surprisingly close to the familiar conventional scale that divides the octave into twelve equal intervals. Stockhausen’s scale divides a much larger 5:1 harmonic span into twenty-five equal steps, producing distinctive timbral qualities unlike those of many octave-based scales used in world music. We may never know whether he was fully aware of its rich harmonic vocabulary, but it is remarkable to think he created it using the stock-in-trade of 1950s broadcast studios: magnetic tape, chinagraph pencil, splicing block, and razor blade. Tuning resources developed in Csound now make this scale accessible for experimentation by other musicians. These resources have been adopted for the Satellite Gamelan app and can also be reused by users of hand-held mobile synthesisers who would like to explore other musical scales.
 
