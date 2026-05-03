@@ -28,6 +28,10 @@ The leader's role is:
     1. **PREVIEW** : plays the animation sequence 'fast-forward' giving players an overview of the changing UI
     2. **CONCERT** : plays it in real-time and lasts between 12:24 and 12:48 seconds 
 
+## Satellite Gamelan player instructions
+
+The Satellite Gamelan has an animated sequence of states where keys appear and disappear at carious timme throughout the performance. The sequence is started by the lead player. All players then tap keys as they appear. Each player can play uo to 5 notes In each state. 
+
 <p>
   <img src="assets/md-images/ph1.PNG" width="250" alt="Phonehenge image 1">
   <img src="assets/md-images/ph2.PNG" width="250" alt="Phonehenge image 2">
