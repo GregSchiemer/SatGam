@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ConsentText</key>
+	<dict>
+		<key>default</key>
+		<string>This profile installs the Satellite Gamelan root certificate so this iPhone can trust the local SatGam server on the performance Wi-Fi network.</string>
+	</dict>
+	<key>DurationUntilRemoval</key>
+	<integer>7776000</integer>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>PayloadCertificateFileName</key>
+			<string>SatGam-rootCA.cer</string>
+			<key>PayloadContent</key>
+			<data>
+			LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUU5ekNDQTEr
+			Z0F3SUJBZ0lRYzNvelpmZloyeUxxa3o0blhEMnVkakFOQmdrcWhr
+			aUc5dzBCQVFzRkFEQ0IKa3pFZU1Cd0dBMVVFQ2hNVmJXdGpaWEow
+			SUdSbGRtVnNiM0J0Wlc1MElFTkJNVFF3TWdZRFZRUUxEQ3RuYzBC
+			TgpZV05DYjI5ckxWQnlieTB5TG14dlkyRnNJQ2hIY21WbmIzSjVJ
+			RTBnVTJOb2FXVnRaWElwTVRzd09RWURWUVFECkRESnRhMk5sY25R
+			Z1ozTkFUV0ZqUW05dmF5MVFjbTh0TWk1c2IyTmhiQ0FvUjNKbFoy
+			OXllU0JOSUZOamFHbGwKYldWeUtUQWVGdzB5TmpBME1UTXlNakU0
+			TWpGYUZ3MHpOakEwTVRNeU1qRTRNakZhTUlHVE1SNHdIQVlEVlFR
+			SwpFeFZ0YTJObGNuUWdaR1YyWld4dmNHMWxiblFnUTBFeE5EQXlC
+			Z05WQkFzTUsyZHpRRTFoWTBKdmIyc3RVSEp2CkxUSXViRzlqWVd3
+			Z0tFZHlaV2R2Y25rZ1RTQlRZMmhwWlcxbGNpa3hPekE1QmdOVkJB
+			TU1NbTFyWTJWeWRDQm4KYzBCTllXTkNiMjlyTFZCeWJ5MHlMbXh2
+			WTJGc0lDaEhjbVZuYjNKNUlFMGdVMk5vYVdWdFpYSXBNSUlCb2pB
+			TgpCZ2txaGtpRzl3MEJBUUVGQUFPQ0FZOEFNSUlCaWdLQ0FZRUEw
+			YnVVdnBvM3p3alMzRE9MaXVtb2ZldUt1ditzClhJS1pTdlRETEVV
+			MnRHOXNRTE4yZkdIZTQzQnBZb3NBR29vWTNTWCsxSGVIaGtzS3h5
+			emtBOUo1dkJsMlRFcW4KNlZwa3hwYUFWcWFHWmdNTXRPaXFZSjJQ
+			MUlDUitteElWRkV4NVNHeldaWGF3bUcwaWZDdmRiTlhqQjVMdmUw
+			cwpGdHNKNWE0SmIranNkdFU5ZGNLdlJ3VE5CNUdMazJtOCtMMVAr
+			UzFvMlNOU1BZVEhrM3NDTmx5SFJMN3p4Z243CkZQMnQzTW9DMUhZ
+			Q2QwUkw3V2gyQkdqdzF4UEdQWVFGVk1jVHJDUis0Mms0aUwxQkIw
+			blM4RGI1dTF4R29iaWYKMWZFaXduU1JBajliM3RiWWFLNlRWaCsv
+			dDdBN0dZbU5tTzBWbE94ZkJaVFJWbUpTVnJlRkFmYmVYUzhGRGhm
+			cQpVY3lsZ1VJcG9PTi8ycytoSlQwMkh4cW5QVGpoL1Z4V2MrWlVn
+			eEpONDNhajFmT0U2ekdDY2pEcWNjMlprR3dxClpjR3B0ZXQzOVdu
+			d2pGNHRDT3RyWHRhQm5IeG55R1VWTXRJYkdRSDBLQXBhWVRrekJx
+			aFcwQ3ZDdDR4VlJGNFYKdk5HNjhVdEUydkpzdmRVMzNJYkJQeGRN
+			MUt2Tm8wWWc3aHZ6QWdNQkFBR2pSVEJETUE0R0ExVWREd0VCL3dR
+			RQpBd0lDQkRBU0JnTlZIUk1CQWY4RUNEQUdBUUgvQWdFQU1CMEdB
+			MVVkRGdRV0JCUmUyVkZKSFlhYjJQcDM4QXowCkthY2U5WWxMOXpB
+			TkJna3Foa2lHOXcwQkFRc0ZBQU9DQVlFQUJyOEt3VHZOQS9JMWV3
+			bTJwb21EQUN6cGp3ZGEKQ0NoR3ZxNUxkckV5d3dsNE5oQnA2WkNO
+			amRtR2tCTkRpYjNNQ1EyTnREZEJRQVIrQjhkZk1oeXV3MjJCVVVh
+			UgpHOURaWk5nZ2tYeXMrRDloQkxsNmZLQVlkUzBhMUVEenMzMFZj
+			RXo1ejVUSThOd1kyaHVoeXgwZzF4MjlzMm8zClJzck5lZWliL1RN
+			WjBlWmJ4aTQ0bER4eTFEMWUvS1Q3TExHb1NoSUZpcU9iN3F1elZH
+			cW84Zk42STZ4ZUJjRnUKRDdvZURWZnhOZm9SWFk0cFFRWExFSkdp
+			UHdxdHc5VzhaTmlXd0E2QzB1WGZycko5S3p6TEkxeXZIVEVYRWht
+			YQpPSU9oaUJ4dTd1TTRsaEx3SDN5MmlCL3Z4TGFkbXZZcHpBWTZ1
+			SHpsaTA5d3FDb2h2N1dQcVNqZmV5akY5WXV6ClNaMDNEMW5vMFYz
+			dHduZjJNamNDcjZEQ3ExUDlqTmZpSmFxazQyYTJXYVYrSVgzbURV
+			aEdTZS9LYzFvM1k0aDMKUDBPQmZFclpWOFg1dWV0aE5xS1RlWmJ0
+			VTJxM2ExZUs3TW1BYVdQaVdiL1NrUE8zbDZ4eGZxSkVYaWQ4bUJs
+			RApkRjRwTkhaVVRxczBjeXIzQTFETlRvSnIybWFUSXU5OGNLWFAK
+			LS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+			</data>
+			<key>PayloadDescription</key>
+			<string>Adds a CA root certificate</string>
+			<key>PayloadDisplayName</key>
+			<string>mkcert gs@MacBook-Pro-2.local (Gregory M Schiemer)</string>
+			<key>PayloadIdentifier</key>
+			<string>com.apple.security.root.5859E415-8592-4202-AF03-548F9F51F936</string>
+			<key>PayloadType</key>
+			<string>com.apple.security.root</string>
+			<key>PayloadUUID</key>
+			<string>5859E415-8592-4202-AF03-548F9F51F936</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+	<key>PayloadDescription</key>
+	<string>Installs the Satellite Gamelan root certificate used to trust the local SatGam HTTPS/WSS server for Phonehenge rehearsals and performances.</string>
+	<key>PayloadDisplayName</key>
+	<string>Satellite Gamelan Root Certificate</string>
+	<key>PayloadIdentifier</key>
+	<string>au.com.schiemer.satgam.rootca</string>
+	<key>PayloadOrganization</key>
+	<string>Satellite Gamelan</string>
+	<key>PayloadRemovalDisallowed</key>
+	<false/>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>095153D0-7991-4D04-8B04-516B711BD741</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+</dict>
+</plist>

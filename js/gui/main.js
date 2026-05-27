@@ -81,6 +81,8 @@ import {
 
 import { frameRender } from './renderer.js';
 
+//import { sendClientStatus } from './clientStatus.js';
+
 import { 
   MAX_STATES, 
   STATE_DUR, 
@@ -91,6 +93,8 @@ import {
 } from './globals.js';
 
 import { makeClockBus } from './clockBus.js';
+
+import { installPhoneDiag, setPhoneDiag } from './phoneDiag.js';
 
 let _lastPhonesKey = null;
 console.log('[main] page loaded', window.location.pathname);
@@ -117,8 +121,13 @@ export async function initApp() {
 
   // 2) status uses pane geometry
   const status = initStatus(ctx);
-  
+  installPhoneDiag(status);
+  setPhoneDiag({ phase: 'status-created' });  
+
   initBus(status);
+  setPhoneDiag({ phase: 'bus-init-called' });
+
+//  sendClientStatus(status, 'bus-init-called')
   console.log('[main] role =', status.role);
 
   // 3) slots uses pane geometry
@@ -150,6 +159,8 @@ export async function initApp() {
 
   // 10) initial paint
   refresh();
+  setPhoneDiag({ phase: 'rendered' });
+//  sendClientStatus(status, 'page-loaded')
 }
 
 // ---------------------------------------------------------------------------
@@ -457,6 +468,7 @@ function initStatus(ctx) {
     startWall: null,                 // performance.now() at run start
     runStateDurationMs: null,        // duration of one rendered state block
     nextStateWallMs: null,           // next state boundary for local timing
+    consortWakeArmed: false,		 // auto lock time
 
     // =========================
     // Audio

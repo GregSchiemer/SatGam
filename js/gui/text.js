@@ -71,6 +71,13 @@ export function renderReadyToPlay(ctxT, status) {
   drawLowText(ctxT, status, lowStartLine(status));
 }
 
+export function renderWakeConsort(ctxT, status) {
+  drawTopText(ctxT, status, 'Phonehenge');
+  drawSubText(ctxT, status, 'tap wake');
+  drawMidText(ctxT, status, 'wake');
+  drawLowText(ctxT, status, 'keep screen awake');
+}
+
 export function renderStartConsort(ctxT, status) {
   drawTopText(ctxT, status, 'Phonehenge');
   drawSubText(ctxT, status, 'stand by');
@@ -88,6 +95,13 @@ export function renderRunning(ctxT, { status, mins, secs }) {
   drawTopText(ctxT, status, String(status.index + 1));
   drawSubText(ctxT, status, makeSubText(status));
   drawMidText(ctxT, status, `${mins}:${secs}`);
+}
+
+export function renderEntryLeader(ctxT, status) {
+  drawSubText(ctxT, status, 'select MODE');
+  drawLeftText(ctxT, status, 'PREVIEW');
+  drawRightText(ctxT, status, 'CONCERT');
+  drawLowText(ctxT, status, lowStartLine(status)); 
 }
 
 export function makeSubText(status) {
@@ -151,11 +165,3 @@ function lowStartLine(status) {
   const m = status.modeChosen ? String(status.modeChosen).toUpperCase() : 'CONCERT';
   return `${m} MODE`;
 }
-
-export function renderEntryLeader(ctxT, status) {
-  drawSubText(ctxT, status, 'select MODE');
-  drawLeftText(ctxT, status, 'PREVIEW');
-  drawRightText(ctxT, status, 'CONCERT');
-  drawLowText(ctxT, status, lowStartLine(status)); 
-}
-

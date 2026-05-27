@@ -15,8 +15,10 @@ import {
   blendBgCanvasesInto, 
   beginBackgroundCrossfade 
 } from './canvasUtils.js';
+
 import {
   renderStartLeader,
+  renderWakeConsort,
   renderStartConsort,
   renderReadyToPlay,
   renderRunning,
@@ -213,19 +215,25 @@ function isEntryView(status) {
 function renderEntryView(ctxT, ctxS, status) {
   ctxT.clearRect(0, 0, ctxT.w, ctxT.h);
 
+  const ctxB = arrB[0].ctx;
+  prepareAndRenderBackground(ctxB, status);
+
   if (status.role === 'consort') {
-    const ctxB = arrB[0].ctx;
-    prepareAndRenderBackground(ctxB, status);
-    renderSpritesLayer(status.fullHenge, { maskBits: [1, 1, 1, 1, 1] });
-    renderStartConsort(ctxT, status);
-    composeFrame({ drawB: true, drawS: true, drawT: true });
+    if (status.consortWakeArmed) {
+      renderSpritesLayer(status.fullHenge, { maskBits: [1, 1, 1, 1, 1] });
+      renderStartConsort(ctxT, status);
+      composeFrame({ drawB: true, drawS: true, drawT: true });
+      return;
+    }
+
+    renderWakeConsort(ctxT, status);
+    composeFrame({ drawB: true, drawS: false, drawT: true });
     return;
   }
 
   renderEntryLeader(ctxT, status);
   composeFrame({ drawB: true, drawS: false, drawT: true });
 }
-
 
 // =======================
 // —— Running View ——

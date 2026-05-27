@@ -1,5 +1,7 @@
 // js/gui/net.js — minimal WebSocket helper with controlled reconnect + tracing
 
+import { setPhoneDiag } from './phoneDiag.js';
+
 export class WS {
   constructor(url, { onOpen, onMsg, onClose, onError, reconnectMs = 1000 } = {}) {
     this.url = url;
@@ -28,10 +30,19 @@ export class WS {
 
     this.ws = new WebSocket(this.url);
 
-    this.ws.onopen = () => {
-      console.log('[WS] open', { url: this.url });
-      this.onOpen();
-    };
+	setPhoneDiag({
+	  ws: 'connecting',
+	  phase: 'net-ws-created',
+	});
+
+	this.ws.onopen = () => {
+	  console.log('[WS] open', { url: this.url });
+	  setPhoneDiag({
+		ws: 'open',
+		phase: 'net-open',
+	  });
+	  this.onOpen();
+	};
 
     this.ws.onmessage = (e) => {
       try {
@@ -45,10 +56,14 @@ export class WS {
       }
     };
 
-    this.ws.onerror = (err) => {
-      console.warn('[WS] error', { url: this.url, err });
-      this.onError(err);
-    };
+	this.ws.onerror = (err) => {
+	  console.warn('[WS] error', { url: this.url, err });
+	  setPhoneDiag({
+		ws: 'ERROR',
+		phase: 'net-error',
+	  });
+	  this.onError(err);
+	};
 
     this.ws.onclose = (ev) => {
       console.log('[WS] close', {
@@ -58,6 +73,11 @@ export class WS {
         wasClean: ev.wasClean,
         closedByUser: this._closedByUser,
       });
+
+	  setPhoneDiag({
+		ws: `closed:${ev.code}`,
+		phase: 'net-close',
+	  });
 
       this.onClose(ev);
 

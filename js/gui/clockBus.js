@@ -1,6 +1,13 @@
 // js/gui/clockBus.js — leader/consort clock bus using net.js WS helper
 
 import { WS } from './net.js';
+import {
+  attachClientStatusSocket,
+  detachClientStatusSocket,
+  sendClientStatusNow,
+} from './clientStatus.js';
+
+//import { setPhoneDiag } from './phoneDiag.js';
 
 let BUS_SEQ = 0;
 let SOCKET_SEQ = 0;
@@ -15,12 +22,52 @@ function resolveWsPort(wsPort) {
   return wsPort ?? qsPort ?? 8010;
 }
 
+function resolveSameOriginWsPath() {
+  const q = new URLSearchParams(window.location.search);
+
+  // Explicit same-origin mode:
+  //   ?wsMode=same-origin
+  //
+  // Implicit same-origin mode:
+  //   no wsPort supplied
+  //
+  // Optional custom path:
+  //   ?wsPath=/ws
+  //
+  // Default same-origin path:
+  //   /ws
+  const explicitSameOrigin = q.get('wsMode') === 'same-origin';
+  const noSeparateWsPort = !q.has('wsPort');
+
+  if (!explicitSameOrigin && !noSeparateWsPort) return null;
+
+  const path = q.get('wsPath') || '/ws';
+  return path.startsWith('/') ? path : `/${path}`;
+}
+
 function resolveWsUrl(wsPort) {
   const loc = window.location;
+
+  const sameOriginPath = resolveSameOriginWsPath();
+  if (sameOriginPath) {
+    const proto = (loc.protocol === 'https:') ? 'wss' : 'ws';
+
+    // loc.host includes the page port, e.g. 192.168.1.10:8443.
+    return `${proto}://${loc.host}${sameOriginPath}`;
+  }
+
+  // Original two-port behaviour, used when wsPort is supplied.
   const host = loc.hostname || 'localhost';
   const proto = (loc.protocol === 'https:') ? 'wss' : 'ws';
   const port = resolveWsPort(wsPort);
   return `${proto}://${host}:${port}`;
+}
+
+function statusForDiagnostics({ role, statusId }) {
+  return {
+    role,
+    statusId,
+  };
 }
 
 // Role must be 'leader' or 'consort' to match server.py
@@ -79,6 +126,10 @@ export function makeClockBus({ role, wsPort, onMsg, statusId = 'no-status' } = {
 
     nativeReadyState() {
       return bus.ws?.ws?.readyState ?? WebSocket.CLOSED;
+    },
+
+    nativeSocket() {
+      return bus.ws?.ws ?? null;
     },
 
     isOpen() {
@@ -212,8 +263,15 @@ export function makeClockBus({ role, wsPort, onMsg, statusId = 'no-status' } = {
         reason,
       });
 
+//	  setPhoneDiag({
+//  		ws: 'connecting',
+//  		phase: `ws-opening:${reason}`,
+//	});
+	
       bus.ws = new WS(url, {
         reconnectMs: 1000,
+
+
 
         onOpen: () => {
           bus.lastOpenAt = Date.now();
@@ -229,8 +287,38 @@ export function makeClockBus({ role, wsPort, onMsg, statusId = 'no-status' } = {
             openCount: bus.openCount,
           });
 
-          // server.py expects this first
-          bus.send({ type: 'register', role });
+//		  setPhoneDiag({
+//		  	ws: 'open',
+//		  	phase: 'ws-open',
+//		  });
+		
+          // IMPORTANT:
+          // server.py expects the first WebSocket message to be:
+          //   { type: 'register', role }
+          //
+          // Do not send client-status before this.
+          const registerSent = bus.send({ type: 'register', role });
+
+          const nativeWs = bus.nativeSocket();
+
+          // Attach the native WebSocket so queued client-status messages
+          // from main.js can be flushed safely.
+          attachClientStatusSocket(nativeWs);
+
+          // Send exactly one ws-registered milestone for this open event.
+          sendClientStatusNow(
+            nativeWs,
+            statusForDiagnostics({ role, statusId }),
+            'ws-registered',
+            {
+              busId,
+              socketId,
+              url,
+              openCount: bus.openCount,
+              registerSent,
+              reason,
+            }
+          );
         },
 
         onMsg: (msg) => {
@@ -240,6 +328,13 @@ export function makeClockBus({ role, wsPort, onMsg, statusId = 'no-status' } = {
         onClose: (ev) => {
           bus.lastCloseAt = Date.now();
           bus.closeCount += 1;
+
+          detachClientStatusSocket(bus.nativeSocket());
+
+//		setPhoneDiag({
+//		  ws: `closed:${ev?.code ?? '?'}`,
+//		  phase: 'ws-closed',
+//		});
 
           console.warn('[clockBus] socket closed', {
             statusId,
@@ -255,6 +350,12 @@ export function makeClockBus({ role, wsPort, onMsg, statusId = 'no-status' } = {
         },
 
         onError: (err) => {
+        
+//        setPhoneDiag({
+//		  ws: 'ERROR',
+//		  phase: 'ws-error',
+//		});
+        
           console.warn('[clockBus] socket error', {
             statusId,
             busId,
@@ -352,6 +453,8 @@ export function makeClockBus({ role, wsPort, onMsg, statusId = 'no-status' } = {
       bus._cleanupFns.length = 0;
 
       ACTIVE_BUSES.delete(guardKey);
+
+      detachClientStatusSocket(bus.nativeSocket());
 
       if (bus.ws?.close) {
         try { bus.ws.close(); } catch (_) {}

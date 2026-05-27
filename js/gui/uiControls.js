@@ -63,15 +63,9 @@ export function installUIHandlers(ctx, canvas, status, audio) {
   installLeaderModeConfirmHandler(ctx, canvas, status, audio);
   installClockStartHandler(ctx, canvas, status);
   installEndScreenTapHandler(ctx, canvas, status);
+  installConsortEntryHandler(ctx, canvas, status); 
   installFadeToBlackHandler(ctx, canvas, status);
   installCsoundHandler(ctx, canvas, status, audio);
-
-//  installHengeHandler(ctx, canvas, status);
-//  installLeaderModeConfirmHandler(ctx, canvas, status);
-//  installLeaderStopHandler(ctx, canvas, status);
-//  installCsoundHandler(ctx, canvas, status, csound);
-//  installCsoundHandler(ctx, canvas, status);
-//  installPingHandler(ctx, canvas, status);
 }
 
 // --- helper: PointerEvent -> DESIGN coords (works for fixed and fit) ---
@@ -93,9 +87,12 @@ function mayPlayPhoneTap(status) {
   if (status.modeChosen === 'concert') return !!status.running;
   return false;
 }
+
+
 // ---------------------------------------------------------------------------
 //  Leader: choose PREVIEW/CONCERT by tapping left/right hot spots
 // ---------------------------------------------------------------------------
+
 export function installLeaderEntryHandler(ctx, canvas, status) {
   canvas.addEventListener('pointerup', (ev) => {
     if (status.role !== 'leader') return;
@@ -138,7 +135,6 @@ export function installLeaderEntryHandler(ctx, canvas, status) {
 // ---------------------------------------------------------------------------
 //  Leader: confirm by tapping bottom text hot spot (ctx.low)
 // ---------------------------------------------------------------------------
-
 
 function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
   canvas.addEventListener('pointerup', async (ev) => {
@@ -330,13 +326,15 @@ export function installLeaderStopHandler(ctx, canvas, status) {
 }
 
 // ---------------------------------------------------------------------------
-//  Clock tap: start animation (center clock hot spot at ctx.mid)
+//  Leader: start animation by tapping center clock hot spot
 // ---------------------------------------------------------------------------
 
 export function installClockStartHandler(ctx, canvas, status) {
   canvas.addEventListener('pointerup', (ev) => {
-    if (status.role === 'leader' && !status.leaderModeConfirmed) return;
+	if (status.role === 'consort') return;
 
+    if (status.role === 'leader' && !status.leaderModeConfirmed) return;
+	
     // 🔧 Use the same coordinate space as installHengeHandler
     const { x, y } = eventToCtxPoint(ev, canvas, ctx);
 
@@ -398,7 +396,7 @@ export function installClockStartHandler(ctx, canvas, status) {
 
 
 // ---------------------------------------------------------------------------
-//  End screen: leader can tap clock to reselect mode (back to mode-select)
+//  Leader: tap End screen centre hot spot returns to Mode Select view
 // ---------------------------------------------------------------------------
 
 export function installEndScreenTapHandler(ctx, canvas, status) {
@@ -494,76 +492,9 @@ export function installEndScreenTapHandler(ctx, canvas, status) {
   }, { capture: true });
 }
 
-/*
-export function installEndScreenTapHandler(ctx, canvas, status) {
-  canvas.addEventListener('pointerup', (ev) => {
-    if (status.role !== 'leader') return;
-    if (!status.isEndScreen) return;
-
-    const { x, y } = eventToCtxPoint(ev, canvas, ctx);
-
-    const reSelect = isInsideCircle(x, y, ctx.mid.x, ctx.mid.y, ctx.tapRadius);
-    if (!reSelect) {
-      console.log('[end] ignored: outside end screen hot spot');
-      return;
-    }
-
-    console.log('[end] reselect: returning to Entry View');
-
-    // Stop local animation first
-    stopAnimation();
-
-    // Stop any leader-side ticking on the bus too
-    status.clockBus?.stopTicking?.();
-
-    // Return leader to Entry View flags
-    status.running = false;
-    status.netRunning = false;
-    status.isEndScreen = false;
-    status.leaderModeConfirmed = false;
-    status.modeConfirmed = false;
-    status.cuedToStart = false;
-
-    status.startWall = null;
-    status.runStateDurationMs = null;
-
-    status.index = 0;
-    status.lastKeyIndex = null;
-
-    status.netTickCount = 0;
-    status.netLastTickMs = null;
-
-    // Keep the last confirmed mode selected in Entry View
-    status.modeChosen = status.lastConfirmedMode ?? status.modeChosen ?? 'concert';
-
-    if (status.modeChosen === 'preview') {
-      status.msPerBeat = status.previewClock;
-      console.log('[End View] lastConfirmedMode was PREVIEW MODE');
-    } else {
-      status.msPerBeat = status.concertClock;
-      console.log('[End View] lastConfirmedMode was CONCERT MODE');
-    }
-
-    // Optional but useful for debugging
-    status.view = 'entry';
-
-    // Tell consorts to leave End View too
-    const resetMsg = {
-      type: 'reset',
-      mode: status.modeChosen,
-    };
-
-    console.log('[leader] sending RESET', resetMsg);
-    status.clockBus?.send?.(resetMsg);
-
-    refresh();
-  }, { capture: true });
-}
-*/
-
 
 // ---------------------------------------------------------------------------
-//  Leader & Consort: trigger sound by tapping henge hot spots
+//  All phones: trigger sound by tapping henge hot spots
 // ---------------------------------------------------------------------------
 
 function installCsoundHandler(ctx, canvas, status, audio) {
@@ -665,6 +596,9 @@ function installCsoundHandler(ctx, canvas, status, audio) {
   }, { capture: true });
 }
 
+// ---------------------------------------------------------------------------
+//  All phones: trigger sound using key ID
+// ---------------------------------------------------------------------------
 
 function installHengeHandler(ctx, canvas, status) {
   canvas.addEventListener('pointerup', (ev) => {
@@ -726,6 +660,10 @@ function installHengeHandler(ctx, canvas, status) {
   }, { capture: true });
 }
 
+// ---------------------------------------------------------------------------
+//  All phones: activate Csound test tone using phantom key ID
+// ---------------------------------------------------------------------------
+
 function installPingHandler(ctx, canvas, status) {
   canvas.addEventListener('pointerup', async (ev) => {
     if (status.role === 'leader' && !status.leaderModeConfirmed) return;
@@ -781,8 +719,81 @@ function installPingHandler(ctx, canvas, status) {
   }, { capture: true });
 }
 
+// ---------------------------------------------------------------------------
+//  Consort: local wake-arm gesture before standby
+// ---------------------------------------------------------------------------
 
-//function installFadeToBlackHandler(ctx, canvas, status) {
+export function installConsortEntryHandler(ctx, canvas, status) {
+  canvas.addEventListener('pointerup', (ev) => {
+    if (status.role !== 'consort') return;
+    if (status.consortWakeArmed) return;
+
+    const { x, y } = eventToCtxPoint(ev, canvas, ctx);
+
+    const x1 = ctx.mid.x;
+    const y1 = ctx.mid.y;
+    const r  = ctx.tapRadius;
+
+    const tapWake = isInsideCircle(x, y, x1, y1, r);
+
+    if (!tapWake) {
+      console.log('[consort wake] ignored: outside mid screen hot spot');
+      return;
+    }
+
+    // This wake tap belongs only to the consort wake screen.
+    // Do not let the same pointerup reach clock-start or other centre-tap handlers.
+    ev.preventDefault();
+    ev.stopImmediatePropagation();
+
+    console.log('[consort wake] armed');
+
+    status.consortWakeArmed = true;
+
+    refresh();
+  });
+}
+
+/*
+export function installConsortEntryHandler(ctx, canvas, status) {
+  canvas.addEventListener('pointerup', (ev) => {
+    if (status.role !== 'consort') return;
+    if (status.consortWakeArmed) return;
+
+    const { x, y } = eventToCtxPoint(ev, canvas, ctx);
+
+    const x1 = ctx.mid.x;
+    const y1 = ctx.mid.y;
+    const r  = ctx.tapRadius;
+
+    const tapWake = isInsideCircle(x, y, x1, y1, r);
+
+    if (!tapWake) {
+      console.log('[consort wake] ignored: outside mid screen hot spot');
+      return;
+    }
+
+    // This wake tap belongs only to the consort wake screen.
+    // Do not let the same pointerup reach clock-start or other centre-tap handlers.
+    ev.preventDefault();
+    ev.stopImmediatePropagation();
+
+    console.log('[consort wake] armed');
+
+    status.consortWakeArmed = true;
+
+    // Later this is where wakeLock.js should be activated from the gesture.
+    // requestSatGamWakeLock(status);
+
+    refresh();
+  });
+}
+*/
+
+// ---------------------------------------------------------------------------
+//  Leader: tap confirmation hot spot to trigger Fade to Black 
+// ---------------------------------------------------------------------------
+
 export function installFadeToBlackHandler(ctx, canvas, status) {
   canvas.addEventListener('pointerup', (ev) => {
     if (!status.running) return;                 // only mid-performance

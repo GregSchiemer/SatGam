@@ -96,7 +96,7 @@ gkBend2   chnexport "bend2",   1
 
 instr 900
   chnset cpspch(8.00), "baseCps"
-  chnset -18,          "ampDbfs"
+  chnset -35,          "ampDbfs"
   chnset 100/99,       "bend1"
   chnset 99/98,        "bend2"
 endin

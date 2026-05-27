@@ -146,3 +146,4 @@ assets/certs-archive/
 assets/python/server-backup*.py
 
 .DS_Store
+.DS_Store

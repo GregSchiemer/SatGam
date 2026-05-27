@@ -26,19 +26,11 @@ gkAmpDbfs chnexport "ampDbfs", 1
 gkBend1   chnexport "bend1",   1
 gkBend2   chnexport "bend2",   1
 
-;
-; 510 / 505 -> 1.0099009901
-; 505 / 500 -> 1.0100000000
-; 500 / 495 -> 1.0101010101
-; 495 / 490 -> 1.0102040816
-; 490 / 485 -> 1.0103092784
-; 485 / 480 -> 1.0104166667
-
 instr 900
   chnset cpspch(8.00), "baseCps"
   chnset -18,          "ampDbfs"
-  chnset 100/99,       "bend1"	; 1.0101010101
-  chnset 99/98,        "bend2"	; 1.0102040816
+  chnset 100/99,       "bend1"
+  chnset 99/98,        "bend2"
 endin
 
 instr 901
@@ -108,7 +100,7 @@ instr 210
   iBaseOct  = p5
   iBaseDeg  = p6
 
-  iN  = 1
+  iN  = int(p7)
   if (iN <= 0) then
     iN = 5
   endif
@@ -366,4 +358,5 @@ instr 25  ; degree 24
   iMode     = p6
   schedule 210, 0, 0.01, iVoiceDur, iBaseOct, 24, iNNotes, iMode
   turnoff
+
 endin
