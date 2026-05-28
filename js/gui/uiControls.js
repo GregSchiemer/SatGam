@@ -719,6 +719,7 @@ function installPingHandler(ctx, canvas, status) {
   }, { capture: true });
 }
 
+
 // ---------------------------------------------------------------------------
 //  Consort: local wake-arm gesture before standby
 // ---------------------------------------------------------------------------
@@ -741,8 +742,8 @@ export function installConsortEntryHandler(ctx, canvas, status) {
       return;
     }
 
-    // This wake tap belongs only to the consort wake screen.
-    // Do not let the same pointerup reach clock-start or other centre-tap handlers.
+    // This tap belongs to the local consort wake screen.
+    // Do not allow the same pointerup to be reused by other centre-tap handlers.
     ev.preventDefault();
     ev.stopImmediatePropagation();
 
@@ -750,45 +751,21 @@ export function installConsortEntryHandler(ctx, canvas, status) {
 
     status.consortWakeArmed = true;
 
-    refresh();
-  });
-}
-
-/*
-export function installConsortEntryHandler(ctx, canvas, status) {
-  canvas.addEventListener('pointerup', (ev) => {
-    if (status.role !== 'consort') return;
-    if (status.consortWakeArmed) return;
-
-    const { x, y } = eventToCtxPoint(ev, canvas, ctx);
-
-    const x1 = ctx.mid.x;
-    const y1 = ctx.mid.y;
-    const r  = ctx.tapRadius;
-
-    const tapWake = isInsideCircle(x, y, x1, y1, r);
-
-    if (!tapWake) {
-      console.log('[consort wake] ignored: outside mid screen hot spot');
-      return;
-    }
-
-    // This wake tap belongs only to the consort wake screen.
-    // Do not let the same pointerup reach clock-start or other centre-tap handlers.
-    ev.preventDefault();
-    ev.stopImmediatePropagation();
-
-    console.log('[consort wake] armed');
-
-    status.consortWakeArmed = true;
-
-    // Later this is where wakeLock.js should be activated from the gesture.
-    // requestSatGamWakeLock(status);
+    // Request screen wake lock from the consort phone's own user gesture.
+    // Do not await here; startPerformanceWakeLock() should request immediately.
+    startPerformanceWakeLock(status).then((ok) => {
+      if (ok) {
+        console.log('[consort wake] wake lock active');
+      } else {
+        console.warn(
+          '[consort wake] wake lock unavailable; player may need to disable auto-lock manually'
+        );
+      }
+    });
 
     refresh();
   });
 }
-*/
 
 // ---------------------------------------------------------------------------
 //  Leader: tap confirmation hot spot to trigger Fade to Black 

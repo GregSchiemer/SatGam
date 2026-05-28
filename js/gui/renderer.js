@@ -26,28 +26,34 @@ import {
   chooseTextColorForBackground,
   renderEntryLeader,
 } from './text.js';
+
 import { 
   FamilyIndex, 
   ColorFamily 
 } from './color.js';
+
 import { 
   familyForIndex, 
   drawPhoneAt 
-} from './sprites.js'; 
+} from './sprites.js';
+ 
 import { 
   MAX_STATES, 
   STATE_DUR, 
   MAX_DUR, 
   CONCERT_CLK, 
   PREVIEW_CLK 
-} from './globals.js'; 
+} from './globals.js';
+
 import { 
   sequence 
 } from './sequence.js';
+
 import { 
   stopAnimation, 
   startAnimation } 
 from './animation.js';
+
 import { 
   clockify, 
   easeInOutQuad01,
@@ -212,6 +218,7 @@ function isEntryView(status) {
   return false;
 }
 
+
 function renderEntryView(ctxT, ctxS, status) {
   ctxT.clearRect(0, 0, ctxT.w, ctxT.h);
 
@@ -219,6 +226,9 @@ function renderEntryView(ctxT, ctxS, status) {
   prepareAndRenderBackground(ctxB, status);
 
   if (status.role === 'consort') {
+    // ------------------------------------------------------------
+    // Consort armed: show crisp phonehenge + normal standby text
+    // ------------------------------------------------------------
     if (status.consortWakeArmed) {
       renderSpritesLayer(status.fullHenge, { maskBits: [1, 1, 1, 1, 1] });
       renderStartConsort(ctxT, status);
@@ -226,14 +236,50 @@ function renderEntryView(ctxT, ctxS, status) {
       return;
     }
 
-    renderWakeConsort(ctxT, status);
-    composeFrame({ drawB: true, drawS: false, drawT: true });
+    // ------------------------------------------------------------
+    // Consort not armed: show blurred phonehenge + wake text
+    // ------------------------------------------------------------
+
+// 1. Draw crisp phonehenge into sprite layer.
+	renderSpritesLayer(status.fullHenge, { maskBits: [1, 1, 1, 1, 1] });
+
+// 2. Save a separate copy of the crisp sprite layer.
+	const crispCanvas = arrS[0].ctx.canvas;
+
+	const tmp = document.createElement('canvas');
+	tmp.width = crispCanvas.width;
+	tmp.height = crispCanvas.height;
+
+	const tmpCtx = tmp.getContext('2d');
+	tmpCtx.drawImage(crispCanvas, 0, 0);
+
+// 3. Replace sprite layer with plain copied version.
+	const ctxSprite = arrS[0].ctx;
+	ctxSprite.save();
+
+// Reset any transform left behind by previous drawing.
+	ctxSprite.setTransform(1, 0, 0, 1, 0, 0);
+	ctxSprite.clearRect(0, 0, ctxSprite.canvas.width, ctxSprite.canvas.height);
+	ctxSprite.globalAlpha = 0.35;
+	ctxSprite.filter = 'blur(18px)';
+
+	ctxSprite.drawImage(
+	  tmp,
+	  0, 0, tmp.width, tmp.height,
+	  0, 0, ctxSprite.canvas.width, ctxSprite.canvas.height
+	);
+	ctxSprite.restore();
+
+// 4. Draw text and compose.
+	renderWakeConsort(ctxT, status);
+	composeFrame({ drawB: true, drawS: true, drawT: true });
     return;
   }
 
   renderEntryLeader(ctxT, status);
   composeFrame({ drawB: true, drawS: false, drawT: true });
 }
+
 
 // =======================
 // —— Running View ——

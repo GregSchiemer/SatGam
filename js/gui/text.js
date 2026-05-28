@@ -72,10 +72,10 @@ export function renderReadyToPlay(ctxT, status) {
 }
 
 export function renderWakeConsort(ctxT, status) {
-  drawTopText(ctxT, status, 'Phonehenge');
-  drawSubText(ctxT, status, 'tap wake');
+//  drawTopText(ctxT, status, 'Phonehenge');
+  drawSubText(ctxT, status, 'tap wake to keep screen active');
   drawMidText(ctxT, status, 'wake');
-  drawLowText(ctxT, status, 'keep screen awake');
+  //drawLowText(ctxT, status, 'keep screen awake');
 }
 
 export function renderStartConsort(ctxT, status) {
