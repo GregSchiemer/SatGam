@@ -8,11 +8,11 @@ The app features instruments that are easy to play and quick to learn, enabling 
 
 ## Features
 
-- 🎨 Canvas-based layout and animation in pure ES6 modules
-- async server provides secure http and web socket services 
 - 🎵 Csound audio synthesis via dynamic gesture-triggered loading
+- async server provides secure http and web socket services 
 - ✅ Mobile-friendly, multi-player, autoplay-policy compliant
 - 🔁 Collaborative GUI for a consort of players synchronised by a lead player
+- 🎨 Canvas-based layout and animation in pure ES6 modules
 - application runs untethered from the internet
 
 The app is downloaded to phones via a Wi-Fi Router. The app is launched using 1 of 2 html files depending on the role :
