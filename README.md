@@ -20,7 +20,7 @@ The app is downloaded to phones via a Wi-Fi Router. The app is launched using 1 
 - **Lead player** (`leader.html`) — lead player taps the digital clock readout to start an animation sequence that drives the performance
 - **Consort** (`consort.html`) — all players trigger sounds by tapping sprites enabled by the animation sequence
 - Both versions display the same 25-key layout and interactive clock
-- The lead player syncs the consort via a Wi-Fi 6 Router
+- The lead player synchronises all phones in the consort via a Wi-Fi 6 Router
 
 The leader's role is: 
 - to start the animation sequence in sync on all phones;
@@ -149,7 +149,7 @@ In this setup:
 ---
 
 ---
-**Part 1 — aio_server.py**
+**Part 1 — Satellite Gamelan Server : aio_server.py**
 
 aio_server.py is run from **Terminal** using the following command settings :
 
@@ -241,7 +241,7 @@ How to set up [tp-link AX73 Wi-Fi 6 Router](https://youtu.be/5nZY1M_RH-k)
 
 ---
 
-**Part 3 — Create and install SatGam certificates**
+**Part 3 — Satellite Gamelan Certificate**
 
 Open a Terminal window and run the following commands.
 
@@ -316,7 +316,7 @@ Example:
 
 ___
 
-**Part 4 — Create Leader and Consort QR codes**
+**Part 4 — Satellite Gamelan QR codes**
 
 Open another Terminal window if needed.
 
