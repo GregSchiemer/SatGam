@@ -57,7 +57,7 @@ This section is for anyone curious about why the Satellite Gamelan app sounds th
 
 This shows 
 - how the 25 pitches are calculated and mapped to 25 keys on a hand-held digital synthesiser
-- where the 25 pitches sit in comparison to notes on a conventional music stave, and
+- where these pitches sit in comparison to notes on a conventional music stave, and
 - how close they are to the 5-limit harmonic ratios they approximate.
 
 ## 📁 Project Structure
@@ -144,16 +144,15 @@ Certificates must be created for the **SatGam Server** running on the MacBook Pr
 
 In this setup:
 
-- **MacBook Pro** runs `aio_server.py`
+- **aio_server.py** runs on MacBook Pro
 - **AX73 wireless router** provides the private LAN and Wi-Fi
-- `mkcert` creates the SatGam server certificate and its local certificate authority (CA) 
-- **phones** connect to the MacBook through the AX73 network
+- **phones** connect to the server through the AX73 network by scanning QR codes
 ---
 
 ---
-**Part 1 — Satellite Gamelan server : aio_server.py**
+**Part 1 — aio_server.py**
 
-aio_server.py is run from **Terminal**. Start in the root directory of the SatGam project:
+aio_server.py is run from **Terminal** using the following command settings :
 
 ```
 	cd /Users/gs/Developer/SG/SatGam
@@ -172,19 +171,10 @@ The default port is 8443.
 When the server starts successfully, the Terminal should show messages similar to:
 
 ```
-Expected output will be similar to:
-
-```
-	——— Preflight ———
-	✅ no auto-start in main.js
-	✅ robust wsPort parsing present (qsPort)
-	⚠️ leader.html did not show a direct import during preflight (static check).
-	If you see [ws] connections later, WS is wired at runtime.
-	⚠️ consort.html did not show a direct import during preflight (static check).
-	If you see [ws] connections later, WS is wired at runtime.
-	———— End preflight ————
-	[wss] Listening on wss://0.0.0.0:8444
-	[https] Serving /Users/gs/Developer/SG/SatGam on https://0.0.0.0:8443
+	diag_client=False log_http=False log_ws=True log_assets=True log_client_status=True
+	[https+wss] Serving /Users/gs/Developer/SG/SatGam
+	[https+wss] https://0.0.0.0:8443
+	[https+wss] WebSocket endpoint: wss://0.0.0.0:8443/ws
 ```
 
 	**Note**
@@ -193,24 +183,6 @@ Expected output will be similar to:
 	* the home-side interface
 	* the AX73-side interface
 	* 192.168.1.10
-
-
-
-	diag_client=False log_http=False log_ws=True log_assets=True log_client_status=True
-	[https+wss] Serving /Users/gs/Developer/SG/SatGam
-	[https+wss] https://0.0.0.0:8443
-	[https+wss] WebSocket endpoint: wss://0.0.0.0:8443/ws
-
-```
-
-**aio_server.py** is run from **Terminal** using the following command settings :
-
-```
-	cd /Users/gs/Developer/SG/SatGam
-	python3 assets/python/aio_server.py \
-	  	--port 8443 \
-	  	-r .
-```
 
 
 Additional command options include:
