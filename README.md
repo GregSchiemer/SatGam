@@ -141,25 +141,14 @@ Certificates must be created for the **SatGam Server** running on the MacBook Pr
 
 In this setup:
 
-- **MacBook Pro** runs `server.py`
+- **MacBook Pro** runs `aio_server.py`
 - **AX73 wireless router** provides the private LAN and Wi-Fi
-- **phones** connect to the MacBook through the AX73 network
 - `mkcert` creates the SatGam server certificate and its local certificate authority (CA) 
-
+- **phones** connect to the MacBook through the AX73 network
 ---
 
-### Satellite Gamelan Router Settings
-
-<p>
-  <img src="assets/md-images/ax73.JPG" width="250" alt="TP-Link AX73 Wi-Fi Router">
-</p>
-
-[SatGam Router Settings PDF](satgam_router_settings.pdf)
-
-How to set up [tp-link AX73 Wi-Fi 6 Router](https://youtu.be/5nZY1M_RH-k)
-
 ---
-### Running aio_server.py
+**Part 1 — Satellite Gamelan server : aio_server.py**
 
 aio_server.py is run from **Terminal**. Start in the root directory of the SatGam project:
 
@@ -179,8 +168,30 @@ The default port is 8443.
 
 When the server starts successfully, the Terminal should show messages similar to:
 
+```
+Expected output will be similar to:
 
 ```
+	——— Preflight ———
+	✅ no auto-start in main.js
+	✅ robust wsPort parsing present (qsPort)
+	⚠️ leader.html did not show a direct import during preflight (static check).
+	If you see [ws] connections later, WS is wired at runtime.
+	⚠️ consort.html did not show a direct import during preflight (static check).
+	If you see [ws] connections later, WS is wired at runtime.
+	———— End preflight ————
+	[wss] Listening on wss://0.0.0.0:8444
+	[https] Serving /Users/gs/Developer/SG/SatGam on https://0.0.0.0:8443
+```
+
+	**Note**
+	0.0.0.0 means the server is listening on all local interfaces, including:
+	* localhost
+	* the home-side interface
+	* the AX73-side interface
+	* 192.168.1.10
+
+
 
 	diag_client=False log_http=False log_ws=True log_assets=True log_client_status=True
 	[https+wss] Serving /Users/gs/Developer/SG/SatGam
@@ -203,43 +214,60 @@ Additional command options include:
 
 ```
 		--cert-file assets/certs/SatGam.pem
-```	
 
+```	
 			
-			Uses the SatGam public certificate file.
 			Uses the SatGam public certificate file.
 			
 	
 ```
 		--key-file assets/certs/SatGam-key.pem
-```
 
+```
 			
-			Uses the SatGam private encryption key.
 			Uses the SatGam private encryption key.
 			
 
 ```
 		--log-ws
+
 ```
+
 			Displays WebSocket messages in the Terminal console log.
+
 
 ```
 		--log-assets
+
 ```
-	
+
 			Identifies assets sent to phone clients.
 
 ```
 		--diag-client
+
 ```
-	
+
 			Displays diagnostic status messages on phone clients.
 	
 
 ---
 
-**Part 1 — Create and install SatGam certificates**
+**Part 2 — Satellite Gamelan Router Settings**
+
+<p>
+  <img src="assets/md-images/ax73.JPG" width="250" alt="TP-Link AX73 Wi-Fi Router">
+</p>
+
+[SatGam Router Settings PDF](satgam_router_settings.pdf)
+
+How to set up [tp-link AX73 Wi-Fi 6 Router](https://youtu.be/5nZY1M_RH-k)
+
+** Launch the secure SatGam server**
+
+---
+
+**Part 3 — Create and install SatGam certificates**
 
 Open a Terminal window and run the following commands.
 
@@ -311,46 +339,10 @@ Example:
 	-rw-r--r--  1 gs  staff  1781 14 Apr 08:18 SatGam-rootCA.pem
 	-rw-r--r--  1 gs  staff  1614 14 Apr 08:18 SatGam.pem
 ```
----
-**Part 2 — Launch the secure SatGam server**
 
-Open a **new Terminal window** and leave the certificate window available.
+___
 
-6.	**Launch server.py using the SatGam certificate and key**
-
-```
-	cd /Users/gs/Developer/SG/SatGam
-	python3 assets/python/server.py \
-	  --tls \
-	  --https-port 8443 \
-	  --wss-port 8444 \
-	  --cert-file assets/certs/SatGam.pem \
-	  --key-file assets/certs/SatGam-key.pem \
-	  -r .
-```
-Expected output will be similar to:
-
-```
-	——— Preflight ———
-	✅ no auto-start in main.js
-	✅ robust wsPort parsing present (qsPort)
-	⚠️ leader.html did not show a direct import during preflight (static check).
-	If you see [ws] connections later, WS is wired at runtime.
-	⚠️ consort.html did not show a direct import during preflight (static check).
-	If you see [ws] connections later, WS is wired at runtime.
-	———— End preflight ————
-	[wss] Listening on wss://0.0.0.0:8444
-	[https] Serving /Users/gs/Developer/SG/SatGam on https://0.0.0.0:8443
-```
-
-**Note**
-0.0.0.0 means the server is listening on all local interfaces, including:
-* localhost
-* the home-side interface
-* the AX73-side interface
-* 192.168.1.10
----
-**Part 3 — Create Leader and Consort QR codes**
+**Part 4 — Create Leader and Consort QR codes**
 
 Open another Terminal window if needed.
 
