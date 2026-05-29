@@ -9,6 +9,7 @@ The app features instruments that are easy to play and quick to learn, enabling 
 ## Features
 
 - 🎨 Canvas-based layout and animation in pure ES6 modules
+- async server providing https and secure web socket services 
 - 🎵 Csound audio synthesis via dynamic gesture-triggered loading
 - ✅ Mobile-friendly, multi-player, autoplay-policy compliant
 - 🔁 Collaborative GUI for a consort of players synchronised by a lead player
@@ -54,7 +55,7 @@ This section is for anyone curious about why the Satellite Gamelan app sounds th
 This shows 
 - how the 25 pitches are calculated and mapped to 25 keys on a hand-held digital synthesiser
 - where the 25 pitches sit in comparison to notes on a conventional music stave, and
-- how close they are to pythagorean ratios they approximate.
+- how close they are to the 5-limit harmonic ratios they approximate.
 
 ## 📁 Project Structure
 
@@ -158,34 +159,79 @@ In this setup:
 How to set up [tp-link AX73 Wi-Fi 6 Router](https://youtu.be/5nZY1M_RH-k)
 
 ---
-### SatGam Server
+### Running aio_server.py
 
-The SatGam server runs on a MacBook Pro. It is written in python allowing it to run on other platforms. Each player launches the app by scanning a QR code on their phone. The server waits and automatically connects as each phone launches allowing phones to download the Satellite Gamelan app. 
-The MacBook Pro has a fixed AX73-side IP address:
-
-```
-		192.168.1.10
-```
-
-The secure ports are:
+aio_server.py is run from **Terminal**. Start in the root directory of the SatGam project:
 
 ```
-		HTTPS: 8443
-		WSS: 8444
+	cd /Users/gs/Developer/SG/SatGam
 ```
 
-The **server** is run from **Terminal** using the following commands:
+Then run the server:
 
 ```
-	gs@MacBook-Pro-2 ~ % cd /Users/gs/Developer/SG/SatGam
-	python3 assets/python/server.py \
-		--tls \
-	  	--https-port 8443 \
-	  	--wss-port 8444 \
-	  	--cert-file assets/certs/SatGam.pem \
-	  	--key-file assets/certs/SatGam-key.pem \
+	python3 assets/python/aio_server.py \
+	  --port 8443 \
+	  -r .
+```
+
+The default port is 8443.
+
+When the server starts successfully, the Terminal should show messages similar to:
+
+
+```
+
+	diag_client=False log_http=False log_ws=True log_assets=True log_client_status=True
+	[https+wss] Serving /Users/gs/Developer/SG/SatGam
+	[https+wss] https://0.0.0.0:8443
+	[https+wss] WebSocket endpoint: wss://0.0.0.0:8443/ws
+
+```
+
+**aio_server.py** is run from **Terminal** using the following command settings :
+
+```
+	cd /Users/gs/Developer/SG/SatGam
+	python3 assets/python/aio_server.py \
+	  	--port 8443 \
 	  	-r .
 ```
+
+
+Additional command options include:
+
+```
+		--cert-file assets/certs/SatGam.pem
+```
+	
+		Uses the SatGam public certificate file.
+	
+```
+		--key-file assets/certs/SatGam-key.pem
+```
+	
+		Uses the SatGam private encryption key.
+
+```
+		--log-ws
+```
+	
+		Displays WebSocket messages in the Terminal console log.
+
+```
+		--log-assets
+```
+	
+		Identifies assets sent to phone clients.
+
+```
+		--diag-client
+```
+	
+		Displays diagnostic status messages on phone clients.
+	
+
 ---
 
 **Part 1 — Create and install SatGam certificates**
