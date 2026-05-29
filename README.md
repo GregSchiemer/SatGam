@@ -9,14 +9,14 @@ The app features instruments that are easy to play and quick to learn, enabling 
 ## Features
 
 - 🎨 Canvas-based layout and animation in pure ES6 modules
-- async server provides secure https and sweb socket services 
+- async server provides secure http and web socket services 
 - 🎵 Csound audio synthesis via dynamic gesture-triggered loading
 - ✅ Mobile-friendly, multi-player, autoplay-policy compliant
 - 🔁 Collaborative GUI for a consort of players synchronised by a lead player
 
 The app is downloaded to phones via a Wi-Fi Router. No internet connection is required. The app is launched using 1 of 2 html files depending on the role :
 
-- **Lead player** (`leader.html`) — lead player taps the digital clock readout to start the animation sequence that drives the performance
+- **Lead player** (`leader.html`) — lead player taps the digital clock readout to start an animation sequence that drives the performance
 - **Consort** (`consort.html`) — all players trigger sounds by tapping sprites enabled by the animation sequence
 - Both versions display the same 25-key layout and interactive clock
 - The lead player syncs the consort via a Wi-Fi 6 Router
