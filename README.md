@@ -207,6 +207,8 @@ Additional command options include:
 
 			
 			Uses the SatGam public certificate file.
+			Uses the SatGam public certificate file.
+			
 	
 ```
 		--key-file assets/certs/SatGam-key.pem
@@ -214,6 +216,8 @@ Additional command options include:
 
 			
 			Uses the SatGam private encryption key.
+			Uses the SatGam private encryption key.
+			
 
 ```
 		--log-ws
