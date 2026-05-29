@@ -203,20 +203,17 @@ Additional command options include:
 
 ```
 		--cert-file assets/certs/SatGam.pem
-```
-	
+```	
 			Uses the SatGam public certificate file.
 	
 ```
 		--key-file assets/certs/SatGam-key.pem
 ```
-	
 			Uses the SatGam private encryption key.
 
 ```
 		--log-ws
 ```
-	
 			Displays WebSocket messages in the Terminal console log.
 
 ```
