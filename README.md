@@ -9,32 +9,34 @@ The app features instruments that are easy to play and quick to learn, enabling 
 ## Features
 
 - 🎨 Canvas-based layout and animation in pure ES6 modules
-- async server providing https and secure web socket services 
+- async server provides secure https and sweb socket services 
 - 🎵 Csound audio synthesis via dynamic gesture-triggered loading
 - ✅ Mobile-friendly, multi-player, autoplay-policy compliant
 - 🔁 Collaborative GUI for a consort of players synchronised by a lead player
 
 The app is downloaded to phones via a Wi-Fi Router. No internet connection is required. The app is launched using 1 of 2 html files depending on the role :
 
-- **Lead player** (`leader.html`) — lead player taps the digital clock readout to start the animation sequence
+- **Lead player** (`leader.html`) — lead player taps the digital clock readout to start the animation sequence that drives the performance
 - **Consort** (`consort.html`) — all players trigger sounds by tapping sprites enabled by the animation sequence
 - Both versions display the same 25-key layout and interactive clock
 - The lead player syncs the consort via a Wi-Fi 6 Router
 
 The leader's role is: 
 - to start the animation sequence in sync on all phones;
-- to select 1 of 2 playing modes:
+- to select 1 of 2 playing modes for playing the animation sequence :
 
-    1. **PREVIEW** : plays the animation sequence 'fast-forward' giving players an overview of the changing UI
-    2. **CONCERT** : plays it in real-time and lasts between 12:24 and 12:48 seconds 
+    1. **PREVIEW** : plays 'fast-forward' giving players an overview of the changing UI
+    2. **CONCERT** : plays in real-time and lasts between 12:24 and 12:48 seconds 
 
 ## Player instructions
 
-The app has an animated sequence of states where 25 coloured keys appear and disappear at various times during the performance. 
+The app has an animated sequence of states where 25 coloured keys appear and disappear at various times during the performance.
+
+- before starting the performance all phones are set in wake mode
 
 - the sequence starts when the lead player taps the clock 
 
-- all players start a note by tapping a key as it appears
+- players start note by tapping keys as they appear
 
 - in each state a player may play up to 5 notes
 
