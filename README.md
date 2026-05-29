@@ -8,12 +8,12 @@ The app features instruments that are easy to play and quick to learn, enabling 
 
 ## Features
 
-- 🎵 Csound audio synthesis via dynamic gesture-triggered loading
-- async server provides secure http and web socket services 
+- 🎵 **Csound audio synthesis** via dynamic gesture-triggered loading
+- 🌐 **Async** server provides secure **HTTP** and **WebSocket** services
 - ✅ Mobile-friendly, multi-player, autoplay-policy compliant
 - 🔁 Collaborative GUI for a consort of players synchronised by a lead player
 - 🎨 Canvas-based layout and animation in pure ES6 modules
-- application runs untethered from the internet
+- 📡 **Application** runs untethered from the internet
 
 The app is downloaded to phones via a Wi-Fi Router. The app is launched using 1 of 2 html files depending on the role :
 
@@ -33,11 +33,11 @@ The leader's role is:
 
 The app has an animated sequence of states where 25 coloured keys appear and disappear at various times during the performance.
 
-- before starting the performance all phones are set in wake mode
+- before starting the performance players set phones in wake mode
 
 - the sequence starts when the lead player taps the clock 
 
-- players start note by tapping keys as they appear
+- players trigger notes by tapping keys as they appear
 
 - in each state a player may play up to 5 notes
 
