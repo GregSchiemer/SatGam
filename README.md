@@ -177,12 +177,12 @@ When the server starts successfully, the Terminal should show messages similar t
 	[https+wss] WebSocket endpoint: wss://0.0.0.0:8443/ws
 ```
 
-	**Note**
-	0.0.0.0 means the server is listening on all local interfaces, including:
-	* localhost
-	* the home-side interface
-	* the AX73-side interface
-	* 192.168.1.10
+			**Note**
+			0.0.0.0 means the server is listening on all local interfaces, including:
+			- localhost
+			- the home-side interface
+			- the AX73-side interface
+			- 192.168.1.10
 
 
 Additional command options include:
