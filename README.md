@@ -205,31 +205,31 @@ Additional command options include:
 		--cert-file assets/certs/SatGam.pem
 ```
 	
-		Uses the SatGam public certificate file.
+			Uses the SatGam public certificate file.
 	
 ```
 		--key-file assets/certs/SatGam-key.pem
 ```
 	
-		Uses the SatGam private encryption key.
+			Uses the SatGam private encryption key.
 
 ```
 		--log-ws
 ```
 	
-		Displays WebSocket messages in the Terminal console log.
+			Displays WebSocket messages in the Terminal console log.
 
 ```
 		--log-assets
 ```
 	
-		Identifies assets sent to phone clients.
+			Identifies assets sent to phone clients.
 
 ```
 		--diag-client
 ```
 	
-		Displays diagnostic status messages on phone clients.
+			Displays diagnostic status messages on phone clients.
 	
 
 ---
