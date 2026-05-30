@@ -291,11 +291,11 @@ def main():
     app = create_app(args)
 
     print(
-        "[settings] "
+        "[settings  "
         f"log_http={args.log_http} "
         f"log_ws={args.log_ws} "
         f"log_assets={args.log_assets} "
-        f"log_client_status={args.log_client_status}"
+        f"log_client_status={args.log_client_status}]"
     )
     print(f"[https+wss] Serving {root}")
     print(f"[https+wss] https://{args.host}:{args.port}")
