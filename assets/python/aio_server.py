@@ -269,9 +269,13 @@ def main():
     ap.add_argument("-r", "--root", default=".", help="Static root directory")
     ap.add_argument("--host", default="0.0.0.0")
     ap.add_argument("--port", type=int, default=8443)
-    ap.add_argument("--cert-file", required=True)
-    ap.add_argument("--key-file", required=True)
+    ap.add_argument("--cert-file", default="assets/certs/SatGam.pem",
+    help="TLS certificate file. Default: assets/certs/SatGam.pem",
+    )
 
+    ap.add_argument("--key-file", default="assets/certs/SatGam-key.pem",
+    help="TLS private key file. Default: assets/certs/SatGam-key.pem",
+    )
     ap.add_argument("--log-http", action=argparse.BooleanOptionalAction, default=False)
     ap.add_argument("--log-ws", action=argparse.BooleanOptionalAction, default=True)
     ap.add_argument("--log-assets", action=argparse.BooleanOptionalAction, default=True)
@@ -287,7 +291,7 @@ def main():
     app = create_app(args)
 
     print(
-        "[diag] "
+        "[settings] "
         f"log_http={args.log_http} "
         f"log_ws={args.log_ws} "
         f"log_assets={args.log_assets} "
