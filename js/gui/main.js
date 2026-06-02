@@ -362,6 +362,14 @@ export function handleClockMsg(msg, status) {
     status.lastKeyIndex = null;
 
     status.modeChosen = msg.mode || status.lastConfirmedMode || status.modeChosen || 'concert';
+    
+    // Concert-safe repeat-run fix:
+    // A reset after End View must force consort phones to reacquire
+    // their local wake/audio gesture before the next run.
+    if (status.role === 'consort') {
+      console.log('[consort] reset: clearing consortWakeArmed');
+      status.consortWakeArmed = false;
+    }    
     status.view = 'entry';
 
     if (status.modeChosen === 'preview') {
