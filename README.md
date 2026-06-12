@@ -10,7 +10,7 @@ The app renders a synchronised multiplayer interface using gesture-triggered aud
 
 ## 📁 Project Structure
 
-Actual `.pem` certificate files are omitted here for clarity.
+Certificate (`.pem`) files are omitted here for clarity.
 
 ```
 .
