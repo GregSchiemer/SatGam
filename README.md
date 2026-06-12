@@ -8,6 +8,75 @@ Performance relies on a choir of miniature speakers to project sound into reverb
 
 The app renders a synchronised multiplayer interface using gesture-triggered audio and ES6 canvas animation. It was designed as a [concert app](https://satellitegamelan.com) to perform microtonal music composed by the developer initially to explore microtonal tuning theories of [Erv Wilson](https://www.anaphoria.com/wilson.html). This version supports a work that explores harmonic properties of a tuning system with 25 equally spaced intervals, devised by Karlheinz Stockhausen for his 1954 electronic work [*Studie II*](https://joachimheintz.de/stuecke/code/stockhausen_studie_II_LAC_2010.pdf). The source code here is intended as an eventual replacement of the original app written in Objective-C. It uses a combination of javaScript and [Csound](https://csound.com/index.html) [WebAssembly](https://github.com/orgs/csound/people) and draws on the work of New Zealand composer and computer music pioneer [Barry Vercoe](https://www.media.mit.edu/posts/in-memoriam-barry-lloyd-vercoe-1937-2025/) and an international community of [Csound developers](https://github.com/csound/csound#contributors). In the spirit of Vercoe I have released the code into the wild.
 
+## 📁 Project Structure
+
+Actual `.pem` certificate files are omitted here for clarity.
+
+```
+.
+├── apple-touch-icon-precomposed.png
+├── apple-touch-icon.png
+├── assets
+│   ├── bash
+│   │   └── zshrc
+│   ├── certs
+│   ├── csd
+│   │   ├── phonehenge-0.csd
+│   │   ├── phonehenge-1.csd
+│   │   ├── phonehenge-2.csd
+│   │   ├── phonehenge-3.csd
+│   │   ├── phonehenge-4.csd
+│   │   ├── sprite-chords.orc
+│   │   ├── sprite-single.csd
+│   │   └── sprite-single.orc
+│   ├── python
+│   │   ├── make-qr.py
+│   │   └── server.py
+│   └── qr-images
+│       ├── qr-consort.png
+│       └── qr-leader.png
+├── consort.html
+├── css
+│   └── bootstrap.min.css
+├── favicon.ico
+├── js
+│   ├── gui
+│   │   ├── animation.js
+│   │   ├── audioEngine.js
+│   │   ├── canvasExtensions.js
+│   │   ├── canvasUtils.js
+│   │   ├── clockBus.js
+│   │   ├── clockTransport.js
+│   │   ├── color.js
+│   │   ├── csoundInit.js
+│   │   ├── globals.js
+│   │   ├── helpers.js
+│   │   ├── henge.js
+│   │   ├── main.js
+│   │   ├── net.js
+│   │   ├── renderer.js
+│   │   ├── runTime.js
+│   │   ├── satgamPing.js
+│   │   ├── sequence.js
+│   │   ├── sprites.js
+│   │   ├── text.js
+│   │   ├── uiControls.js
+│   │   └── wakeLock.js
+│   └── synth
+│       ├── csound6
+│       │   ├── csound.js
+│       │   └── csound.js.map
+│       └── csound7
+│           ├── csound.js
+│           └── csound.js.map
+├── leader.html
+├── LICENSE
+└── README.md
+
+16 directories, 58 files
+
+```
+
 ## Documentation
 
 - [Concert Direction](docs/overview.md)
