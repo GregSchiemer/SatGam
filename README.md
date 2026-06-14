@@ -86,6 +86,6 @@ Certificate (`.pem`) files are omitted here for clarity.
 - [Tuning](docs/tuning.md)
 - [Setup](docs/setup.md)
 - [Server](docs/server.md)
-- [Security](docs/certificates.md)
+- [Certification](docs/certificates.md)
 - [Router](docs/router.md)
 - [Source material from original README](docs/source.md)

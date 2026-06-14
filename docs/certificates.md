@@ -1,6 +1,6 @@
 **Part 3 — Satellite Gamelan Certificates**
 
-Certificates reassure the phone browser that an authentic Web Assembly application will be downloaded when a QR code is scanned. 
+Certificates reassure the phone browser that an authentic Web Assembly application will be downloaded when a QR code is scanned. SatGam provides ready-to-deploy certificates for iOS and Android phones. But certificates may also be customised to accomodate on-going development. 
 
 
 *** Ready-to-Deploy ***
