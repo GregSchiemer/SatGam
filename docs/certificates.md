@@ -22,15 +22,16 @@ gs@MacBook-Pro-2 SatGam % tree
 ```
 For android phones deploy SatGam-rootCA.cer
 
-1. upload to via Bluetooth 
-2. install certificate
-3. trust certificate
+1. upload to Firefox ? via Bluetooth 
+2. install certificate how ?
+3. trust certificate how ?
 
 For iOS phones deploy Satellite-Gamelan-Root-Certificate.mobileconfig
 
 1. upload to Safari via Bluetooth using AirDrop or via USB using Apple Configurator
-2. install certificate
-3. trust certificate
+2. install certificate > **Settings** > **General** > **VPN & Device Management** > **Satellite Gamelan Root Certificate** > **Install**
+   
+3. trust certificate > **Settings** > **General** > **About** > **Certificate Trust Settings** > **Enable Full Trust for Root certificates**
   
 
 
