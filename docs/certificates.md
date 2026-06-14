@@ -1,9 +1,10 @@
 **Part 3 — Satellite Gamelan Certificates**
 
-Certificates reassure the phone browser that an authentic Web Assembly application will be downloaded when a QR code is scanned. SatGam provides ready-to-deploy certificates for iOS and Android phones. But certificates may also be customised to accomodate on-going development. 
+Certificates reassure the phone browser that an authentic Web Assembly application will be downloaded when a QR code is scanned. SatGam provides certificates that are ready-to-deploy and customisable to accomodate on-going development. 
 
 
 *** Ready-to-Deploy ***
+
 SatGam assets/certs includes ready-to-deploy certificates for iPhone and android phones. 
 
 ```
@@ -19,13 +20,17 @@ gs@MacBook-Pro-2 SatGam % tree
             └── Satellite-Gamelan-Root-Certificate.mobileconfig
 
 ```
-A ready-to-deploy certificate is uploaded to a phone, then installed and trusted. 
+For android phones deploy SatGam-rootCA.cer
 
-There are 3 steps to deploy Satellite-Gamelan-Root-Certificate.mobileconfig on an iOS phone
+1. upload to via Bluetooth 
+2. install certificate
+3. trust certificate
 
-1. upload Satellite-Gamelan-Root-Certificate.mobileconfig using AirDrop or Apple Configurator
-2. install Satellite-Gamelan-Root-Certificate.mobileconfig
-3. trust 
+For iOS phones deploy Satellite-Gamelan-Root-Certificate.mobileconfig
+
+1. upload to Safari via Bluetooth using AirDrop or via USB using Apple Configurator
+2. install certificate
+3. trust certificate
   
 
 
