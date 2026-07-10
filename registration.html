@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>SatGam Phone Registration</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    :root {
+      --bg: #10131a;
+      --panel: #1c2230;
+      --text: #f5f7fb;
+      --muted: #b8c0d4;
+      --button: #f5f7fb;
+      --button-text: #10131a;
+      --border: #3a4358;
+      --warning: #ffe7a3;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      line-height: 1.45;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    main {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px;
+      margin: 18px 0;
+    }
+
+    h1 {
+      font-size: 2rem;
+      line-height: 1.15;
+      margin: 0 0 12px;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      margin: 0 0 12px;
+    }
+
+    p {
+      margin: 0 0 14px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .warning {
+      color: var(--warning);
+    }
+
+    .button-row {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    a.button {
+      display: block;
+      box-sizing: border-box;
+      width: 100%;
+      padding: 16px 18px;
+      border-radius: 14px;
+      text-align: center;
+      text-decoration: none;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--button-text);
+      background: var(--button);
+    }
+
+    label {
+      display: block;
+      margin-top: 14px;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 13px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 1rem;
+      color: var(--text);
+      background: #0c0f15;
+    }
+
+    code {
+      font-family: Menlo, Monaco, Consolas, monospace;
+      font-size: 0.9rem;
+    }
+
+    ol {
+      padding-left: 1.25rem;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    .small {
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+
+<body>
+<main>
+  <div class="panel">
+    <h1>Satellite Gamelan Phone Registration</h1>
+
+    <p>
+      Phone registration is essential for taking part in a Satellite Gamelan performance. Registration means your phone will play in a secure environment. Registration will never happen on-line. It must be done in person, before the first rehearsal. 
+    </p>
+
+    <p class="warning small">
+      The security of your personal information matters. Never entrust it to a web bot.
+    </p>
+
+    <p class="muted">
+      Initially, you will connect your phone to a secure Wi-Fi network that is disconnected from the internet. The network password will be given to you verbally by a trusted person if I am not available. Secondly, you will install the Satellite Gamelan security certificate on your phone by scanning a QR code. With the certificate installed, your phone knows the Satellite Gamelan is a web assembly app that runs safely inside your phone’s web browser and will not interfere with your phone’s normal behaviour. 
+    <br>
+    <br>
+      The Satellite Gamelan security certificate will never record your personal information and should only be installed on your phone in your presence, helped, where necessary, by someone you trust. It can be removed from your phone at anytime and should be removed after the performance. Thank you for taking part. 
+    <br>
+    <br>
+      The following three-step phone registration process allows the Satellite Gamelan Certificate to be downloaded, installed and trusted. Start by scanning the QR code then complete the three steps on your phone. Once your phone is registered you are ready to launch the Satellite Gamelan app, This happens when you scan a second QR code. 
+    <br>
+    <br>
+      NOTE. This is not the rehearsal/concert launch page. Use Satellite Gamelan Leader or Consort QR codes to start rehearsal/performance.
+    </p>
+
+  </div>
+
+  <div class="panel">
+    <h2>Please use your phone to scan the QR code</h2>
+
+    <p>
+      Connect your phone to the <strong>Vercoe</strong> Wi-Fi network, then use your phone to scan the 
+      QR code then chose your phone type to complete registration. Satellite Gamelan supports iPhones and Android phones
+    </p>
+    
+    <div style="text-align: center; margin: 1.25rem 0;">
+      <img
+        src="assets/qr-images/qr-registration.png"
+        alt="QR code for Satellite Gamelan phone registration"
+        width="320"
+        style="max-width: 100%; height: auto;"
+      >
+    </div>
+
+   </div>
+
+  <div class="panel">
+ 
+     <div class="button-row">
+      <a
+        id="ios-link"
+        class="button"
+        href="assets/certs/ios-deploy/Satellite-Gamelan-Root-Certificate.mobileconfig"
+      >
+        Register iPhone (Safari)
+      </a>
+    </div>
+ 
+    <ol>
+      <li><strong>DOWNLOAD</strong></li>
+      <p>Tap <strong>Register iPhone (Safari)</strong> to download the Satellite Gamelan Root certificate then
+      <br>     
+            
+      <li><strong>INSTALL</strong></li>
+      <p>go to <strong>Settings → General → VPN & Device Management → Profile Downloaded</strong> 
+      and tap <strong>Profile Downloaded</strong> to install the Satellite Gamelan Root certificate then
+      </p>
+
+      <li><strong>TRUST</strong></li>
+      <p>go to <strong>Settings → General → About → Certificate Trust Settings</strong>
+      and under <strong>Enable Full Trust for Root certificates</strong>, toggle the horizontal switch right to enable full trust for the downloaded Root certificate (enabled switch is green).</p>
+    </ol>
+
+  </div>
+
+  <div class="panel">
+    <div class="button-row">
+      <a
+        id="android-link"
+        class="button"
+        href="assets/certs/android-deploy/SatGam-rootCA.cer"
+      >
+        Register Android (Chrome)
+      </a>
+    </div>
+
+    <ol>
+      <li><strong>DOWNLOAD</strong></li>
+      <p>Tap <strong>Register Android → Encryption & Credentials → Install a certificate</strong> or alternatively, <strong> More security settings → Encryption & Credentials → Install a certificate</strong> then
+      choose <code>SatGam-rootCA.cer</code>
+      <br>
+
+      <li><strong>INSTALL</strong></li>
+      <p>go to <strong>Settings</strong> and search for <strong>Install a certificate</strong> 
+      then select <strong>CA certificate</strong> to install the downloaded Root certificate
+      </p>
+
+      <li><strong>TRUST</strong></li>
+      search for <strong>Install certificate</strong> and choose <strong><code>SatGam-rootCA.cer</code></strong>
+      <p class="warning small">
+      <br>
+      Expect an Android warning whenever a local certificate authority is manually installed.
+      This means the final trust decision is always made by the phone owner.
+      </p>
+    </ol>
+  </div>
+
+  <div class="panel">
+    <h2>After registration</h2>
+
+    <p>
+      At the time of registration the certificate you installed will be trusted by your browser. This means your phone is ready to take part in 
+      rehearsals and concerts using the Satellite Gamelan web app.
+    </p>
+
+    <p>
+      For rehearsal/performance, scan the appropriate Satellite Gamelan QR code:
+    </p>
+
+    <ul>
+      <li><strong>Leader QR code</strong> — opens <code>leader.html</code>.</li>
+      <li><strong>Consort QR code</strong> — opens <code>consort.html</code>.</li>
+    </ul>
+
+  </div>
+</main>
+
+<script>
+(function () {
+  const nameInput = document.getElementById('player-name');
+  const groupInput = document.getElementById('player-group');
+  const iosLink = document.getElementById('ios-link');
+  const androidLink = document.getElementById('android-link');
+
+  const storageKey = 'satgam.registration';
+
+  function loadSavedDetails() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
+      if (saved.name) nameInput.value = saved.name;
+      if (saved.group) groupInput.value = saved.group;
+    } catch {
+      // Ignore malformed localStorage.
+    }
+  }
+
+  function saveDetails() {
+    const details = {
+      name: nameInput.value.trim(),
+      group: groupInput.value.trim()
+    };
+
+    localStorage.setItem(storageKey, JSON.stringify(details));
+    return details;
+  }
+
+  function logAction(platform, action) {
+    const details = saveDetails();
+
+    const payload = {
+      platform,
+      action,
+      name: details.name,
+      group: details.group,
+      page: 'registration.html',
+      href: window.location.href,
+      userAgent: navigator.userAgent,
+      timestamp: new Date().toISOString()
+    };
+
+    const body = JSON.stringify(payload);
+
+    /*
+      This logging endpoint is optional.
+
+      If assets/python/server.py does not implement /register-log,
+      the certificate download still proceeds normally.
+    */
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon('/register-log', new Blob([body], {
+        type: 'application/json'
+      }));
+    } else {
+      fetch('/register-log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body,
+        keepalive: true
+      }).catch(() => {});
+    }
+  }
+
+  loadSavedDetails();
+
+  nameInput.addEventListener('input', saveDetails);
+  groupInput.addEventListener('input', saveDetails);
+
+  iosLink.addEventListener('click', function () {
+    logAction('ios', 'download_mobileconfig');
+  });
+
+  androidLink.addEventListener('click', function () {
+    logAction('android', 'download_cer');
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,11 +1,11 @@
 ## Satellite Gamelan Certificates
 
-Certificates reassure the phone browser that an authentic Web Assembly application will be downloaded when a QR code is scanned. SatGam provides certificates that are either **ready-to-deploy** or **customised** to accomodate on-going development. 
+Certificates allow phone browsers to trust the local SatGam HTTPS/WSS server when performers launch the app from a QR code. SatGam certificates are either **ready-to-deploy** or **customised** to accommodate ongoing development. 
 
 
 ### Ready-to-Deploy
 
-SatGam assets/certs includes ready-to-deploy certificates for iOS phones and Android phones. 
+SatGam assets/certs includes ready-to-deploy certificates for iOS and Android phones. 
 
 ```
 
@@ -22,7 +22,7 @@ gs@MacBook-Pro-2 SatGam % tree
 ```
 For **Android** phones use **SatGam-rootCA.cer**
 
-1. upload to (Firefox ?) via Bluetooth 
+1. upload to Chrome
 2. install certificate (how ?)
 3. trust certificate (how ?)
 

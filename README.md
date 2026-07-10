@@ -6,12 +6,11 @@ The instruments are easy to play and quick to learn, enabling musicians to explo
 
 Performance relies on a choir of miniature speakers to project sound into reverberant concert venues that were designed to propagate the unamplified sound of multiple hand-held instruments and a cappella voices.
 
-The app renders a synchronised multiplayer interface using gesture-triggered audio and ES6 canvas animation. It was designed as a [concert app](https://satellitegamelan.com) to perform microtonal music composed by the developer initially to explore microtonal tuning theories of [Erv Wilson](https://www.anaphoria.com/wilson.html). The source code here is intended as an eventual replacement of the original app written in Objective-C. It uses a combination of javaScript and [Csound](https://csound.com/index.html) [WebAssembly](docs/server.md) and draws on the work of New Zealand composer and computer music pioneer [Barry Vercoe](https://www.media.mit.edu/posts/in-memoriam-barry-lloyd-vercoe-1937-2025/) and an international community of [Csound developers](docs/server.md). In the spirit of Vercoe I have released the code into the wild.
+The app renders a synchronised multiplayer interface using gesture-triggered audio and ES6 canvas animation. It was designed as a [concert app](https://satellitegamelan.com) to perform microtonal music composed by the developer initially to explore microtonal tuning theories of [Erv Wilson](https://www.anaphoria.com/wilson.html). The source code here is intended as an eventual replacement of the original app written in Objective-C. It uses a combination of JavaScript and [Csound](https://csound.com/index.html) [WebAssembly](docs/server.md) and draws on the work of New Zealand composer and computer music pioneer [Barry Vercoe](https://www.media.mit.edu/posts/in-memoriam-barry-lloyd-vercoe-1937-2025/) and an international community of [Csound developers](docs/server.md). In the spirit of Vercoe I have released the code into the wild.
 
-This version of the code evolved to support the realisation of *Phonehenge*, a work that explores harmonic properties of [a non-octave tuning system with 25 equally spaced intervals](docs/tuning.md), devised by Karlheinz Stockhausen for his 1954 electronic work [*Studie II*](https://joachimheintz.de/stuecke/code/stockhausen_studie_II_LAC_2010.pdf).
+This version of the code evolved to support the realisation of *Phonehenge*, a work where musicians can explore the harmonic properties of a [non-octave tuning system](docs/tuning.md) with 25 equally spaced pitches, devised by Karlheinz Stockhausen for his 1954 electronic work [*Studie II*](https://joachimheintz.de/stuecke/code/stockhausen_studie_II_LAC_2010.pdf).
 
 ### 📁 File Structure
-Certificate (`.pem`) files are omitted here for clarity.
 
 ```
 .
@@ -77,6 +76,7 @@ Certificate (`.pem`) files are omitted here for clarity.
 16 directories, 58 files
 
 ```
+The `assets/certs` directory contains server certificates and mobile deployment certificates. See [Security](docs/certificates.md).
 
 ## Documentation
 
@@ -86,6 +86,6 @@ Certificate (`.pem`) files are omitted here for clarity.
 - [Tuning](docs/tuning.md)
 - [Setup](docs/setup.md)
 - [Server](docs/server.md)
-- [Certification](docs/certificates.md)
+- [Security](docs/certificates.md)
 - [Router](docs/router.md)
 - [Source material from original README](docs/source.md)
