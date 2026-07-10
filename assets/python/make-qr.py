@@ -124,22 +124,33 @@ def add_label(qr_img, role, palette, font):
 
 def main():
     ap = argparse.ArgumentParser(description="Generate SatGam QR codes (leader/consort)")
-    ap.add_argument("--scheme", default="https",
-                    help="URL scheme for the page in the QR code")
     ap.add_argument("--host", default=None,
                     help="LAN host or .local hostname visible to phones")
-    ap.add_argument("--http-port", type=int, default=8443,
-                    help="HTTP/HTTPS server port for the page URL")
+    
+    ap.add_argument("--performance-scheme", default="https",
+                    help="URL scheme for leader/consort QR codes")
+    
+    ap.add_argument("--performance-port", type=int, default=8443,
+                    help="HTTPS server port for leader/consort QR codes")
+    
+    ap.add_argument("--registration-scheme", default="http",
+                    help="URL scheme for registration QR code")
+    
+    ap.add_argument("--registration-port", type=int, default=8000,
+                    help="HTTP server port for registration QR code")
+    
     ap.add_argument("--outdir", default="assets/qr-images",
                     help="Output directory for PNGs")
+    
     ap.add_argument("--font-size", type=int, default=18,
-                    help="Banner font size")
+                    help="Banner font size")  
     ap.add_argument("--font-path", default=None,
                     help="Optional explicit font file path for the banner label")
     args = ap.parse_args()
 
     host = args.host or guess_host()
-    base = f"{args.scheme}://{host}:{args.http_port}"
+    performance_base = f"{args.performance_scheme}://{host}:{args.performance_port}"
+    registration_base = f"{args.registration_scheme}://{host}:{args.registration_port}"
 
     outdir = Path(args.outdir)
     outdir.mkdir(parents=True, exist_ok=True)
@@ -153,7 +164,7 @@ def main():
     BLACK = (0, 0, 0)
 
     # Leader
-    leader_url = f"{base}/leader.html"
+    leader_url = f"{performance_base}/leader.html"
     leader_qr = mk_qr(leader_url, fill=AQUA_LIGHT, back=WHITE)
     leader_card = add_label(
         leader_qr,
@@ -165,7 +176,7 @@ def main():
     leader_card.save(leader_path)
 
     # Consort
-    consort_url = f"{base}/consort.html"
+    consort_url = f"{performance_base}/consort.html"
     consort_qr = mk_qr(consort_url, fill=BLUE_DARK, back=WHITE)
     consort_card = add_label(
         consort_qr,
@@ -175,13 +186,27 @@ def main():
     )
     consort_path = outdir / "qr-consort.png"
     consort_card.save(consort_path)
-    print("Base URL:", base)
+
+    # Registration
+    registration_url = f"{registration_base}/registration.html"
+    registration_qr = mk_qr(registration_url, fill=BLACK, back=WHITE)
+    registration_card = add_label(
+        registration_qr,
+        "Phonehenge - Registration",
+        palette={"bg": WHITE, "banner_bg": WHITE, "banner_fg": BLACK},
+        font=font,
+    )
+    registration_path = outdir / "qr-registration.png"
+    registration_card.save(registration_path)
     print("Font size:", args.font_size)
     if args.font_path:
         print("Font path override:", args.font_path)
+        
     print("Leader ", leader_path, "->", leader_url)
     print("Consort", consort_path, "->", consort_url)
+    print("Registration", registration_path, "->", registration_url)
     print("Scan from phones while the server is running on the same Wi-Fi.")
+
 
 
 if __name__ == "__main__":
