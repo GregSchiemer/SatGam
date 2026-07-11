@@ -27,7 +27,7 @@ README.md        Main GitHub landing page
 docs/            Markdown documentation linked from README.md
 assets/docs/     Supporting PDF, TeX, CSV, and notation source files
 assets/md-images Images used by Markdown documentation
-```
+
 .
 ├── apple-touch-icon-precomposed.png
 ├── apple-touch-icon.png
