@@ -10,17 +10,23 @@ The app renders a synchronised multiplayer interface using gesture-triggered aud
 
 This version of the code evolved to support the realisation of *Phonehenge*, a work where musicians can explore the harmonic properties of a [non-octave tuning system](docs/tuning.md) with 25 equally spaced pitches, devised by Karlheinz Stockhausen for his 1954 electronic work [*Studie II*](https://joachimheintz.de/stuecke/code/stockhausen_studie_II_LAC_2010.pdf).
 
-### Features
+## Features
 
-🎵 Csound audio synthesis via dynamic gesture-triggered loading
-🌐 Async server provides secure HTTP and WebSocket services
-✅ Mobile-friendly, multi-player, autoplay-policy compliant
-🔁 Collaborative GUI for a consort of players synchronised by a lead player
-🎨 Canvas-based layout and animation in pure ES6 modules
-📡 Application runs untethered from the internet
+- 🎵 **Csound audio synthesis** via dynamic gesture-triggered loading
+- 🌐 **Async** server provides secure **HTTP** and **WebSocket** services
+- ✅ Mobile-friendly, multi-player, autoplay-policy compliant
+- 🔁 Collaborative GUI for a consort of players synchronised by a lead player
+- 🎨 Canvas-based layout and animation in pure ES6 modules
+- 📡 **Application** runs untethered from the internet
 
-### 📁 File Structure
+## 📁 File Structure
 
+```text
+
+README.md        Main GitHub landing page
+docs/            Markdown documentation linked from README.md
+assets/docs/     Supporting PDF, TeX, CSV, and notation source files
+assets/md-images Images used by Markdown documentation
 ```
 .
 ├── apple-touch-icon-precomposed.png
