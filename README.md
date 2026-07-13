@@ -118,7 +118,6 @@ This overview of **[Stockhausen's Scale](assets/docs/stockhausen_25root5.pdf)** 
 
 ## Concert instructions
 
-
 Players download the app to their phone from a local server via a Wi-Fi Router. The app is launched by scanning 1 of 2 QR codes depending on their role in the performance : one QR code launches leader.html, the other launches consort.html.
 
 - **Lead player** (`leader.html`) â€” lead player taps the digital clock readout to start an animation sequence that drives the performance
@@ -146,18 +145,18 @@ The app has an animated sequence of states where 25 coloured keys appear and dis
 - in each state a player may play up to 5 notes
 
 
-## 4. Router 
+## Router 
 
 <p>
-  <img src="~/assets/md-images/ax73.JPG" width="250" alt="TP-Link AX73 Wi-Fi Router">
+  <img src="assets/md-images/ax73.JPG" width="250" alt="TP-Link AX73 Wi-Fi Router">
 </p>
 
-[SatGam Router Settings PDF](~/assets/docs/satgam_router_settings.pdf)
+[SatGam Router Settings PDF](assets/docs/satgam_router_settings.pdf)
 
 How to set up [tp-link AX73 Wi-Fi 6 Router](https://youtu.be/5nZY1M_RH-k)
 
 
-## 5. Server
+## Server
 
 aio_server.py is run from **Terminal** using the following command settings :
 
@@ -184,12 +183,12 @@ When the server starts successfully, the Terminal should show messages similar t
 	[https+wss] WebSocket endpoint: wss://0.0.0.0:8443/ws
 ```
 
-		**Note**
-		0.0.0.0 means the server is listening on all local interfaces, including:
-		- localhost
-		- the home-side interface
-		- the AX73-side interface
-		- 192.168.1.10
+  **NOTE**
+	  0.0.0.0 means the server is listening on all local interfaces, including:
+	  - localhost
+	  - the home-side interface
+	  - the AX73-side interface
+	  - 192.168.1.10
 
 
 Additional command options include:
@@ -220,22 +219,16 @@ Additional command options include:
 
 ```
 		--log-assets
-
 ```
 
 			Identifies assets sent to phone clients.
 
 ```
 		--diag-client
-
 ```
-
 			Displays diagnostic status messages on phone clients.
 
-```text
-
-```
-## 6. Security
+## Security
 
 The Satellite Gamelan is downloaded from a local server via a Wi-Fi 6 Router. This is secure for two reasons:
 - the Wi-Fi Router is not connected to the internet
@@ -244,20 +237,18 @@ The Satellite Gamelan is downloaded from a local server via a Wi-Fi 6 Router. Th
 Laptop and phones must initially be connected to the local area network. The local server runs on the laptop computer. The in a **terminal** window type the following :
 
 ```text
-python3 assets/python/server.py --root . --http-port 8000 --ws-port 8010
+		python3 assets/python/server.py --root . --http-port 8000 --ws-port 8010
 
 ```
-
-In a second **terminal** window, launch **registration.html** :
-
+	In a second **terminal** window, launch **registration.html** :
+		
 ```text
-      open registration.html
-
+		open registration.html
 ```
 
 Users scan a QR code with their phone. This launches registration.html on the phone where the root certificate is downloaded, installed and trusted. This creates a secure pathway for Satellite Gamelan to be donloaded and launched on their phone, either Android phone or iPhone.
 
-## 7. References
+## References
 
 - K. Grady (2024) [An Extended Interview with Greg Schiemer](https://www.xenharmonikon.org/2024/09/13/an-extended-interview-with-greg-schiemer/)
 - T. Narushima (2018) [Microtonality and the Tuning Systems of Erv Wilson](https://www.routledge.com/Microtonality-and-the-Tuning-Systems-of-Erv-Wilson/Narushima/p/book/9781138857568)
@@ -276,21 +267,7 @@ Users scan a QR code with their phone. This launches registration.html on the ph
 - [gallery](https://satellitegamelan.com/gallery.php)
 - [about](https://satellitegamelan.com/about.php)
 
-## 8. Acknowledgements
+## Acknowledgements
 
 - Australian Research Council, 2003-2005 Discovery Project ( DP0346291 ), project title : *Tuning Musical Applications for Wireless Internet* 
 - Australian Tax Payers
-
-```text
-
-```
-
-- [Concert Direction](docs/overview.md)
-- [References](docs/references.md) **
-- [Tuning](docs/tuning.md)**
-- [Setup](docs/setup.md)
-- [Server](docs/server.md)**
-- [Security](docs/certificates.md)**
-- [Router](docs/router.md)**
-
-- [Source material from original README](docs/source.md)
