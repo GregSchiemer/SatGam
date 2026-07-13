@@ -257,8 +257,6 @@ The registration page opens displays a QR code that players scan with their phon
 
 Once the certificate is downloaded, installed and trusted, a secure server is launched creating a secure pathway for players to download and launch the Satellite Gamelan app on the phone. All players in the consort, except the leader, scan the following QR code :
 
-Before players  
-
 <p>
   <img src="assets/qr-images/qr-consort.png" width="250" alt="Phonehenge image 1">
 </p>
