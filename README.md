@@ -103,9 +103,11 @@ The `assets/certs` directory contains server certificates and mobile deployment 
 7. References
 8. Acknowledgements
 
-## 1.Tuning
+## Tuning
 
-This section is for anyone curious about why the Satellite Gamelan app sounds the way it does. It shows how a scale that does not repeat at the octave can nevertheless sound surprisingly close to the familiar conventional scale that divides the octave into twelve equal intervals. Stockhausen’s scale divides a much larger 5:1 harmonic span into twenty-five equal steps, producing distinctive timbral qualities unlike those of many octave-based scales used in world music. We may never know whether he was fully aware of its rich harmonic vocabulary, but it is remarkable to think he created it using the stock-in-trade of 1950s broadcast studios: magnetic tape, chinagraph pencil, splicing block, and razor blade. Tuning resources developed in Csound now make this scale accessible for experimentation by other musicians. These resources have been adopted for the Satellite Gamelan app and can also be reused by users of hand-held mobile synthesisers who would like to explore other musical scales.
+This section is for anyone curious about why the Satellite Gamelan app sounds the way it does. It shows how a scale that does not repeat at the octave can nevertheless sound surprisingly close to the familiar conventional scale that divides the octave into twelve equal intervals. Stockhausen’s scale divides a much larger 5:1 harmonic span into twenty-five equal steps, producing distinctive timbral qualities unlike those of many octave-based scales used in world music. We may never know whether he was fully aware of its rich harmonic vocabulary, but it is remarkable to think he created it using the stock-in-trade of 1950s broadcast studios: magnetic tape, chinagraph pencil, splicing block, and razor blade. 
+
+Tuning resources developed in Csound now make this scale accessible for experimentation by other musicians. These resources have been adopted for the Satellite Gamelan app and can also be reused by users of hand-held mobile synthesisers who would like to explore other musical scales.
 
 
 This overview of **[Stockhausen's Scale](assets/docs/stockhausen_25root5.pdf)** shows
@@ -114,7 +116,7 @@ This overview of **[Stockhausen's Scale](assets/docs/stockhausen_25root5.pdf)** 
 - where these pitches sit in comparison to notes on a conventional music stave, and
 - how close they are to the 5-limit harmonic ratios they approximate.
 
-## 2. Concert instructions
+## Concert instructions
 
 
 Players download the app to their phone from a local server via a Wi-Fi Router. The app is launched by scanning 1 of 2 QR codes depending on their role in the performance : one QR code launches leader.html, the other launches consort.html.
@@ -131,7 +133,7 @@ The leader's role is:
     1. **PREVIEW** : plays 'fast-forward' giving players an overview of the changing UI
     2. **CONCERT** : plays in real-time and lasts between 12:24 and 12:48 seconds 
 
-## 3. Player instructions
+## Player instructions
 
 The app has an animated sequence of states where 25 coloured keys appear and disappear at various times during the performance.
 
@@ -144,18 +146,8 @@ The app has an animated sequence of states where 25 coloured keys appear and dis
 - in each state a player may play up to 5 notes
 
 
-
-## Player Instructions
-
-```text
-
-```
-
 ## 4. Router 
 
-```text
-
-```
 <p>
   <img src="~/assets/md-images/ax73.JPG" width="250" alt="TP-Link AX73 Wi-Fi Router">
 </p>
@@ -245,9 +237,26 @@ Additional command options include:
 ```
 ## 6. Security
 
+The Satellite Gamelan is downloaded from a local server via a Wi-Fi 6 Router. This is secure for two reasons:
+- the Wi-Fi Router is not connected to the internet
+- The app runs Csound as an audio synthesiser inside a mobile phone web browser which requires a root certificate to be downloaded, installed and trusted. This allows the app to launch securely without raising security alerts and alarming the phone user.
+
+Laptop and phones must initially be connected to the local area network. The local server runs on the laptop computer. The in a **terminal** window type the following :
+
 ```text
+python3 assets/python/server.py --root . --http-port 8000 --ws-port 8010
 
 ```
+
+In a second **terminal** window, launch **registration.html** :
+
+```text
+      open registration.html
+
+```
+
+Users scan a QR code with their phone. This launches registration.html on the phone where the root certificate is downloaded, installed and trusted. This creates a secure pathway for Satellite Gamelan to be donloaded and launched on their phone, either Android phone or iPhone.
+
 ## 7. References
 
 - K. Grady (2024) [An Extended Interview with Greg Schiemer](https://www.xenharmonikon.org/2024/09/13/an-extended-interview-with-greg-schiemer/)
