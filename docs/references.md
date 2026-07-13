@@ -18,5 +18,6 @@
 - [about](https://satellitegamelan.com/about.php)
 
 ## Acknowledgements
+
+- Australian Research Council, 2003-2005 Discovery Project ( DP0346291 ), project title : *Tuning Musical Applications for Wireless Internet* 
 - Australian Tax Payers
-- Australian Research Council, 2003-2005 Discovery Project, project title : *Tuning Musical Applications for Wireless Internet* 
