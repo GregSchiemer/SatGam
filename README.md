@@ -90,14 +90,15 @@ This version of the code evolved to support the realisation of *Phonehenge*, a w
  `assets/certs`     ready-to-use server certificates and mobile deployment certificates. See [Security](docs/certificates.md).
 
 ## Documentation
-    1. [Tuning](## Tuning)
-    2. [Concert Instructions](## Concert Instructions)
-    3. [Player Instructtions](## Player Instructtions)
-    4. [Router](## Router)
-    5. [Server](## Server)
-    6. [Certificate](## Certificate)
-    7. [References](## References)
-    8. [Acknowledgements](## Acknowledgements)
+    1. [Tuning](https://github.com/GregSchiemer/SatGam#tuning)
+    2. [Concert Instructions](https://github.com/GregSchiemer/SatGam#concert-instructions)
+    3. [Player Instructions](https://github.com/GregSchiemer/SatGam#player-instructions)
+    4. [Router](https://github.com/GregSchiemer/SatGam#router)
+    5. [Server](https://github.com/GregSchiemer/SatGam#server)
+    6. [Certificate](https://github.com/GregSchiemer/SatGam#certificate)
+    7. [References](https://github.com/GregSchiemer/SatGam#references)
+    8. [satellitegamelan.net](https://github.com/GregSchiemer/SatGam#satellitegamelannet)
+    9. [Acknowledgements](https://github.com/GregSchiemer/SatGam#acknowledgements)
 
 ## Tuning 
 
