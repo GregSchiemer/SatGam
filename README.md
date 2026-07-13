@@ -161,75 +161,64 @@ How to set up [tp-link AX73 Wi-Fi 6 Router](https://youtu.be/5nZY1M_RH-k)
 
 ## Server
 
-aio_server.py is run from **Terminal** using the following command settings :
+    aio_server.py is run from **Terminal** using the following command settings :
 
-```
+```text
 	cd /Users/gs/Developer/SG/SatGam
 ```
 
-Then run the server:
+    Then run the server:
 
-```
+```text
 	python3 assets/python/aio_server.py \
 	  --port 8443 \
 	  -r .
 ```
 
-The default port is 8443.
+    The default port is 8443.
 
-When the server starts successfully, the Terminal should show messages similar to:
+    When the server starts successfully, the Terminal should show messages similar to:
 
-```
+```text
 	diag_client=False log_http=False log_ws=True log_assets=True log_client_status=True
 	[https+wss] Serving /Users/gs/Developer/SG/SatGam
 	[https+wss] https://0.0.0.0:8443
 	[https+wss] WebSocket endpoint: wss://0.0.0.0:8443/ws
 ```
-
-  **NOTE**
-	  0.0.0.0 means the server is listening on all local interfaces, including:
+    **NOTE**
+    0.0.0.0 means the server is listening on all local interfaces, including:
 	  - localhost
 	  - the home-side interface
 	  - the AX73-side interface
 	  - 192.168.1.10
 
+    Additional command options include:
 
-Additional command options include:
-
-```
+```text
 		--cert-file assets/certs/SatGam.pem
 
-```	
-			
-			Uses the SatGam public certificate file.
-			
+```				
+			Uses the SatGam public certificate file.		
 	
-```
+```text
 		--key-file assets/certs/SatGam-key.pem
+```		
+			Uses the SatGam private encryption key
 
-```
-			
-			Uses the SatGam private encryption key.
-			
-
-```
+```text
 		--log-ws
-
 ```
+	Displays WebSocket messages in the Terminal console log.
 
-			Displays WebSocket messages in the Terminal console log.
-
-
-```
+```text
 		--log-assets
 ```
+	Identifies assets sent to phone clients.
 
-			Identifies assets sent to phone clients.
-
-```
+```text
 		--diag-client
 ```
-			Displays diagnostic status messages on phone clients.
+	Displays diagnostic status messages on phone clients.
 
 ## Certificate
 
@@ -237,11 +226,23 @@ The Satellite Gamelan is downloaded from a local server via a Wi-Fi 6 Router. Th
 - the Wi-Fi Router is not connected to the internet
 - The app runs Csound as an audio synthesiser inside a mobile phone web browser which requires a root certificate to be downloaded, installed and trusted. This allows the app to launch securely without raising security alerts and alarming the phone user.
 
-Laptop and phones must initially be connected to the local area network. The local server runs on the laptop computer. In a **terminal** window, type the following :
+Laptop and phones must be connected to the local area network. The local server runs on the laptop computer. In a **terminal** window, type the following :
 
 ```text
 		python3 assets/python/server.py --root . --http-port 8000 --ws-port 8010
+```
+When `server.py` launches, the following appears in the console window :
 
+```text
+		——— Preflight ———
+		✅ no auto-start in main.js
+		✅ robust wsPort parsing present (qsPort)
+		⚠️ leader.html did not show a direct import during preflight (static check). If you see [ws] connections later, WS is wired at runtime.
+		⚠️ consort.html did not show a direct import during preflight (static check). If you see [ws] connections later, WS is wired at runtime.
+		———— End preflight ————
+		[diag] log_http=True log_ws=True log_user_agent=False log_assets=True log_client_status=True
+		[ws] Listening on ws://0.0.0.0:8010
+		[http] Serving /Users/gs/Developer/SG/SatGam on http://0.0.0.0:8000
 ```
 	In a second **terminal** window, launch **registration.html** :
 		
@@ -249,7 +250,19 @@ Laptop and phones must initially be connected to the local area network. The loc
 		open registration.html
 ```
 
-Users scan a QR code with their phone. This launches registration.html on the phone where the root certificate is downloaded, installed and trusted. This creates a secure pathway for Satellite Gamelan to be donloaded and launched on their phone, either Android phone or iPhone.
+The registration page opens displays a QR code that players scan with their phone. This launches the registration page on the phone where the root certificate can be downloaded, installed and trusted on either an Android phone or iPhone.
+<p>
+  <img src="assets/qr-images/qr-registration.png" width="250" alt="Phonehenge image 1">
+</p>
+
+Once the certificate is downloaded, installed and trusted, a second server is launched creating a secure pathway for players to download and launch the Satellite Gamelan app on the phone. All players in the consort, except the leader, scan the following QR code :
+
+Before players  
+
+<p>
+  <img src="assets/qr-images/qr-ph1.PNG" width="250" alt="Phonehenge image 1">
+</p>
+
 
 ## References
 
