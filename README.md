@@ -220,11 +220,11 @@ How to set up [tp-link AX73 Wi-Fi 6 Router](https://youtu.be/5nZY1M_RH-k)
 ```
 	Displays diagnostic status messages on phone clients.
 
-## Certificate
+## Certificates
 
-The Satellite Gamelan is downloaded from a local server via a Wi-Fi 6 Router. This is secure for two reasons:
+The Satellite Gamelan is downloaded from a local server via a Wi-Fi 6 Router and is secure for two reasons:
 - the Wi-Fi Router is not connected to the internet
-- The app runs Csound as an audio synthesiser inside a mobile phone web browser which requires a root certificate to be downloaded, installed and trusted. This allows the app to launch securely without raising security alerts and alarming the phone user.
+- the app runs Csound as an audio synthesiser inside a mobile phone web browser which requires a root certificate to be downloaded, installed and trusted. This allows the app to launch securely without raising security alerts and alarming the phone user.
 
 Laptop and phones must be connected to the local area network. The local server runs on the laptop computer. In a **terminal** window, type the following :
 
