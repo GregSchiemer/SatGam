@@ -90,15 +90,15 @@ This version of the code evolved to support the realisation of *Phonehenge*, a w
  `assets/certs`     ready-to-use server certificates and mobile deployment certificates. See [Security](docs/certificates.md).
 
 ## Documentation
-    1. [Tuning](https://github.com/GregSchiemer/SatGam#tuning)
-    2. [Concert Instructions](https://github.com/GregSchiemer/SatGam#concert-instructions)
-    3. [Player Instructions](https://github.com/GregSchiemer/SatGam#player-instructions)
-    4. [Router](https://github.com/GregSchiemer/SatGam#router)
-    5. [Server](https://github.com/GregSchiemer/SatGam#server)
-    6. [Certificate](https://github.com/GregSchiemer/SatGam#certificate)
-    7. [References](https://github.com/GregSchiemer/SatGam#references)
-    8. [satellitegamelan.net](https://github.com/GregSchiemer/SatGam#satellitegamelannet)
-    9. [Acknowledgements](https://github.com/GregSchiemer/SatGam#acknowledgements)
+    [Tuning](https://github.com/GregSchiemer/SatGam#tuning)
+    [Concert Instructions](https://github.com/GregSchiemer/SatGam#concert-instructions)
+    [Player Instructions](https://github.com/GregSchiemer/SatGam#player-instructions)
+    [Router](https://github.com/GregSchiemer/SatGam#router)
+    [Server](https://github.com/GregSchiemer/SatGam#server)
+    [Certificate](https://github.com/GregSchiemer/SatGam#certificate)
+    [References](https://github.com/GregSchiemer/SatGam#references)
+    [satellitegamelan.net](https://github.com/GregSchiemer/SatGam#satellitegamelannet)
+    [Acknowledgements](https://github.com/GregSchiemer/SatGam#acknowledgements)
 
 ## Tuning 
 
