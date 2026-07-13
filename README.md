@@ -22,12 +22,6 @@ This version of the code evolved to support the realisation of *Phonehenge*, a w
 ## 📁 Project File Structure
 
 ```text
-
-README.md        Main GitHub landing page
-docs/            Markdown documentation linked from README.md
-assets/docs/     Supporting PDF, TeX, CSV, and notation source files
-assets/md-images Images used by Markdown documentation
-
 .
 ├── apple-touch-icon-precomposed.png
 ├── apple-touch-icon.png
@@ -91,19 +85,21 @@ assets/md-images Images used by Markdown documentation
 16 directories, 58 files
 
 ```
-The `assets/certs` directory contains server certificates and mobile deployment certificates. See [Security](docs/certificates.md).
+ `assets/docs/`     Supporting PDF, TeX, CSV, and notation source files
+ `assets/md-images` Images used by Markdown documentation
+ `assets/certs`     ready-to-use server certificates and mobile deployment certificates. See [Security](docs/certificates.md).
 
 ## Documentation
-1. Tuning
-2. Concert Instructtions
-3. Player Instructtions
-4. Router
-5. Server
-6. Security
-7. References
-8. Acknowledgements
+    1. [Tuning](## Tuning)
+    2. [Concert Instructions](## Concert Instructions)
+    3. [Player Instructtions](## Player Instructtions)
+    4. [Router](## Router)
+    5. [Server](## Server)
+    6. [Certificate](## Certificate)
+    7. [References](## References)
+    8. [Acknowledgements](## Acknowledgements)
 
-## Tuning
+## Tuning 
 
 This section is for anyone curious about why the Satellite Gamelan app sounds the way it does. It shows how a scale that does not repeat at the octave can nevertheless sound surprisingly close to the familiar conventional scale that divides the octave into twelve equal intervals. Stockhausen’s scale divides a much larger 5:1 harmonic span into twenty-five equal steps, producing distinctive timbral qualities unlike those of many octave-based scales used in world music. We may never know whether he was fully aware of its rich harmonic vocabulary, but it is remarkable to think he created it using the stock-in-trade of 1950s broadcast studios: magnetic tape, chinagraph pencil, splicing block, and razor blade. 
 
@@ -119,6 +115,12 @@ This overview of **[Stockhausen's Scale](assets/docs/stockhausen_25root5.pdf)** 
 ## Concert instructions
 
 Players download the app to their phone from a local server via a Wi-Fi Router. The app is launched by scanning 1 of 2 QR codes depending on their role in the performance : one QR code launches leader.html, the other launches consort.html.
+
+<p>
+  <img src="assets/md-images/ph1.PNG" width="250" alt="Phonehenge image 1">
+  <img src="assets/md-images/ph2.PNG" width="250" alt="Phonehenge image 2">
+  <img src="assets/md-images/wifi.PNG" width="250" alt="Archer AX73 screen shot">
+</p>
 
 - **Lead player** (`leader.html`) â€” lead player taps the digital clock readout to start an animation sequence that drives the performance
 - **Consort** (`consort.html`) â€” all players trigger sounds by tapping sprites enabled by the animation sequence
@@ -228,13 +230,13 @@ Additional command options include:
 ```
 			Displays diagnostic status messages on phone clients.
 
-## Security
+## Certificate
 
 The Satellite Gamelan is downloaded from a local server via a Wi-Fi 6 Router. This is secure for two reasons:
 - the Wi-Fi Router is not connected to the internet
 - The app runs Csound as an audio synthesiser inside a mobile phone web browser which requires a root certificate to be downloaded, installed and trusted. This allows the app to launch securely without raising security alerts and alarming the phone user.
 
-Laptop and phones must initially be connected to the local area network. The local server runs on the laptop computer. The in a **terminal** window type the following :
+Laptop and phones must initially be connected to the local area network. The local server runs on the laptop computer. In a **terminal** window, type the following :
 
 ```text
 		python3 assets/python/server.py --root . --http-port 8000 --ws-port 8010
