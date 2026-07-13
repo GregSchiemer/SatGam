@@ -87,7 +87,7 @@ This version of the code evolved to support the realisation of *Phonehenge*, a w
 ```
  assets/docs/     Supporting PDF, TeX, CSV, and notation source files
  assets/md-images Images used by Markdown documentation
- assets/certs     ready-to-use server certificates and mobile deployment certificates. See [Security](docs/certificates.md)
+ assets/certs     ready-to-use server certificates and mobile deployment certificates
 
 ## Documentation
     [Tuning](https://github.com/GregSchiemer/SatGam#tuning)
