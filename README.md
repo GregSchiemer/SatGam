@@ -90,17 +90,17 @@ This version of the code evolved to support the realisation of *Phonehenge*, a w
  assets/certs     ready-to-use server certificates and mobile deployment certificates
 
 ## Documentation
-    [Tuning](https://github.com/GregSchiemer/SatGam##tuning)
-    [Concert Instructions](https://github.com/GregSchiemer/SatGam##concert-instructions)
-    [Player Instructions](https://github.com/GregSchiemer/SatGam##player-instructions)
-    [Router](https://github.com/GregSchiemer/SatGam##router)
-    [Server](https://github.com/GregSchiemer/SatGam##server)
-    [Certificate](https://github.com/GregSchiemer/SatGam##certificate)
-    [References](https://github.com/GregSchiemer/SatGam##references)
-    [satellitegamelan.net](https://github.com/GregSchiemer/SatGam##satellitegamelannet)
-    [Acknowledgements](https://github.com/GregSchiemer/SatGam##acknowledgements)
+- [Tuning](https://github.com/GregSchiemer/SatGam#tuning)
+- [Concert Instructions](https://github.com/GregSchiemer/SatGam#concert-instructions)
+- [Player Instructions](https://github.com/GregSchiemer/SatGam#player-instructions)
+- [Router](https://github.com/GregSchiemer/SatGam#router)
+- [Server](https://github.com/GregSchiemer/SatGam#server)
+- [Certificate](https://github.com/GregSchiemer/SatGam#certificate)
+- [References](https://github.com/GregSchiemer/SatGam#references)
+- [satellitegamelan.net](https://github.com/GregSchiemer/SatGam#satellitegamelannet)
+- [Acknowledgements](https://github.com/GregSchiemer/SatGam#acknowledgements)
 
-##Tuning 
+## Tuning 
 
 This section is for anyone curious about why the Satellite Gamelan app sounds the way it does. It shows how a scale that does not repeat at the octave can nevertheless sound surprisingly close to the familiar conventional scale that divides the octave into twelve equal intervals. Stockhausen’s scale divides a much larger 5:1 harmonic span into twenty-five equal steps, producing distinctive timbral qualities unlike those of many octave-based scales used in world music. We may never know whether he was fully aware of its rich harmonic vocabulary, but it is remarkable to think he created it using the stock-in-trade of 1950s broadcast studios: magnetic tape, chinagraph pencil, splicing block, and razor blade. 
 
@@ -148,7 +148,7 @@ The app has an animated sequence of states where 25 coloured keys appear and dis
 - in each state a player may play up to 5 notes
 
 
-##Router 
+## Router 
 
 <p>
   <img src="assets/md-images/ax73.JPG" width="250" alt="TP-Link AX73 Wi-Fi Router">
@@ -159,7 +159,7 @@ The app has an animated sequence of states where 25 coloured keys appear and dis
 How to set up [tp-link AX73 Wi-Fi 6 Router](https://youtu.be/5nZY1M_RH-k)
 
 
-##Server
+## Server
 
     aio_server.py is run from **Terminal** using the following command settings :
 
@@ -220,7 +220,7 @@ How to set up [tp-link AX73 Wi-Fi 6 Router](https://youtu.be/5nZY1M_RH-k)
 ```
 	Displays diagnostic status messages on phone clients.
 
-##Certificates
+## Certificates
 
 The Satellite Gamelan is downloaded from a local server via a Wi-Fi 6 Router and is secure for two reasons:
 - the Wi-Fi Router is not connected to the internet
@@ -262,7 +262,7 @@ Once the certificate is downloaded, installed and trusted, a secure server is la
 </p>
 
 
-##References
+## References
 
 - K. Grady (2024) [An Extended Interview with Greg Schiemer](https://www.xenharmonikon.org/2024/09/13/an-extended-interview-with-greg-schiemer/)
 - T. Narushima (2018) [Microtonality and the Tuning Systems of Erv Wilson](https://www.routledge.com/Microtonality-and-the-Tuning-Systems-of-Erv-Wilson/Narushima/p/book/9781138857568)
@@ -274,14 +274,14 @@ Once the certificate is downloaded, installed and trusted, a secure server is la
 - G. Schiemer and M. Havryliv (2006) [Pocket Gamelan: tuneable trajectories for flying sources in *Mandala 3* and *Mandala 4*](https://www.academia.edu/85041071)
 - G. Schiemer and M. Havryliv (2005) [Pocket Gamelan: a Pure Data interface for Mobile phones](https://www.nime.org/proceedings/2005/nime2005_156.pdf)
 
-##satellitegamelan.net
+## satellitegamelan.net
 
 - [index](https://satellitegamelan.com/index.php)
 - [links](https://satellitegamelan.com/links.php)
 - [gallery](https://satellitegamelan.com/gallery.php)
 - [about](https://satellitegamelan.com/about.php)
 
-##Acknowledgements
+## Acknowledgements
 
 - Australian Research Council, 2003-2005 Discovery Project ( DP0346291 ), project title : *Tuning Musical Applications for Wireless Internet* 
 - Australian Tax Payers
