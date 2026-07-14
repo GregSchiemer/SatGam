@@ -113,18 +113,17 @@ This overview of **[Stockhausen's Scale](assets/docs/stockhausen_25root5.pdf)** 
 - where these pitches sit in comparison to notes on a conventional music stave, and
 - how close they are to the 5-limit harmonic ratios they approximate.
 
-##Concert-instructions
+## Concert instructions
 
-Players download the app to their phone from a local server via a Wi-Fi Router. The app is launched by scanning 1 of 2 QR codes depending on their role in the performance : one QR code launches leader.html, the other launches consort.html.
+Players download the app to their phone from a local server via a Wi-Fi Router. The app is launched by scanning 1 of 2 QR codes depending on their role in the performance : one QR code launches leader.html, the other launches consort.html
 
 <p>
   <img src="assets/md-images/ph1.PNG" width="250" alt="Phonehenge image 1">
   <img src="assets/md-images/ph2.PNG" width="250" alt="Phonehenge image 2">
-  <img src="assets/md-images/wifi.PNG" width="250" alt="Archer AX73 screen shot">
 </p>
 
-- **Lead player** (`leader.html`) â€” lead player taps the digital clock readout to start an animation sequence that drives the performance
-- **Consort** (`consort.html`) â€” all players trigger sounds by tapping sprites enabled by the animation sequence
+- **Lead player** (`leader.html`) lead player taps the digital clock readout to start an animation sequence that drives the performance
+- **Consort** (`consort.html`) all players trigger sounds by tapping sprites enabled by the animation sequence
 - Both versions display the same 25-key layout and interactive clock
 - The lead player synchronises all phones in the consort via a Wi-Fi 6 Router
 
@@ -135,7 +134,7 @@ The leader's role is:
     1. **PREVIEW** : plays 'fast-forward' giving players an overview of the changing UI
     2. **CONCERT** : plays in real-time and lasts between 12:24 and 12:48 seconds 
 
-##Player-instructions
+## Player instructions
 
 The app has an animated sequence of states where 25 coloured keys appear and disappear at various times during the performance.
 
