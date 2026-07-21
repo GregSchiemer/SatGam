@@ -262,7 +262,7 @@ Once the certificate is downloaded, installed and trusted, a secure server is la
 
 ## Security
 
-**No internet connection** is reported when a phone first connects to the Vercoe network. This is cause for both celebration and caution. The Wi-Fi router lets a small consort of players connect to the Vercoe network and share the Satellite Gamelan concert app on their phones and no one needs to connect to the internet. Whileever the phone remains connected to the Vercoe network it will not fall prey to klepto-hyenas that lurk on the dark web.
+**No internet connection** is reported when a phone first connects to the Vercoe network —— cause for both celebration and caution. The Wi-Fi router lets a small consort of players connect to the Vercoe network and share the Satellite Gamelan concert app on their phones and no one needs to connect to the internet. Whileever the phone remains connected to the Vercoe network it will not fall prey to klepto-hyenas that lurk on the dark web.
 
 However once the concert is finished players are advised to remove the certificate from their phone. This will prevent a scenario where an internet scammer might use it to launch a malicious application and steal personal information that was protected while the Satellite Gamelan app was in use. The steps that follow will prevent such a scenario from ever happening.
 
@@ -275,7 +275,7 @@ However once the concert is finished players are advised to remove the certifica
 					`Satellite Gamelan Root Certificate` > 
 						tap `Remove Profile`
 
-If `Satellite Gamelan Root Certificate` is not found under **Configuration** , then it has already been removed successfully.
+If `Satellite Gamelan Root Certificate` is not found under **Configuration** , it has been removed.
 
 **To Remove the certificate from an Android phone**
 
@@ -286,7 +286,7 @@ If `Satellite Gamelan Root Certificate` is not found under **Configuration** , t
 						`User` ( select `mkcert development CA` ) > 
 							tap `UNINSTALL`
 
-If `mkcert development CA' is not found under **User**, then it has already been removed successfully.
+If `mkcert development CA' is not found under **User**, it is already removed.
 
 [More ways to remove certificates](https://www.xolphin.com/support/FAQ/Removing_root_certificates)
 
