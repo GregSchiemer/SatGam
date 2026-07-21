@@ -218,11 +218,33 @@ export function selectAndRenderBackground(ctxB, status) {
 //  Pointer → canvas coordinate helper
 // ---------------------------------------------------------------------------
 
-// Convert a PointerEvent / MouseEvent into canvas-space coordinates.
-export function eventToCtxPoint(ev, canvas) {
+// Convert a PointerEvent / MouseEvent into DESIGN-space coordinates.
+export function eventToCtxPoint(ev, canvas, ctx) {
   const rect = canvas.getBoundingClientRect();
-  const x = ev.clientX - rect.left;
-  const y = ev.clientY - rect.top;
+
+  if (rect.width <= 0 || rect.height <= 0) {
+    throw new Error(
+      `eventToCtxPoint: invalid canvas rectangle ` +
+      `${rect.width} × ${rect.height}`
+    );
+  }
+
+  const cssX = ev.clientX - rect.left;
+  const cssY = ev.clientY - rect.top;
+
+  const x = cssX * (ctx.designW / rect.width);
+  const y = cssY * (ctx.designH / rect.height);
+
+  console.log('[pointer conversion]', {
+    client: [ev.clientX, ev.clientY],
+    rect: [rect.left, rect.top, rect.width, rect.height],
+    css: [cssX, cssY],
+    design: [x, y],
+    designSize: [ctx.designW, ctx.designH],
+    fit: ctx.fit,
+    dpr: ctx.dpr,
+  });
+
   return { x, y };
 }
 

@@ -105,63 +105,131 @@ console.log('[main] page loaded', window.location.pathname);
 export async function initApp() {
   console.log('✅ GUI initialised');
 
-  // 1) Surfaces from <canvas data-*> contract
+  // 1) Read logical design dimensions from the visible canvas
   const cnvP = document.getElementById('mobile');
-  const designW    = parseInt(cnvP.dataset.designW, 10);
-  const designH	   = parseInt(cnvP.dataset.designH, 10);
 
+  if (!cnvP) {
+    throw new Error('initApp: no <canvas id="mobile"> found in DOM');
+  }
+
+  const designW = parseInt(cnvP.dataset.designW, 10);
+  const designH = parseInt(cnvP.dataset.designH, 10);
+
+  if (!Number.isFinite(designW) || !Number.isFinite(designH)) {
+    throw new Error(
+      `initApp: invalid canvas design dimensions: ` +
+      `designW=${cnvP.dataset.designW}, ` +
+      `designH=${cnvP.dataset.designH}`
+    );
+  }
+
+  // 2) Report viewport, DPR and logical design geometry
+  console.log('[viewport geometry]', {
+    inner: [
+      window.innerWidth,
+      window.innerHeight,
+    ],
+
+    visual: window.visualViewport
+      ? [
+          window.visualViewport.width,
+          window.visualViewport.height,
+        ]
+      : null,
+
+    visualOffset: window.visualViewport
+      ? [
+          window.visualViewport.offsetLeft,
+          window.visualViewport.offsetTop,
+        ]
+      : null,
+
+    visualScale: window.visualViewport?.scale ?? null,
+
+    dpr: window.devicePixelRatio || 1,
+
+    design: [
+      designW,
+      designH,
+    ],
+
+    innerAspect:
+      window.innerHeight > 0
+        ? window.innerWidth / window.innerHeight
+        : null,
+
+    visualAspect:
+      window.visualViewport?.height > 0
+        ? window.visualViewport.width /
+          window.visualViewport.height
+        : null,
+
+    designAspect:
+      designH > 0
+        ? designW / designH
+        : null,
+  });
+
+  // 3) Create visible and off-screen canvas surfaces
   const { ctxP, ctxB, ctxF, ctxT } = initCanvases({
     designW,
     designH,
+    mode: 'fit',
   });
 
-  // Keep your existing variable names if you want
+  // Preserve the existing short variable names
   const cnv = cnvP;
   const ctx = ctxP;
 
-  // 2) status uses pane geometry
+  // 4) Create application status from the pane geometry
   const status = initStatus(ctx);
-  installPhoneDiag(status);
-  setPhoneDiag({ phase: 'status-created' });  
 
+  installPhoneDiag(status);
+  setPhoneDiag({ phase: 'status-created' });
+
+  // 5) Initialise the network/clock bus
   initBus(status);
   setPhoneDiag({ phase: 'bus-init-called' });
 
-//  sendClientStatus(status, 'bus-init-called')
+  // sendClientStatus(status, 'bus-init-called');
   console.log('[main] role =', status.role);
 
-  // 3) slots uses pane geometry
+  // 6) Create Phonehenge slots using pane geometry
   const { slots, ctxS } = makeHenge(ctx, henge25);
+
   ctx.keyRadius = ctxS.keyRadius;
   setSlots(slots);
 
-  console.log('[main] ctxS entries:', Object.entries(ctxS));		
+  console.log('[main] ctxS entries:', Object.entries(ctxS));
 
-  // 4) build slot atlas
+  // 7) Build the phone-sprite atlas
   await ensurePhoneAtlasForSlots(slots);
 
-  // 5) re-initialise geometry when user rotates phone
+  // 8) Reinitialise geometry when the phone rotates
   installResizeHandler(ctxB, status);
 
-  // 6) initialise audio engine
+  // 9) Initialise the audio engine
   const audio = makeAudioEngine();
-  
-  // 7) attach UI to visible pane canvas
+
+  // 10) Attach UI handlers to the visible pane canvas
   installUIHandlers(ctxP, cnvP, status, audio);
 
-  // 8) initialise Mode Select View
+  // 11) Initialise the Mode Select view
   prepareAndRenderBackground(ctxB, status);
 
-  // 9) render arrB/arrS/arrT to composite layer arrP
+  // 12) Render arrB/arrS/arrT to composite layer arrP
   setRender(() => {
-    frameRender(status); 
+    frameRender(status);
   });
 
-  // 10) initial paint
+  // 13) Perform the initial paint
   refresh();
+
   setPhoneDiag({ phase: 'rendered' });
-//  sendClientStatus(status, 'page-loaded')
+
+  // sendClientStatus(status, 'page-loaded');
 }
+
 
 // ---------------------------------------------------------------------------
 //  Helpers

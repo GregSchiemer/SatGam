@@ -95,7 +95,8 @@ This version of the code evolved to support the realisation of *Phonehenge*, a w
 - [Player Instructions](https://github.com/GregSchiemer/SatGam#player-instructions)
 - [Router](https://github.com/GregSchiemer/SatGam#router)
 - [Server](https://github.com/GregSchiemer/SatGam#server)
-- [Certificate](https://github.com/GregSchiemer/SatGam#certificate)
+- [Certificates](https://github.com/GregSchiemer/SatGam#certificates)
+- [Security]
 - [References](https://github.com/GregSchiemer/SatGam#references)
 - [satellitegamelan.net](https://github.com/GregSchiemer/SatGam#satellitegamelannet)
 - [Acknowledgements](https://github.com/GregSchiemer/SatGam#acknowledgements)
@@ -221,10 +222,9 @@ How to set up [tp-link AX73 Wi-Fi 6 Router](https://youtu.be/5nZY1M_RH-k)
 
 ## Certificates
 
-The Satellite Gamelan is downloaded from a local server via a Wi-Fi 6 Router and is secure for two reasons:
+When the Satellite Gamelan is downloaded from a local server `aio_server.py` via a Wi-Fi 6 Router, it is secure for two reasons:
 - the Wi-Fi Router is not connected to the internet
-- the app runs Csound as an audio synthesiser inside a mobile phone web browser which requires a root certificate to be downloaded, installed and trusted. This allows the app to launch securely without raising security alerts and alarming the phone user.
-
+- the app runs Csound as an audio synthesiser inside a mobile phone web browser which requires a root certificate to be downloaded, installed and trusted. This allows the app to launch securely without raising security alerts and alarming the phone user. A local server 'server.py' order to download, install and trust a certificate,  launch the app securely 
 Laptop and phones must be connected to the local area network. The local server runs on the laptop computer. In a **terminal** window, type the following :
 
 ```text
@@ -259,6 +259,29 @@ Once the certificate is downloaded, installed and trusted, a secure server is la
 <p>
   <img src="assets/qr-images/qr-consort.png" width="250" alt="Phonehenge image 1">
 </p>
+
+## Security
+
+When a phone first connects to the Vercoe network, in Settings the following report appears No internet connection -  cause for both celebration and caution.
+
+The Wi-Fi router lets a small consort of players connect to the Vercoe network and share the Satellite Gamelan concert app on their phones and no one needs to connect to the internet. Whileever they remain connected to the Vercoe network their phone cannot fall prey to klepto-hyenas that lurk on the dark web.
+
+However once the concert is finished players are advised to remove the certificate from their phone. It should not remain there indefinitely as an internet scammer could potentially find it and devise ways to use it to launch a malicious application and steal personal information that was protected while the Satellite Gamelan app ran on the Vercoe network. 
+
+The good news is that this has never happened. The steps that follow will prevent it from ever happening.
+
+**To remove the certificate from an iPhone**
+
+Go to Settings > General  > VPN & Device Management > Configuration Profile > `Satellite Gamelan Root Certificate` > Remove Profile
+
+If you don’t find `Satellite Gamelan Root Certificate` under **Configuration** , then it has already been removed successfully.
+
+**To Remove the certificate from an Android phone**
+
+Go to Setting > Security & privacy > Encryption &  credentials > Trusted credentials > User ( select `mkcert development CA` )
+> UNINSTALL
+
+If you don’t find `mkcert development CA' under **User**, then it has already been removed successfully.
 
 
 ## References

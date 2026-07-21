@@ -68,6 +68,7 @@ export function installUIHandlers(ctx, canvas, status, audio) {
   installCsoundHandler(ctx, canvas, status, audio);
 }
 
+/*
 // --- helper: PointerEvent -> DESIGN coords (works for fixed and fit) ---
 function eventToDesignPoint(ev, canvas, ctx) {
   const rect = canvas.getBoundingClientRect();
@@ -81,6 +82,7 @@ function eventToDesignPoint(ev, canvas, ctx) {
 
   return { x: cssX * scaleX, y: cssY * scaleY };
 }
+*/
 
 function mayPlayPhoneTap(status) {
   if (status.modeChosen === 'preview') return !status.running;
