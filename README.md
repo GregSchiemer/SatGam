@@ -276,7 +276,7 @@ However once the concert is finished and the phone returns to normal use, player
 	- select 'Satellite Gamelan Root Certificate'
 	- tap 'Remove Profile'
 
-If `Satellite Gamelan Root Certificate` is not found under **Configuration** , it has been removed.
+If `Satellite Gamelan Root Certificate` is not found under **Configuration** , it is already removed.
 
 **To Remove the certificate from an Android phone**
 
