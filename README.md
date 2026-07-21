@@ -270,14 +270,13 @@ The good news is that this has never happened. The steps that follow will preven
 
 **To remove the certificate from an iPhone**
 
-Go to Settings > General  > VPN & Device Management > Configuration Profile > `Satellite Gamelan Root Certificate` > Remove Profile
+Go to Settings > General  > VPN & Device Management > Configuration Profile > `Satellite Gamelan Root Certificate` > tap `Remove Profile`
 
 If you don’t find `Satellite Gamelan Root Certificate` under **Configuration** , then it has already been removed successfully.
 
 **To Remove the certificate from an Android phone**
 
-Go to Setting > Security & privacy > Encryption &  credentials > Trusted credentials > User ( select `mkcert development CA` )
-> UNINSTALL
+Go to Setting > Security & privacy > Encryption &  credentials > Trusted credentials > User ( select `mkcert development CA` ) > tap `UNINSTALL`
 
 If you don’t find `mkcert development CA' under **User**, then it has already been removed successfully.
 
