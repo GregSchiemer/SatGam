@@ -285,7 +285,8 @@ If 'Satellite Gamelan Root Certificate' is not found under **Configuration**, it
 	- Security & privacy 
 	- Encryption & credentials
 	- Trusted credentials 
-	- User ( select 'mkcert development CA' ) 
+	- User
+	- select 'mkcert development CA' 
 	- tap 'UNINSTALL'
 
 If 'mkcert development CA' is not found under **User**, it is already removed.
