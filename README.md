@@ -281,6 +281,7 @@ Go to Setting > Security & privacy > Encryption &  credentials > Trusted credent
 
 If you don’t find `mkcert development CA' under **User**, then it has already been removed successfully.
 
+[More ways to remove certificates](https://www.xolphin.com/support/FAQ/Removing_root_certificates)
 
 ## References
 
