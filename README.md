@@ -96,7 +96,7 @@ This version of the code evolved to support the realisation of *Phonehenge*, a w
 - [Router](https://github.com/GregSchiemer/SatGam#router)
 - [Server](https://github.com/GregSchiemer/SatGam#server)
 - [Certificates](https://github.com/GregSchiemer/SatGam#certificates)
-- [Security]
+- [Security](https://github.com/GregSchiemer/SatGam#security)
 - [References](https://github.com/GregSchiemer/SatGam#references)
 - [satellitegamelan.net](https://github.com/GregSchiemer/SatGam#satellitegamelannet)
 - [Acknowledgements](https://github.com/GregSchiemer/SatGam#acknowledgements)
@@ -262,11 +262,9 @@ Once the certificate is downloaded, installed and trusted, a secure server is la
 
 ## Security
 
-When a phone first connects to the Vercoe network, in Settings the following report appears No internet connection -  cause for both celebration and caution.
+**No internet connection** is reported when a phone first connects to the Vercoe network. This is cause for both celebration and caution. The Wi-Fi router lets a small consort of players connect to the Vercoe network and share the Satellite Gamelan concert app on their phones and no one needs to connect to the internet. Whileever the phone remains connected to the Vercoe network it will not fall prey to klepto-hyenas that lurk on the dark web.
 
-The Wi-Fi router lets a small consort of players connect to the Vercoe network and share the Satellite Gamelan concert app on their phones and no one needs to connect to the internet. Whileever they remain connected to the Vercoe network their phone cannot fall prey to klepto-hyenas that lurk on the dark web.
-
-However once the concert is finished players are advised to remove the certificate from their phone. It should not remain there indefinitely as an internet scammer could potentially find it and devise ways to use it to launch a malicious application and steal personal information that was protected while the Satellite Gamelan app ran on the Vercoe network. 
+However once the concert is finished players are advised to remove the certificate from their phone. This will prevent an internet scammer who might find it from using it to launch a malicious application and steal personal information that was protected while the Satellite Gamelan app ran on the Vercoe network. 
 
 The good news is that this has never happened. The steps that follow will prevent it from ever happening.
 
