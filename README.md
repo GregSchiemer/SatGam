@@ -264,21 +264,29 @@ Once the certificate is downloaded, installed and trusted, a secure server is la
 
 **No internet connection** is reported when a phone first connects to the Vercoe network. This is cause for both celebration and caution. The Wi-Fi router lets a small consort of players connect to the Vercoe network and share the Satellite Gamelan concert app on their phones and no one needs to connect to the internet. Whileever the phone remains connected to the Vercoe network it will not fall prey to klepto-hyenas that lurk on the dark web.
 
-However once the concert is finished players are advised to remove the certificate from their phone. This will prevent an internet scammer from using it to launch a malicious application and steal personal information that was protected while the Satellite Gamelan app was in use. 
-
-The good news is that this has never happened. The steps that follow will prevent it from ever happening.
+However once the concert is finished players are advised to remove the certificate from their phone. This will prevent a scenario where an internet scammer might use it to launch a malicious application and steal personal information that was protected while the Satellite Gamelan app was in use. The steps that follow will prevent such a scenario from ever happening.
 
 **To remove the certificate from an iPhone**
 
-		Go to `Settings` > `General`  > `VPN & Device Management` > `Configuration Profile` > `Satellite Gamelan Root Certificate` > tap `Remove Profile`
+	Go to `Settings` > 
+		`General`  > 
+			`VPN & Device Management` > 
+				`Configuration Profile` > 
+					`Satellite Gamelan Root Certificate` > 
+						tap `Remove Profile`
 
-If you don’t find `Satellite Gamelan Root Certificate` under **Configuration** , then it has already been removed successfully.
+If `Satellite Gamelan Root Certificate` is not found under **Configuration** , then it has already been removed successfully.
 
 **To Remove the certificate from an Android phone**
 
-		Go to `Setting` > `Security & privacy` > `Encryption &  credentials` > `Trusted credentials` > `User` ( select `mkcert development CA` ) > tap `UNINSTALL`
+		Go to `Setting` > 
+			`Security & privacy` > 
+				`Encryption & credentials` > 
+					`Trusted credentials` > 
+						`User` ( select `mkcert development CA` ) > 
+							tap `UNINSTALL`
 
-If you don’t find `mkcert development CA' under **User**, then it has already been removed successfully.
+If `mkcert development CA' is not found under **User**, then it has already been removed successfully.
 
 [More ways to remove certificates](https://www.xolphin.com/support/FAQ/Removing_root_certificates)
 
