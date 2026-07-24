@@ -161,8 +161,9 @@ How to set up [tp-link AX73 Wi-Fi 6 Router](https://youtu.be/5nZY1M_RH-k)
 
 ## Server
  
- Before the Satellite Gamelan app is launched for the first time, a [certificate](https://github.com/GregSchiemer/SatGam#certificates) must be installed. If it is already installed, then `aio_server.py` can be run from **Terminal** using the following command settings :
+The Satellite Gamelan app uses ‘aio_server.py`, a server that includes an efficient service for sending hypertext messages to all phones and a web socket that allows a lead phone to broadcast messages to other phones in the consort.  
 
+Before the app is launched for the first time, a certificate must be installed. Once installed, the app can be launched  from Terminal using the following command settings :
 ```text
 	cd /Users/gs/Developer/SG/SatGam
 ```
