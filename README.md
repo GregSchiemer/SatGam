@@ -266,6 +266,10 @@ Once the certificate is downloaded, installed and trusted, a secure server is la
 
 However once the concert is finished and the phone returns to normal use, players are advised to remove the certificate from their phone. This will prevent a hypothetical scenario whereby an internet scammer might use the certificate to launch a malicious application and steal personal information that was protected while the Satellite Gamelan app was in use. The steps that follow will prevent such a scenario from ever happening.
 
+<p>
+  <img src="assets/md-images/settings_ios.png" width="60" alt="iOS settings">
+</p>
+
 **To remove the certificate from an iPhone**
 
 	Go to 
@@ -277,6 +281,10 @@ However once the concert is finished and the phone returns to normal use, player
 	- tap 'Remove Profile'
 
 If 'Satellite Gamelan Root Certificate' is not found under **Configuration**, it is already removed.
+
+<p>
+  <img src="assets/md-images/settings_android.png" width="60" alt="Android settings">
+</p>
 
 **To Remove the certificate from an Android phone**
 

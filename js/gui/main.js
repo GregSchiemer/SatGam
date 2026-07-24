@@ -112,9 +112,75 @@ export async function initApp() {
     throw new Error('initApp: no <canvas id="mobile"> found in DOM');
   }
 
-  const designW = parseInt(cnvP.dataset.designW, 10);
-  const designH = parseInt(cnvP.dataset.designH, 10);
+//  const designW = parseInt(cnvP.dataset.designW, 10);
+//  const designH = parseInt(cnvP.dataset.designH, 10);
 
+const referenceDesignW = parseInt(
+  cnvP.dataset.designW,
+  10
+);
+
+const referenceDesignH = parseInt(
+  cnvP.dataset.designH,
+  10
+);
+
+const viewportW =
+  window.visualViewport?.width ??
+  window.innerWidth;
+
+const viewportH =
+  window.visualViewport?.height ??
+  window.innerHeight;
+
+if (
+  !Number.isFinite(referenceDesignW) ||
+  !Number.isFinite(referenceDesignH)
+) {
+  throw new Error(
+    `initApp: invalid reference design dimensions: ` +
+    `designW=${cnvP.dataset.designW}, ` +
+    `designH=${cnvP.dataset.designH}`
+  );
+}
+
+if (
+  !Number.isFinite(viewportW) ||
+  !Number.isFinite(viewportH) ||
+  viewportW <= 0 ||
+  viewportH <= 0
+) {
+  throw new Error(
+    `initApp: invalid viewport dimensions: ` +
+    `${viewportW} × ${viewportH}`
+  );
+}
+
+// Temporary responsive-design test:
+// preserve the 390-unit logical width and derive the height
+// from the current viewport aspect ratio.
+const designW = referenceDesignW;
+
+const designH = Math.round(
+  designW * (viewportH / viewportW)
+);
+
+console.log('[temporary responsive design]', {
+  referenceDesign: [
+    referenceDesignW,
+    referenceDesignH,
+  ],
+  viewport: [
+    viewportW,
+    viewportH,
+  ],
+  derivedDesign: [
+    designW,
+    designH,
+  ],
+});
+
+//////////////////////
   if (!Number.isFinite(designW) || !Number.isFinite(designH)) {
     throw new Error(
       `initApp: invalid canvas design dimensions: ` +
