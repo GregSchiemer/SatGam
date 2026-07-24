@@ -224,7 +224,7 @@ How to set up [tp-link AX73 Wi-Fi 6 Router](https://youtu.be/5nZY1M_RH-k)
 
 ## Certificates
 
-Before the Satellite Gamelan app is launched for the first time, phones need reassurance that it is a trusted app that runs Csound as an audio synthesiser inside a mobile web browser. The certificate provides that reassurance, allowing the Satellite Gamelan to launch without raising security alerts and alarming phone owners. 
+Before the Satellite Gamelan app is launched for the first time, phones need reassurance that it is a trusted app that runs Csound as an audio synthesiser inside a mobile web browser. The certificate provides that reassurance, allowing the Satellite Gamelan to launch without raising security alerts and alarming the phones' owners. 
 
 A local http server 'server.py' is used to download, install and trust the Satellite Gamelan root certificate. To do that laptop and phones must connect to the local area network to download the certificate from the laptop. Phones are already secure because the Wi-Fi Router is not connected to the internet. In a **terminal** window, type the following :
 
