@@ -11,30 +11,75 @@ export const arrF = []; // foreground layer
 export const arrS = []; // sprites layer
 export const arrT = []; // text layer
 
-// alternative name : setCtxProperties
+
+// ---------------------------------------------------------------------------
+// ---- geometric design specifications
+// ---------------------------------------------------------------------------
+
 function stampGeometry(ctx, designW, designH, dpr, fit) {
   ctx.w = designW;
   ctx.h = designH;
   ctx.designW = designW;
   ctx.designH = designH;
 
-  ctx.mid = { x: designW * 0.5, y: designH * 0.5 };
-  ctx.top = { x: ctx.mid.x,     y: designH * 0.18 };
-  ctx.sub = { x: ctx.mid.x,     y: designH * 0.24 };
-  ctx.low = { x: ctx.mid.x,     y: designH * 0.78 };
+  ctx.mid = {
+    x: designW * 0.5,
+    y: designH * 0.5,
+  };
+
+  const titleOffset = 270;
+  const subtitleOffset = 220;
+  const lowerOffset = 235;
+
+  ctx.top = {
+    x: ctx.mid.x,
+    y: ctx.mid.y - titleOffset,
+  };
+
+  ctx.sub = {
+    x: ctx.mid.x,
+    y: ctx.mid.y - subtitleOffset,
+  };
+
+  ctx.low = {
+    x: ctx.mid.x,
+    y: ctx.mid.y + lowerOffset,
+  };
+
+  const scoreHeight = 67;
+  const scoreBottomMargin = 12;
+
+  ctx.score = {
+    currentX: ctx.mid.x,
+    topY: designH - scoreBottomMargin - scoreHeight,
+    height: scoreHeight,
+    bottomY: designH - scoreBottomMargin,
+  };
 
   const lateralOffset = 80;
-  ctx.left  = { x: ctx.mid.x - lateralOffset, y: ctx.mid.y };
-  ctx.right = { x: ctx.mid.x + lateralOffset, y: ctx.mid.y };
+
+  ctx.left = {
+    x: ctx.mid.x - lateralOffset,
+    y: ctx.mid.y,
+  };
+
+  ctx.right = {
+    x: ctx.mid.x + lateralOffset,
+    y: ctx.mid.y,
+  };
 
   ctx.pi2 = 2 * Math.PI;
   ctx.tapRadius = 50;
-  ctx.keyRadius = designW; //20;
+  ctx.keyRadius = designW;
   ctx.cornerRadius = 25;
 
   ctx.dpr = dpr;
-  ctx.fit = fit; // design-units → CSS pixels (before DPR)
+  ctx.fit = fit;
 }
+
+// ---------------------------------------------------------------------------
+// ---- pixelated design specifications
+// ---------------------------------------------------------------------------
 
 function configureCanvas(cnv, cssW, cssH, dpr, fit, designW, designH, isVisible) {
   if (isVisible) {
@@ -57,17 +102,10 @@ function configureCanvas(cnv, cssW, cssH, dpr, fit, designW, designH, isVisible)
   return ctx;
 }
 
-// initCanvases(): creates 4 contexts with identical geometry.
-// - ctxP: visible compositor on #mobile
-// - ctxB: off screen background layer
-// - ctxF: off screen foreground/phones layer
-// - ctxT: off screen text layer
-//
-// mode:
-// - 'fixed': CSS size = designW x designH (good for “hypothetical phone” on laptop)
-// - 'fit'  : scales down to fit window (no upscaling; see fit clamp)
-//
-// alternative name : replicate  
+// ---------------------------------------------------------------------------
+// ---- pixelated design specifications
+// ---------------------------------------------------------------------------
+
 export function initCanvases({ paneId = 'mobile', designW = 390, designH = 844, mode = 'fixed' } = {}) {
   const cnvP = document.getElementById(paneId);
   if (!cnvP) throw new Error(`initCanvases: no <canvas id="${paneId}"> found in DOM`);
@@ -126,7 +164,10 @@ export function initCanvases({ paneId = 'mobile', designW = 390, designH = 844, 
   return { ctxP, ctxB, ctxF, ctxS, ctxT };
 }
 
-// ---- tiny compositor helper ----
+// ---------------------------------------------------------------------------
+// ---- tiny compositor helper
+// ---------------------------------------------------------------------------
+
 function blit(ctxDst, cnvSrc) {
   ctxDst.drawImage(
     cnvSrc,
@@ -135,7 +176,10 @@ function blit(ctxDst, cnvSrc) {
   );
 }
 
-// composeFrame(): clears the visible pane and composites layers in order.
+// ---------------------------------------------------------------------------
+// ---- clears the visible pane and composites layers in order
+// ---------------------------------------------------------------------------
+
 export function composeFrame({ drawB = true, drawF = false, drawS = true, drawT = true } = {}) {
   const { canvas: cnvP, ctx: ctxP } = arrP[0];
   const { canvas: cnvB } = arrB[0];
@@ -152,7 +196,7 @@ export function composeFrame({ drawB = true, drawF = false, drawS = true, drawT 
 }
 
 // ---------------------------------------------------------------------------
-//  Slots (henge geometry) – one entry per phone around the ring
+// ---- Slots (henge geometry) – one entry per phone around the ring
 // ---------------------------------------------------------------------------
 export function setSlots(slots) {
   arrA.length = 0;
@@ -164,7 +208,7 @@ export function getSlots() {
 }
 
 // ---------------------------------------------------------------------------
-//  Background rendering - color.js configures a neutral gradient
+// --- background rendering - color.js configures a neutral gradient
 // ---------------------------------------------------------------------------
 export function prepareAndRenderBackground(ctxB, status) {
 
@@ -187,6 +231,9 @@ export function prepareAndRenderBackground(ctxB, status) {
 
 }
 
+// ---------------------------------------------------------------------------
+// --- background rendering - color.js configures a neutral gradient
+// ---------------------------------------------------------------------------
 export function selectAndRenderBackground(ctxB, status) {
   const fam = status?.bgFamily ?? ColorFamily.NONE;
 
@@ -213,12 +260,9 @@ export function selectAndRenderBackground(ctxB, status) {
   ctxB.restore();
 }
 
-
 // ---------------------------------------------------------------------------
-//  Pointer → canvas coordinate helper
+// --- convert a PointerEvent / MouseEvent into DESIGN-space coordinates.
 // ---------------------------------------------------------------------------
-
-// Convert a PointerEvent / MouseEvent into DESIGN-space coordinates.
 export function eventToCtxPoint(ev, canvas, ctx) {
   const rect = canvas.getBoundingClientRect();
 
@@ -257,7 +301,7 @@ export function renderSavedBackground(ctxP) {
 }
 
 // ---------------------------------------------------------------------------
-//  Shape helpers (used by sprites.js)
+// --- shape helpers (used by sprites.js)
 // ---------------------------------------------------------------------------
 export function drawPhonePath(ctx, { x, y, w, h, r }) {
   if (!ctx) return;
@@ -327,7 +371,9 @@ export function radializeSlots(ctx, baseSlots) {
   });
 }
 
-// bgFade helpers (put near frameRender, or export from canvasUtils)
+// ---------------------------------------------------------------------------
+// --- bgFade helpers (put near frameRender, or export from canvasUtils)
+// ---------------------------------------------------------------------------
 export function ensureBgFadeBuffers(status, cnvB) {
   if (!status._bgFade) status._bgFade = {};
   const f = status._bgFade;
