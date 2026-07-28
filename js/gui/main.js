@@ -59,14 +59,6 @@ import {
 } from './henge.js';
 
 import { 
-  sequence 
-} from './sequence.js';
-
-//import {
-//  enableCsound
-//} from './initCsound.js';
-
-import { 
   makeAudioEngine 
 } from "./audioEngine.js";
 
@@ -76,8 +68,15 @@ import {
 
 import {
   FamilyIndex,
-  ColorFamily
+  ColorFamily,
+  COLOR_MAP
 } from './color.js';
+
+import { 
+  sequence 
+} from './sequence.js';
+
+import { createGraphicScore } from './graphicScore.js';
 
 import { frameRender } from './renderer.js';
 
@@ -98,99 +97,91 @@ import { installPhoneDiag, setPhoneDiag } from './phoneDiag.js';
 
 let _lastPhonesKey = null;
 console.log('[main] page loaded', window.location.pathname);
-// ---------------------------------------------------------------------------
-//  App entry point
-// ---------------------------------------------------------------------------
 
-export async function initApp() {
-  console.log('✅ GUI initialised');
 
-  // 1) Read logical design dimensions from the visible canvas
-  const cnvP = document.getElementById('mobile');
-
-  if (!cnvP) {
-    throw new Error('initApp: no <canvas id="mobile"> found in DOM');
-  }
-
-//  const designW = parseInt(cnvP.dataset.designW, 10);
-//  const designH = parseInt(cnvP.dataset.designH, 10);
-
-const referenceDesignW = parseInt(
-  cnvP.dataset.designW,
-  10
-);
-
-const referenceDesignH = parseInt(
-  cnvP.dataset.designH,
-  10
-);
-
-const viewportW =
-  window.visualViewport?.width ??
-  window.innerWidth;
-
-const viewportH =
-  window.visualViewport?.height ??
-  window.innerHeight;
-
-if (
-  !Number.isFinite(referenceDesignW) ||
-  !Number.isFinite(referenceDesignH)
-) {
-  throw new Error(
-    `initApp: invalid reference design dimensions: ` +
-    `designW=${cnvP.dataset.designW}, ` +
-    `designH=${cnvP.dataset.designH}`
-  );
-}
-
-if (
-  !Number.isFinite(viewportW) ||
-  !Number.isFinite(viewportH) ||
-  viewportW <= 0 ||
-  viewportH <= 0
-) {
-  throw new Error(
-    `initApp: invalid viewport dimensions: ` +
-    `${viewportW} × ${viewportH}`
-  );
-}
-
-// Temporary responsive-design test:
-// preserve the 390-unit logical width and derive the height
-// from the current viewport aspect ratio.
-const designW = referenceDesignW;
-
-const designH = Math.round(
-  designW * (viewportH / viewportW)
-);
-
-console.log('[temporary responsive design]', {
-  referenceDesign: [
-    referenceDesignW,
-    referenceDesignH,
-  ],
-  viewport: [
-    viewportW,
-    viewportH,
-  ],
-  derivedDesign: [
-    designW,
-    designH,
-  ],
-});
-
-//////////////////////
-  if (!Number.isFinite(designW) || !Number.isFinite(designH)) {
+function deriveResponsiveGeometry(canvas) {
+  if (!canvas) {
     throw new Error(
-      `initApp: invalid canvas design dimensions: ` +
-      `designW=${cnvP.dataset.designW}, ` +
-      `designH=${cnvP.dataset.designH}`
+      'deriveResponsiveGeometry: canvas is required'
     );
   }
 
-  // 2) Report viewport, DPR and logical design geometry
-  console.log('[viewport geometry]', {
+  const referenceDesignW = parseInt(
+    canvas.dataset.designW,
+    10
+  );
+
+  const referenceDesignH = parseInt(
+    canvas.dataset.designH,
+    10
+  );
+
+  if (
+    !Number.isFinite(referenceDesignW) ||
+    !Number.isFinite(referenceDesignH) ||
+    referenceDesignW <= 0 ||
+    referenceDesignH <= 0
+  ) {
+    throw new Error(
+      `deriveResponsiveGeometry: invalid reference design dimensions: ` +
+      `designW=${canvas.dataset.designW}, ` +
+      `designH=${canvas.dataset.designH}`
+    );
+  }
+
+  const viewportW =
+    window.visualViewport?.width ??
+    window.innerWidth;
+
+  const viewportH =
+    window.visualViewport?.height ??
+    window.innerHeight;
+
+  if (
+    !Number.isFinite(viewportW) ||
+    !Number.isFinite(viewportH) ||
+    viewportW <= 0 ||
+    viewportH <= 0
+  ) {
+    throw new Error(
+      `deriveResponsiveGeometry: invalid viewport dimensions: ` +
+      `${viewportW} × ${viewportH}`
+    );
+  }
+
+  // Preserve the reference logical width and derive a logical height
+  // whose aspect ratio matches the current viewport.
+  const designW = referenceDesignW;
+
+  const designH = Math.round(
+    designW * (viewportH / viewportW)
+  );
+
+  const geometry = {
+    referenceDesignW,
+    referenceDesignH,
+    viewportW,
+    viewportH,
+    designW,
+    designH,
+  };
+
+  console.log('[responsive geometry]', {
+    referenceDesign: [
+      referenceDesignW,
+      referenceDesignH,
+    ],
+
+    viewport: [
+      viewportW,
+      viewportH,
+    ],
+
+    derivedDesign: [
+      designW,
+      designH,
+    ],
+
     inner: [
       window.innerWidth,
       window.innerHeight,
@@ -210,33 +201,47 @@ console.log('[temporary responsive design]', {
         ]
       : null,
 
-    visualScale: window.visualViewport?.scale ?? null,
+    visualScale:
+      window.visualViewport?.scale ?? null,
 
-    dpr: window.devicePixelRatio || 1,
+    dpr:
+      window.devicePixelRatio || 1,
 
-    design: [
-      designW,
-      designH,
-    ],
+    referenceDesignAspect:
+      referenceDesignW / referenceDesignH,
 
-    innerAspect:
-      window.innerHeight > 0
-        ? window.innerWidth / window.innerHeight
-        : null,
+    viewportAspect:
+      viewportW / viewportH,
 
-    visualAspect:
-      window.visualViewport?.height > 0
-        ? window.visualViewport.width /
-          window.visualViewport.height
-        : null,
-
-    designAspect:
-      designH > 0
-        ? designW / designH
-        : null,
+    derivedDesignAspect:
+      designW / designH,
   });
 
-  // 3) Create visible and off-screen canvas surfaces
+  return geometry;
+}
+
+// ---------------------------------------------------------------------------
+//  App entry point
+// ---------------------------------------------------------------------------
+
+export async function initApp() {
+  console.log('✅ GUI initialised');
+
+  // 1) Determine and report responsive geometry
+  const cnvP = document.getElementById('mobile');
+
+  if (!cnvP) {
+    throw new Error(
+      'initApp: no <canvas id="mobile"> found in DOM'
+    );
+  }
+
+  const {
+    designW,
+    designH,
+  } = deriveResponsiveGeometry(cnvP);
+
+  // 2) Create visible and off-screen canvas surfaces
   const { ctxP, ctxB, ctxF, ctxT } = initCanvases({
     designW,
     designH,
@@ -246,6 +251,13 @@ console.log('[temporary responsive design]', {
   // Preserve the existing short variable names
   const cnv = cnvP;
   const ctx = ctxP;
+
+  // 3) Create the pre-rendered graphic score
+  const graphicScore = createGraphicScore({
+    sequence,
+    colorMap: COLOR_MAP,
+    dpr: ctxP.dpr,
+  });
 
   // 4) Create application status from the pane geometry
   const status = initStatus(ctx);

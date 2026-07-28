@@ -32,7 +32,7 @@ export const TextColorByFamily = Object.freeze({
 
 
 // Central color dictionary (RGBA format)
-const COLOR_MAP = {
+export const COLOR_MAP = {
   warmY: [235, 235, 0, 1],
   paleY: [255, 255, 168, 1],
   warmR: [255, 16, 64, 1],
