@@ -78,7 +78,10 @@ import {
 
 import { createGraphicScore } from './graphicScore.js';
 
-import { frameRender } from './renderer.js';
+import {
+  frameRender,
+  setGraphicScore,
+} from './renderer.js';
 
 //import { sendClientStatus } from './clientStatus.js';
 
@@ -97,7 +100,6 @@ import { installPhoneDiag, setPhoneDiag } from './phoneDiag.js';
 
 let _lastPhonesKey = null;
 console.log('[main] page loaded', window.location.pathname);
-
 
 function deriveResponsiveGeometry(canvas) {
   if (!canvas) {
@@ -253,12 +255,12 @@ export async function initApp() {
   const ctx = ctxP;
 
   // 3) Create the pre-rendered graphic score
-  const graphicScore = createGraphicScore({
-    sequence,
-    colorMap: COLOR_MAP,
-    dpr: ctxP.dpr,
-  });
-
+const graphicScore = createGraphicScore({
+  sequence,
+  dpr: ctxP.dpr,
+});
+  setGraphicScore(graphicScore);
+	
   // 4) Create application status from the pane geometry
   const status = initStatus(ctx);
 

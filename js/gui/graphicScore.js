@@ -8,19 +8,20 @@
 // - pre-render a complete warm score strip
 // - draw the pale strip at a state-derived position
 // - superimpose the current warm column
+// - draw a thicker outline around the fixed current column
 //
 // This module has no clock, WebSocket, status, or concert-mode dependency.
 
-const DEFAULT_NEUTRAL_COLOR = [96, 96, 96, 1];
-const DEFAULT_OUTLINE_COLOR = [255, 255, 255, 0.9];
+import { COLOR_MAP } from './color.js';
 
 const DEFAULT_GEOMETRY = Object.freeze({
   cellWidth: 22,
   cellHeight: 11,
-  columnGap: 4,
-  rowGap: 3,
+  columnGap: 0,
+  rowGap: 0,
   cornerRadius: 4,
   outlineWidth: 1,
+  currentOutlineWidth: 2,
 });
 
 function rgbaString(value, label = 'colour') {
@@ -48,7 +49,9 @@ function rgbaString(value, label = 'colour') {
 
 function validateSequence(sequence) {
   if (!Array.isArray(sequence)) {
-    throw new Error('graphicScore: sequence must be an array');
+    throw new Error(
+      'graphicScore: sequence must be an array'
+    );
   }
 
   if (sequence.length !== 31) {
@@ -60,7 +63,8 @@ function validateSequence(sequence) {
   sequence.forEach((state, stateIndex) => {
     if (!Array.isArray(state) || state.length !== 5) {
       throw new Error(
-        `graphicScore: state ${stateIndex + 1} must contain exactly 5 bits`
+        `graphicScore: state ${stateIndex + 1} ` +
+        `must contain exactly 5 bits`
       );
     }
 
@@ -75,34 +79,11 @@ function validateSequence(sequence) {
   });
 }
 
-function validateColorMap(colorMap) {
-  if (!colorMap || typeof colorMap !== 'object') {
-    throw new Error('graphicScore: colorMap must be an object');
-  }
-
-  const requiredKeys = [
-    'paleY',
-    'paleR',
-    'paleG',
-    'paleB',
-    'paleM',
-    'warmY',
-    'warmR',
-    'warmG',
-    'warmB',
-    'warmM',
-  ];
-
-  requiredKeys.forEach((key) => {
-    if (!Object.prototype.hasOwnProperty.call(colorMap, key)) {
-      throw new Error(
-        `graphicScore: colorMap is missing "${key}"`
-      );
-    }
-  });
-}
-
-function createHiDPICanvas(logicalWidth, logicalHeight, dpr) {
+function createHiDPICanvas(
+  logicalWidth,
+  logicalHeight,
+  dpr
+) {
   if (
     !Number.isFinite(logicalWidth) ||
     !Number.isFinite(logicalHeight) ||
@@ -134,7 +115,14 @@ function createHiDPICanvas(logicalWidth, logicalHeight, dpr) {
     );
   }
 
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.setTransform(
+    dpr,
+    0,
+    0,
+    dpr,
+    0,
+    0
+  );
 
   return {
     canvas,
@@ -145,48 +133,86 @@ function createHiDPICanvas(logicalWidth, logicalHeight, dpr) {
   };
 }
 
-function roundedRectPath(ctx, x, y, width, height, radius) {
+function roundedRectPath(
+  ctx,
+  x,
+  y,
+  width,
+  height,
+  radius
+) {
   const r = Math.max(
     0,
-    Math.min(radius, width * 0.5, height * 0.5)
+    Math.min(
+      radius,
+      width * 0.5,
+      height * 0.5
+    )
   );
 
   ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + width - r, y);
+
+  ctx.moveTo(
+    x + r,
+    y
+  );
+
+  ctx.lineTo(
+    x + width - r,
+    y
+  );
+
   ctx.quadraticCurveTo(
     x + width,
     y,
     x + width,
     y + r
   );
-  ctx.lineTo(x + width, y + height - r);
+
+  ctx.lineTo(
+    x + width,
+    y + height - r
+  );
+
   ctx.quadraticCurveTo(
     x + width,
     y + height,
     x + width - r,
     y + height
   );
-  ctx.lineTo(x + r, y + height);
+
+  ctx.lineTo(
+    x + r,
+    y + height
+  );
+
   ctx.quadraticCurveTo(
     x,
     y + height,
     x,
     y + height - r
   );
-  ctx.lineTo(x, y + r);
+
+  ctx.lineTo(
+    x,
+    y + r
+  );
+
   ctx.quadraticCurveTo(
     x,
     y,
     x + r,
     y
   );
+
   ctx.closePath();
 }
 
 function drawCell(
   ctx,
-  {
+  options = {}
+) {
+  const {
     x,
     y,
     width,
@@ -195,8 +221,8 @@ function drawCell(
     fillStyle,
     outlineStyle,
     outlineWidth,
-  }
-) {
+  } = options;
+
   roundedRectPath(
     ctx,
     x,
@@ -214,15 +240,62 @@ function drawCell(
   ctx.stroke();
 }
 
-function renderStrip({
-  sequence,
-  surface,
-  rowColors,
-  neutralStyle,
-  outlineStyle,
-  geometry,
-  useWarmColors,
-}) {
+function drawCurrentColumnOutline(
+  ctx,
+  options = {}
+) {
+  const {
+    x,
+    topY,
+    rowCount,
+    cellWidth,
+    cellHeight,
+    rowAdvance,
+    cornerRadius,
+    outlineStyle,
+    outlineWidth,
+  } = options;
+
+  ctx.save();
+
+  ctx.strokeStyle = outlineStyle;
+  ctx.lineWidth = outlineWidth;
+
+  for (
+    let rowIndex = 0;
+    rowIndex < rowCount;
+    rowIndex += 1
+  ) {
+    const y =
+      topY +
+      rowIndex * rowAdvance;
+
+    roundedRectPath(
+      ctx,
+      x,
+      y,
+      cellWidth,
+      cellHeight,
+      cornerRadius
+    );
+
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
+function renderStrip(options = {}) {
+  const {
+    sequence,
+    surface,
+    rowColors,
+    neutralStyle,
+    outlineStyle,
+    geometry,
+    useWarmColors,
+  } = options;
+
   const {
     cellWidth,
     cellHeight,
@@ -232,8 +305,11 @@ function renderStrip({
     outlineWidth,
   } = geometry;
 
-  const columnAdvance = cellWidth + columnGap;
-  const rowAdvance = cellHeight + rowGap;
+  const columnAdvance =
+    cellWidth + columnGap;
+
+  const rowAdvance =
+    cellHeight + rowGap;
 
   const ctx = surface.ctx;
 
@@ -244,43 +320,51 @@ function renderStrip({
     surface.logicalHeight
   );
 
-  sequence.forEach((state, columnIndex) => {
-    const x = columnIndex * columnAdvance;
+  sequence.forEach(
+    (state, columnIndex) => {
+      const x =
+        columnIndex * columnAdvance;
 
-    state.forEach((bit, rowIndex) => {
-      const y = rowIndex * rowAdvance;
+      state.forEach(
+        (bit, rowIndex) => {
+          const y =
+            rowIndex * rowAdvance;
 
-      const fillStyle =
-        bit === 0
-          ? neutralStyle
-          : useWarmColors
-            ? rowColors[rowIndex].warm
-            : rowColors[rowIndex].pale;
+          const fillStyle =
+            bit === 0
+              ? neutralStyle
+              : useWarmColors
+                ? rowColors[rowIndex].warm
+                : rowColors[rowIndex].pale;
 
-      drawCell(ctx, {
-        x,
-        y,
-        width: cellWidth,
-        height: cellHeight,
-        radius: cornerRadius,
-        fillStyle,
-        outlineStyle,
-        outlineWidth,
-      });
-    });
-  });
+          drawCell(ctx, {
+            x,
+            y,
+            width: cellWidth,
+            height: cellHeight,
+            radius: cornerRadius,
+            fillStyle,
+            outlineStyle,
+            outlineWidth,
+          });
+        }
+      );
+    }
+  );
 }
 
-export function createGraphicScore({
-  sequence,
-  colorMap,
-  dpr = window.devicePixelRatio || 1,
-  neutralColor = DEFAULT_NEUTRAL_COLOR,
-  outlineColor = DEFAULT_OUTLINE_COLOR,
-  geometry = {},
-} = {}) {
+export function createGraphicScore(
+  options = {}
+) {
+  const {
+    sequence,
+    dpr = window.devicePixelRatio || 1,
+    neutralColor = COLOR_MAP.silver,
+    outlineColor = COLOR_MAP.white,
+    geometry = {},
+  } = options;
+
   validateSequence(sequence);
-  validateColorMap(colorMap);
 
   const resolvedGeometry = {
     ...DEFAULT_GEOMETRY,
@@ -294,6 +378,7 @@ export function createGraphicScore({
     rowGap,
     cornerRadius,
     outlineWidth,
+    currentOutlineWidth,
   } = resolvedGeometry;
 
   const numericGeometry = {
@@ -303,42 +388,83 @@ export function createGraphicScore({
     rowGap,
     cornerRadius,
     outlineWidth,
+    currentOutlineWidth,
   };
 
-  Object.entries(numericGeometry).forEach(([name, value]) => {
-    if (!Number.isFinite(value) || value < 0) {
+  Object.entries(
+    numericGeometry
+  ).forEach(([name, value]) => {
+    if (
+      !Number.isFinite(value) ||
+      value < 0
+    ) {
       throw new Error(
-        `graphicScore: invalid geometry value ${name}=${value}`
+        `graphicScore: invalid geometry value ` +
+        `${name}=${value}`
       );
     }
   });
 
-  if (cellWidth <= 0 || cellHeight <= 0) {
+  if (
+    cellWidth <= 0 ||
+    cellHeight <= 0
+  ) {
     throw new Error(
-      'graphicScore: cellWidth and cellHeight must be greater than zero'
+      'graphicScore: cellWidth and cellHeight ' +
+      'must be greater than zero'
     );
   }
 
   const rowColors = [
     {
-      pale: rgbaString(colorMap.paleY, 'paleY'),
-      warm: rgbaString(colorMap.warmY, 'warmY'),
+      pale: rgbaString(
+        COLOR_MAP.paleY,
+        'paleY'
+      ),
+      warm: rgbaString(
+        COLOR_MAP.warmY,
+        'warmY'
+      ),
     },
     {
-      pale: rgbaString(colorMap.paleR, 'paleR'),
-      warm: rgbaString(colorMap.warmR, 'warmR'),
+      pale: rgbaString(
+        COLOR_MAP.paleR,
+        'paleR'
+      ),
+      warm: rgbaString(
+        COLOR_MAP.warmR,
+        'warmR'
+      ),
     },
     {
-      pale: rgbaString(colorMap.paleG, 'paleG'),
-      warm: rgbaString(colorMap.warmG, 'warmG'),
+      pale: rgbaString(
+        COLOR_MAP.paleG,
+        'paleG'
+      ),
+      warm: rgbaString(
+        COLOR_MAP.warmG,
+        'warmG'
+      ),
     },
     {
-      pale: rgbaString(colorMap.paleB, 'paleB'),
-      warm: rgbaString(colorMap.warmB, 'warmB'),
+      pale: rgbaString(
+        COLOR_MAP.paleB,
+        'paleB'
+      ),
+      warm: rgbaString(
+        COLOR_MAP.warmB,
+        'warmB'
+      ),
     },
     {
-      pale: rgbaString(colorMap.paleM, 'paleM'),
-      warm: rgbaString(colorMap.warmM, 'warmM'),
+      pale: rgbaString(
+        COLOR_MAP.paleM,
+        'paleM'
+      ),
+      warm: rgbaString(
+        COLOR_MAP.warmM,
+        'warmM'
+      ),
     },
   ];
 
@@ -400,18 +526,20 @@ export function createGraphicScore({
 
   function draw(
     ctx,
-    {
-      stateIndex,
-      scoreGeometry = ctx.score,
-      clipLeft = 0,
-      clipRight = ctx.designW,
-    } = {}
+    drawOptions = {}
   ) {
     if (!ctx) {
       throw new Error(
         'graphicScore.draw: visible context is required'
       );
     }
+
+    const {
+      stateIndex,
+      scoreGeometry = ctx.score,
+      clipLeft = 0,
+      clipRight = ctx.designW,
+    } = drawOptions;
 
     if (!Number.isInteger(stateIndex)) {
       throw new Error(
@@ -425,8 +553,8 @@ export function createGraphicScore({
       stateIndex >= sequence.length
     ) {
       throw new Error(
-        `graphicScore.draw: stateIndex ${stateIndex} is outside ` +
-        `0–${sequence.length - 1}`
+        `graphicScore.draw: stateIndex ${stateIndex} ` +
+        `is outside 0–${sequence.length - 1}`
       );
     }
 
@@ -467,15 +595,17 @@ export function createGraphicScore({
     ctx.save();
 
     ctx.beginPath();
+
     ctx.rect(
       clipLeft,
       scoreGeometry.topY,
       clipRight - clipLeft,
       scoreGeometry.height
     );
+
     ctx.clip();
 
-    // Full pale strip.
+    // Draw the complete pale score strip.
     ctx.drawImage(
       paleSurface.canvas,
       0,
@@ -488,7 +618,8 @@ export function createGraphicScore({
       stripHeight
     );
 
-    // Current warm column superimposed at ctx.score.currentX.
+    // Superimpose the current warm column at the fixed
+    // current-column position.
     ctx.drawImage(
       warmSurface.canvas,
       Math.round(sourceColumnX * dpr),
@@ -501,23 +632,40 @@ export function createGraphicScore({
       stripHeight
     );
 
+    // Draw the thicker white outlines around the five cells
+    // in the fixed current column.
+    drawCurrentColumnOutline(ctx, {
+      x: currentColumnX,
+      topY: scoreGeometry.topY,
+      rowCount: 5,
+      cellWidth,
+      cellHeight,
+      rowAdvance,
+      cornerRadius,
+      outlineStyle,
+      outlineWidth: currentOutlineWidth,
+    });
+
     ctx.restore();
   }
 
-  console.log('[graphicScore] created', {
-    states: sequence.length,
-    rows: 5,
-    stripSize: [
-      stripWidth,
-      stripHeight,
-    ],
-    backingSize: [
-      paleSurface.canvas.width,
-      paleSurface.canvas.height,
-    ],
-    geometry: resolvedGeometry,
-    dpr,
-  });
+  console.log(
+    '[graphicScore] created',
+    {
+      states: sequence.length,
+      rows: 5,
+      stripSize: [
+        stripWidth,
+        stripHeight,
+      ],
+      backingSize: [
+        paleSurface.canvas.width,
+        paleSurface.canvas.height,
+      ],
+      geometry: resolvedGeometry,
+      dpr,
+    }
+  );
 
   return {
     draw,

@@ -61,6 +61,18 @@ import {
 logStatusProbe 
 } from './helpers.js';
 
+let graphicScore = null;
+
+export function setGraphicScore(score) {
+  if (!score || typeof score.draw !== 'function') {
+    throw new Error(
+      'setGraphicScore: expected a graphic-score object with draw()'
+    );
+  }
+
+  graphicScore = score;
+}
+
 // ==============================
 // —— Background (cross-cutting) ——
 // ==============================
@@ -403,6 +415,7 @@ function renderTextLayer(ctxT, status, elapsedMs) {
 // ======================
 
 export function frameRender(status) {
+  const ctxP = arrP[0].ctx;
   const ctxB = arrB[0].ctx;
   const ctxS = arrS[0].ctx;
   const ctxT = arrT[0].ctx;
@@ -450,8 +463,17 @@ if (dbg !== status._lastViewDbg) {
   renderPhonesLayer(ctxS, status);
   renderTextLayer(ctxT, status, elapsedMs);
   composeFrame({ drawB: true, drawS: true, drawT: true });
+  
+  // Temporary first test:
+// draw sequence state 1 after the normal frame has been composited.
+	if (graphicScore) {
+  	graphicScore.draw(ctxP, {
+      stateIndex: 6,
+      preStart: !status.running,
+      scoreGeometry: ctxP.score,
+    });
+  }
 }
-
 
 // ---------- phones ----------
 function renderPhonesLayer(ctxS, status) {

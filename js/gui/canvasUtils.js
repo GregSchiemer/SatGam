@@ -46,8 +46,8 @@ function stampGeometry(ctx, designW, designH, dpr, fit) {
     y: ctx.mid.y + lowerOffset,
   };
 
-  const scoreHeight = 67;
-  const scoreBottomMargin = 12;
+  const scoreHeight = 55;
+  const scoreBottomMargin = 1;
 
   ctx.score = {
     currentX: ctx.mid.x,

@@ -33,14 +33,21 @@ export const TextColorByFamily = Object.freeze({
 
 // Central color dictionary (RGBA format)
 export const COLOR_MAP = {
+  silver: [192, 192, 192, 1],
+  white: [255, 255, 255, 1],
+
   warmY: [235, 235, 0, 1],
   paleY: [255, 255, 168, 1],
+
   warmR: [255, 16, 64, 1],
   paleR: [255, 128, 140, 1],
+
   warmG: [64, 255, 0, 1],
   paleG: [144, 255, 128, 1],
+
   warmB: [0, 180, 255, 1],
   paleB: [124, 255, 255, 1],
+
   warmM: [255, 80, 255, 1],
   paleM: [255, 208, 255, 1],
 };
