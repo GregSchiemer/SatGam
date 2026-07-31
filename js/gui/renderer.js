@@ -466,13 +466,24 @@ if (dbg !== status._lastViewDbg) {
   
   // Temporary first test:
 // draw sequence state 1 after the normal frame has been composited.
+
+/*
 	if (graphicScore) {
   	graphicScore.draw(ctxP, {
       stateIndex: 6,
       preStart: !status.running,
       scoreGeometry: ctxP.score,
     });
-  }
+  } 
+  */
+  
+if (status.running) {
+  graphicScore.draw(ctxP, {
+    stateIndex: status.index,
+    scoreGeometry: ctxP.score,
+  });
+ }
+
 }
 
 // ---------- phones ----------
