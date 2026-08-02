@@ -33,6 +33,7 @@ export const TextColorByFamily = Object.freeze({
 
 // Central color dictionary (RGBA format)
 export const COLOR_MAP = {
+  transparent: [0, 0, 0, 0],
   silver: [192, 192, 192, 1],
   white: [255, 255, 255, 1],
 
