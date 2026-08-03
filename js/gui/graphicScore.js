@@ -359,8 +359,8 @@ export function createGraphicScore(
   const {
     sequence,
     dpr = window.devicePixelRatio || 1,
-    neutralColor = COLOR_MAP.silver,
-    outlineColor = COLOR_MAP.white,
+    neutralColor = COLOR_MAP.transparent,
+    outlineColor = COLOR_MAP.silver,
     geometry = {},
   } = options;
 

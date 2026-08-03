@@ -164,6 +164,7 @@ How to set up [tp-link AX73 Wi-Fi 6 Router](https://youtu.be/5nZY1M_RH-k)
 The Satellite Gamelan app uses `aio_server.py`, a server that includes a service that sends hypertext messages to all phones and a web socket that allows a lead phone to broadcast messages to other phones in the consort.  
 
 Before the app is launched for the first time, a [certificate](https://github.com/GregSchiemer/SatGam#certificates) must be installed. Once installed, the app can be launched from **Terminal** using the following command settings :
+
 ```text
 	cd /Users/gs/Developer/SG/SatGam
 ```
@@ -228,6 +229,7 @@ Before the Satellite Gamelan app is launched for the first time, phones need rea
 A local http server 'server.py' is used to download, install and trust the Satellite Gamelan root certificate. To do that laptop and phones must connect to the local area network to download the certificate from the laptop. Phones are already secure because the Wi-Fi Router is not connected to the internet. In a **terminal** window, type the following :
 
 ```text
+	    cd /Users/gs/Developer/SG/SatGam
 		python3 assets/python/server.py --root . --http-port 8000 --ws-port 8010
 ```
 When `server.py` launches, the following appears in the console window :
