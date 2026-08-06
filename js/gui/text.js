@@ -1,7 +1,7 @@
 /* text.js */
 
 import { arrT } from './canvasUtils.js';
-import { ColorFamily, TextColorByFamily } from './color.js';
+import { ColorFamily, TextColorByFamily, warmColorForFamily } from './color.js';
 
 export function drawTopText(ctxT, status, text) {
   const x = ctxT.mid.x, y = ctxT.top.y;
@@ -64,31 +64,38 @@ export function chooseTextColorForBackground(status) {
   return;
 }
 
+
 export function renderReadyToPlay(ctxT, status) {
   drawTopText(ctxT, status, 'Phonehenge');
   drawSubText(ctxT, status, 'tap clock to start');
   drawMidText(ctxT, status, '00:00');
-  drawLowText(ctxT, status, lowStartLine(status));
+
+  if (
+    status.modeChosen === 'preview' &&
+    !status.running &&
+    Number.isInteger(status.lastKeyIndex)
+  ) {
+    drawTappedKeyID(ctxT, status);
+    return;
+  }
+
+  drawLowText(
+    ctxT,
+    status,
+    lowStartLine(status)
+  );
 }
 
+
 export function renderWakeConsort(ctxT, status) {
-//  drawTopText(ctxT, status, 'Phonehenge');
   drawSubText(ctxT, status, 'tap wake to keep screen active');
   drawMidText(ctxT, status, 'wake');
-  //drawLowText(ctxT, status, 'keep screen awake');
 }
 
 export function renderStartConsort(ctxT, status) {
   drawTopText(ctxT, status, 'Phonehenge');
   drawSubText(ctxT, status, 'stand by');
   drawLowText(ctxT, status, status.modeChosen === 'preview' ? 'PREVIEW MODE' : 'CONCERT MODE');
-}
-
-export function renderStartLeader(ctxT, status) {
-  drawSubText(ctxT, status, 'select MODE');
-  drawLeftText(ctxT, status, 'PREVIEW');
-  drawRightText(ctxT, status, 'CONCERT');
-  drawLowText(ctxT, status, lowStartLine(status));
 }
 
 export function renderRunning(ctxT, { status, mins, secs }) {
@@ -137,31 +144,60 @@ function isStartView(status) {
 }
 
 function lowStartLine(status) {
-
-//console.log('[lowStartLine probe]', {
-//  leaderModeConfirmed: status.leaderModeConfirmed,
-//  running: status.running,
-//  isEndScreen: status.isEndScreen,
-//  modeChosen: status.modeCh/osen,
-//  audioReady: status.audioReady,
-//  lastKeyIndex: status.lastKeyIndex,
-//});
-
-
   if (isStartView(status)) {
-    const k = status.lastKeyIndex;
-    if (Number.isInteger(k)) return `Key ${k}`;
-
     if (status.modeChosen === 'concert') {
-      if (status.audioStage === 'loading') return 'MAKING AUDIO...';
-      if (status.audioReady) return 'CONCERT READY';
-      if (status.audioStage === 'failed') return 'AUDIO FAILED';
+      if (status.audioStage === 'loading') {
+        return 'MAKING AUDIO...';
+      }
+
+      if (status.audioReady) {
+        return 'CONCERT READY';
+      }
+
+      if (status.audioStage === 'failed') {
+        return 'AUDIO FAILED';
+      }
+
       return 'CONCERT MODE';
     }
 
-    return 'PREVIEW';
+    return 'PREVIEW MODE';
   }
 
-  const m = status.modeChosen ? String(status.modeChosen).toUpperCase() : 'CONCERT';
-  return `${m} MODE`;
+  const mode =
+    status.modeChosen
+      ? String(status.modeChosen).toUpperCase()
+      : 'CONCERT';
+
+  return `${mode} MODE`;
+}
+
+export function drawTappedKeyID(ctxT, status) {
+  if (status.modeChosen !== 'preview') return;
+  if (status.running) return;
+
+  const keyID = status.lastKeyIndex;
+
+  if (
+    !Number.isInteger(keyID) ||
+    keyID < 1 ||
+    keyID > 25
+  ) {
+    return;
+  }
+
+  const previousTextColor = status.textColor;
+
+  try {
+    status.textColor =
+      warmColorForFamily(status.tapFamily);
+
+    drawLowText(
+      ctxT,
+      status,
+      `Key ${keyID}`
+    );
+  } finally {
+    status.textColor = previousTextColor;
+  }
 }

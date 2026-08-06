@@ -53,6 +53,30 @@ export const COLOR_MAP = {
   paleM: [255, 208, 255, 1],
 };
 
+// family coloured text
+
+export function warmColorForFamily(family) {
+  switch (family) {
+    case ColorFamily.YELLOW:
+      return color('warmY');
+
+    case ColorFamily.RED:
+      return color('warmR');
+
+    case ColorFamily.GREEN:
+      return color('warmG');
+
+    case ColorFamily.BLUE:
+      return color('warmB');
+
+    case ColorFamily.MAGENTA:
+      return color('warmM');
+
+    default:
+      return color('white');
+  }
+}
+
 // Convert shorthand name to CSS `rgba(...)` string
 export function color(name) {
   const rgba = COLOR_MAP[name];

@@ -20,7 +20,6 @@ import {
 } from './canvasUtils.js';
 
 import {
-  renderStartLeader,
   renderStartConsort,
   renderReadyToPlay,
   renderRunning,

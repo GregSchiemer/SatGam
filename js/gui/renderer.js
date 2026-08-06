@@ -17,7 +17,6 @@ import {
 } from './canvasUtils.js';
 
 import {
-  renderStartLeader,
   renderWakeConsort,
   renderStartConsort,
   renderReadyToPlay,

@@ -17,7 +17,6 @@ import {
 } from './sprites.js';
 
 import { 
-  renderStartLeader,
   renderStartConsort, 
   renderReadyToPlay, 
 } from './text.js';
@@ -557,8 +556,13 @@ function installCsoundHandler(ctx, canvas, status, audio) {
     const dur       = status.noteDur   ?? 24.0;
     const formalOct = status.formalOct ?? 0;
     const nNotes    = status.nNotes    ?? 5;
-    const mode      = status.chordMode ?? 0;
-
+    const chordMode = status.chordMode ?? 0;
+    
+    const appMode =
+      status.modeChosen === 'preview'
+        ? 1
+        : 5;
+        
     // Only enforce the tap limit during Running View
     if (status.running) {
       if (status.hengeLocked) return;
@@ -573,8 +577,16 @@ function installCsoundHandler(ctx, canvas, status, audio) {
       }
     }
 
-    audio.noteOn({ keyID, dur, formalOct, nNotes, mode })
-      .catch(e => console.error("❌ noteOn failed:", e));
+    audio.noteOn({
+      keyID,
+      dur,
+      formalOct,
+      nNotes,
+      chordMode,
+      appMode,
+    }).catch((error) => {
+      console.error('❌ noteOn failed:', error);
+    });
 
     // PREVIEW Start View lands here: repaint immediately so "Key N" updates
     if (!status.running) {
