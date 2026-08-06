@@ -65,7 +65,7 @@ export function chooseTextColorForBackground(status) {
 }
 
 
-export function renderReadyToPlay(ctxT, status) {
+export function renderStartLeader(ctxT, status) {
   drawTopText(ctxT, status, 'Phonehenge');
   drawSubText(ctxT, status, 'tap clock to start');
   drawMidText(ctxT, status, '00:00');
@@ -87,7 +87,7 @@ export function renderReadyToPlay(ctxT, status) {
 }
 
 
-export function renderWakeConsort(ctxT, status) {
+export function renderEntryConsort(ctxT, status) {
   drawSubText(ctxT, status, 'tap wake to keep screen active');
   drawMidText(ctxT, status, 'wake');
 }

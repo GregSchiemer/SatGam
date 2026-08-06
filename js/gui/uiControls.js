@@ -18,7 +18,7 @@ import {
 
 import { 
   renderStartConsort, 
-  renderReadyToPlay, 
+  renderStartLeader, 
 } from './text.js';
 
 import { 

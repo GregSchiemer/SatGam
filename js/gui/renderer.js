@@ -17,9 +17,9 @@ import {
 } from './canvasUtils.js';
 
 import {
-  renderWakeConsort,
+  renderEntryConsort,
   renderStartConsort,
-  renderReadyToPlay,
+  renderStartLeader,
   renderRunning,
   renderEnd,
   chooseTextColorForBackground,
@@ -282,7 +282,7 @@ function renderEntryView(ctxT, ctxS, status) {
 	ctxSprite.restore();
 
 // 4. Draw text and compose.
-	renderWakeConsort(ctxT, status);
+	renderEntryConsort(ctxT, status);
 	composeFrame({ drawB: true, drawS: true, drawT: true });
     return;
   }
@@ -405,7 +405,7 @@ function renderTextLayer(ctxT, status, elapsedMs) {
   const { mins, secs } = clockify(clockMs);
 
   if (status.running) renderRunning(ctxT, { status, mins, secs });
-  else renderReadyToPlay(ctxT, status);
+  else renderStartLeader(ctxT, status);
 }
 
 

@@ -21,7 +21,7 @@ import {
 
 import {
   renderStartConsort,
-  renderReadyToPlay,
+  renderStartLeader,
   renderRunning,
   renderDebug,
   renderEnd,
