@@ -20,11 +20,7 @@ import {
 } from './canvasUtils.js';
 
 import {
-  renderStartConsort,
-  renderStartLeader,
-  renderRunning,
   renderDebug,
-  renderEnd,
   chooseTextColorForBackground
 } from './text.js';
 
@@ -628,7 +624,6 @@ function initStatus(ctx) {
     // =========================
     // Audio
     // =========================
-    audioReady: false,
     audioStage: 'idle',              // 'idle' | 'loading' | 'prepared' | 'failed'
     csoundPrimed: false,
     testToneEnabled: false,			 // debug only

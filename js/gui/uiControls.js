@@ -67,22 +67,6 @@ export function installUIHandlers(ctx, canvas, status, audio) {
   installCsoundHandler(ctx, canvas, status, audio);
 }
 
-/*
-// --- helper: PointerEvent -> DESIGN coords (works for fixed and fit) ---
-function eventToDesignPoint(ev, canvas, ctx) {
-  const rect = canvas.getBoundingClientRect();
-  const cssX = ev.clientX - rect.left;
-  const cssY = ev.clientY - rect.top;
-
-  // Map CSS pixels to DESIGN units.
-  // In 'fixed' mode rect.width === ctx.w, so scaleX/Y === 1.
-  const scaleX = ctx.w / rect.width;
-  const scaleY = ctx.h / rect.height;
-
-  return { x: cssX * scaleX, y: cssY * scaleY };
-}
-*/
-
 function mayPlayPhoneTap(status) {
   if (status.modeChosen === 'preview') return !status.running;
   if (status.modeChosen === 'concert') return !!status.running;
@@ -178,7 +162,6 @@ function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
       status.msPerBeat = status.previewClock;
       console.log('[Entry View] lastConfirmedMode will be PREVIEW MODE');
 
-      status.audioReady = false;
       status.csoundPrimed = false;
       status.audioStage = 'idle';
       status.leaderModeConfirmed = true;
@@ -202,7 +185,6 @@ function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
       console.log('[confirm] preview mode entering Start View', {
         modeChosen: status.modeChosen,
         msPerBeat: status.msPerBeat,
-        audioReady: status.audioReady,
         leaderModeConfirmed: status.leaderModeConfirmed,
       });
 
@@ -216,7 +198,6 @@ function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
     console.log('[confirm] status at confirm tap', {
       modeChosen: status.modeChosen,
       msPerBeat: status.msPerBeat,
-      audioReady: status.audioReady,
       leaderModeConfirmed: status.leaderModeConfirmed,
       hasClockBus: !!status.clockBus,
       busKeys: status.clockBus ? Object.keys(status.clockBus) : [],
@@ -229,7 +210,6 @@ function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
 
     status.leaderModeConfirmed = true;
     status.confirmPending = true;
-    status.audioReady = false;
     status.audioStage = 'loading';
 
     if (!status.clockBus?.send) {
@@ -263,13 +243,11 @@ function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
         status.csoundPrimed = true;
       }
 
-      status.audioReady = true;
       status.audioStage = 'prepared';
 
       console.log('[confirm] concert audio prepared', {
         modeChosen: status.modeChosen,
         msPerBeat: status.msPerBeat,
-        audioReady: status.audioReady,
         csoundPrimed: status.csoundPrimed,
         leaderModeConfirmed: status.leaderModeConfirmed,
       });
@@ -277,7 +255,6 @@ function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
       refresh();
     } catch (e) {
       status.csoundPrimed = false;
-      status.audioReady = false;
       status.audioStage = 'failed';
 
       console.error('❌ Csound prime/beep failed:', e);
@@ -289,7 +266,6 @@ function installLeaderModeConfirmHandler(ctx, canvas, status, audio) {
         confirmPending: status.confirmPending,
         leaderModeConfirmed: status.leaderModeConfirmed,
         audioStage: status.audioStage,
-        audioReady: status.audioReady,
       });
 
       refresh();
@@ -336,7 +312,7 @@ export function installClockStartHandler(ctx, canvas, status) {
 
     if (status.role === 'leader' && !status.leaderModeConfirmed) return;
 	
-    // 🔧 Use the same coordinate space as installHengeHandler
+    // 🔧 Use the same design-coordinate conversion as the other pointer handlers.
     const { x, y } = eventToCtxPoint(ev, canvas, ctx);
 
     const x1 = ctx.mid.x;
@@ -610,69 +586,7 @@ function installCsoundHandler(ctx, canvas, status, audio) {
   }, { capture: true });
 }
 
-// ---------------------------------------------------------------------------
-//  All phones: trigger sound using key ID
-// ---------------------------------------------------------------------------
 
-function installHengeHandler(ctx, canvas, status) {
-  canvas.addEventListener('pointerup', (ev) => {
-    if (status.role === 'leader' && !status.leaderModeConfirmed) return;
-    if (status.modeChosen === 'preview') return;
-    if (status.isEndScreen) return;
-
-    const slots = getSlots();
-    if (!slots?.length) return;
-
-    const { x, y } = eventToCtxPoint(ev, canvas, ctx);
-	let hitSlotHotspot = null;
-
-    // ✅ Don’t compete with the clock start handler (centre hot spot)
-    if (isInsideCircle(x, y, ctx.mid.x, ctx.mid.y, ctx.tapRadius)) return;
-
-    // ✅ NEW: only treat taps as "henge taps" if they hit a real slot hot spot
-    for (const s of slots) {
-      const sx = s.x;
-      const sy = s.y;
-
-      if (isInsideCircle(x, y, sx, sy, ctx.keyRadius)) {
-        hitSlotHotspot = true;
-        break;
-      }
-    }
-    if (!hitSlotHotspot) return;
-
-    const tap = pickSlotFromPoint(slots, x, y, ctx);
-    if (!tap) return;
-
-    const tapI = tap.i ?? tap.index ?? null;
-    if (tapI == null) return;
-
-    const tapFamily = familyForIndex(tapI);
-    status.tappedFamily = tapI % FamilyIndex.length;
-
-    status.debugTap = { x, y, tapI, tapFamily };
-	const keyID = tapI + 1;    
-    status.lastKeyIndex = keyID; // Key 1..25
-    
-    console.log('[installHengeHandler] keyID :', keyID);
-    console.log('[textColor]', { bgFamily: status.bgFamily, tapFamily: tapFamily, textColor: status.textColor });
-
-    // START VIEW: show Key ID without swallowing clock events)
-    if (!status.running) {
-      refresh();
-      return;
-    }
-
-    // RUNNING: block off-family taps
-    if (!isFamilyOnInState(status, tapFamily)) return;
-//if (!isFamilyO nInState(tapF amily, sta tus.i ndex)) return;
-
-    // RUNNING: now we can own the event + trigger fade
-    ev.preventDefault();
-    ev.stopImmediatePropagation();
-    beginBackgroundCrossfade(status, arrB[0].ctx, tapFamily, 2320);
-  }, { capture: true });
-}
 
 // ---------------------------------------------------------------------------
 //  All phones: activate Csound test tone using phantom key ID
@@ -732,7 +646,6 @@ function installPingHandler(ctx, canvas, status) {
     }
   }, { capture: true });
 }
-
 
 // ---------------------------------------------------------------------------
 //  Consort: local wake-arm gesture before standby

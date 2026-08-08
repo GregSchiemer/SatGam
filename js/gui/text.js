@@ -82,7 +82,7 @@ export function renderStartLeader(ctxT, status) {
   drawLowText(
     ctxT,
     status,
-    lowStartLine(status)
+    showMode(status)
   );
 }
 
@@ -108,7 +108,7 @@ export function renderEntryLeader(ctxT, status) {
   drawSubText(ctxT, status, 'select MODE');
   drawLeftText(ctxT, status, 'PREVIEW');
   drawRightText(ctxT, status, 'CONCERT');
-  drawLowText(ctxT, status, lowStartLine(status)); 
+  drawLowText(ctxT, status, showMode(status)); 
 }
 
 export function makeSubText(status) {
@@ -143,24 +143,24 @@ function isStartView(status) {
   return status.leaderModeConfirmed && !status.running && !status.isEndScreen;
 }
 
-function lowStartLine(status) {
+function showMode(status) {
   if (isStartView(status)) {
     if (status.modeChosen === 'concert') {
       if (status.audioStage === 'loading') {
         return 'MAKING AUDIO...';
       }
 
-      if (status.audioReady) {
+	   if (status.audioStage === 'prepared') {     
         return 'CONCERT READY';
       }
 
       if (status.audioStage === 'failed') {
         return 'AUDIO FAILED';
       }
-
+      
       return 'CONCERT MODE';
     }
-
+    
     return 'PREVIEW MODE';
   }
 

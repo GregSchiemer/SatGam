@@ -64,12 +64,12 @@ export function installPhoneDiag(status = {}) {
     document.body.appendChild(el);
   }
 
-  renderPhoneDiag();
+//  renderPhoneDiag();
 }
 
 export function setPhoneDiag(patch = {}) {
   Object.assign(diag, patch);
-  renderPhoneDiag();
+//  renderPhoneDiag();
 }
 
 function renderPhoneDiag() {
