@@ -174,7 +174,7 @@ export async function enableCsound() {
     // Load the active orchestra from assets/csd.
     //
     // By default:
-    //   assets/csd/sprite-chords.orc
+    //   assets/csd/phonehenge-voicings.orc
     //
     // A different orchestra can be selected with the existing
     // ?orc=<filename> URL parameter.
@@ -186,8 +186,8 @@ export async function enableCsound() {
 
     const orcName =
       params.get('orc') ??
-      'sprite-chords.orc';
-
+      'phonehenge-voicings.orc';
+      
     // Resolve relative to:
     // js/gui/csoundInit.js
     //
