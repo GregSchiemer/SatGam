@@ -17,13 +17,13 @@ import {
 } from './canvasUtils.js';
 
 import {
+  renderEntryLeader,
   renderEntryConsort,
-  renderStartConsort,
   renderStartLeader,
+  renderStartConsort,
   renderRunning,
   renderEnd,
   chooseTextColorForBackground,
-  renderEntryLeader,
 } from './text.js';
 
 import { 
@@ -404,10 +404,41 @@ function renderTextLayer(ctxT, status, elapsedMs) {
   const clockMs = computeClockMs(status, elapsedMs);
   const { mins, secs } = clockify(clockMs);
 
+  if (status.running) {
+    renderRunning(ctxT, { status, mins, secs });
+    return;
+  }
+
+  if (status.role === 'leader') {
+    renderStartLeader(ctxT, status);
+    return;
+  }
+
+  if (status.role === 'consort') {
+    renderStartConsort(ctxT, status);
+    return;
+  }
+
+  console.error(
+    '[renderTextLayer] unknown role',
+    { role: status.role }
+  );
+}
+/*
+function renderTextLayer(ctxT, status, elapsedMs) {
+
+  if (status.isEndScreen) {
+    renderEnd(ctxT, status);
+    return;
+  }
+
+  const clockMs = computeClockMs(status, elapsedMs);
+  const { mins, secs } = clockify(clockMs);
+
   if (status.running) renderRunning(ctxT, { status, mins, secs });
   else renderStartLeader(ctxT, status);
 }
-
+*/
 
 // ======================
 // —— MAIN STORYBOARD ——

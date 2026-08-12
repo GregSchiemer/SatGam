@@ -626,6 +626,7 @@ function initStatus(ctx) {
     // =========================
     audioStage: 'idle',              // 'idle' | 'loading' | 'prepared' | 'failed'
     csoundPrimed: false,
+    previewSoundActive: false,
     testToneEnabled: false,			 // debug only
     debugKeys: false,				 // debug only
 

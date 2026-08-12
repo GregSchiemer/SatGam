@@ -553,22 +553,30 @@ function installCsoundHandler(ctx, canvas, status, audio) {
       }
     }
 
-    audio.noteOn({
-      keyID,
-      dur,
-      formalOct,
-      nNotes,
-      chordMode,
-      appMode,
-    }).catch((error) => {
-      console.error('❌ noteOn failed:', error);
-    });
+audio.noteOn({
+  keyID,
+  dur,
+  formalOct,
+  nNotes,
+  chordMode,
+  appMode,
+}).catch((error) => {
+  console.error('❌ noteOn failed:', error);
+});
 
-    // PREVIEW Start View lands here: repaint immediately so "Key N" updates
-    if (!status.running) {
-      refresh();
-      return;
-    }
+if (
+  status.role === 'consort' &&
+  !status.running &&
+  status.modeChosen === 'preview'
+) {
+  status.previewSoundActive = true;
+}
+
+// PREVIEW Start View lands here
+if (!status.running) {
+  refresh();
+  return;
+}
 
     // CONCERT Running View lands here
     const familyOn = isFamilyOnInState(tapFamily, status.index);

@@ -64,18 +64,25 @@ export function chooseTextColorForBackground(status) {
   return;
 }
 
-
-export function renderStartLeader(ctxT, status) {
-  drawTopText(ctxT, status, 'Phonehenge');
-  drawSubText(ctxT, status, 'tap clock to start');
-  drawMidText(ctxT, status, '00:00');
-
+function renderPreviewKeyID(ctxT, status) {
   if (
     status.modeChosen === 'preview' &&
     !status.running &&
     Number.isInteger(status.lastKeyIndex)
   ) {
     drawTappedKeyID(ctxT, status);
+    return true;
+  }
+
+  return false;
+}
+
+export function renderStartLeader(ctxT, status) {
+  drawTopText(ctxT, status, 'Phonehenge');
+  drawSubText(ctxT, status, 'tap clock to start');
+  drawMidText(ctxT, status, '00:00');
+
+  if (renderPreviewKeyID(ctxT, status)) {
     return;
   }
 
@@ -86,16 +93,34 @@ export function renderStartLeader(ctxT, status) {
   );
 }
 
-
 export function renderEntryConsort(ctxT, status) {
-  drawSubText(ctxT, status, 'tap wake to keep screen active');
+  drawSubText(ctxT, status, 'tap wake to activate');
   drawMidText(ctxT, status, 'wake');
 }
 
 export function renderStartConsort(ctxT, status) {
   drawTopText(ctxT, status, 'Phonehenge');
-  drawSubText(ctxT, status, 'stand by');
-  drawLowText(ctxT, status, status.modeChosen === 'preview' ? 'PREVIEW MODE' : 'CONCERT MODE');
+  drawSubText(ctxT, status, 'henge plays : ● mutes');
+
+  if (status.modeChosen === 'preview') {
+    drawMidText(
+      ctxT,
+      status,
+      status.previewSoundActive ? '●' : '○'
+    );
+  }
+
+  if (renderPreviewKeyID(ctxT, status)) {
+    return;
+  }
+
+  drawLowText(
+    ctxT,
+    status,
+    status.modeChosen === 'preview'
+      ? 'PREVIEW MODE'
+      : 'CONCERT MODE'
+  );
 }
 
 export function renderRunning(ctxT, { status, mins, secs }) {
