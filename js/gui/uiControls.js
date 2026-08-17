@@ -489,8 +489,25 @@ function installCsoundHandler(ctx, canvas, status, audio) {
     let hitSlotHotspot = false;
 
     // Don’t compete with the centre clock/start hotspot
-    if (isInsideCircle(x, y, ctx.mid.x, ctx.mid.y, ctx.tapRadius)) return;
+	if (isInsideCircle(x, y, ctx.mid.x, ctx.mid.y, ctx.tapRadius)) {
+	  const isConsortPreviewStart =
+		status.role === 'consort' &&
+		!status.running &&
+		status.modeChosen === 'preview';
+	
+	  if (isConsortPreviewStart) {
+		if (!status.previewSoundActive) {
+		  return;
+		}
+	
+		status.previewSoundActive = false;
+		refresh();
+	
+		return;
+	  }
 
+  return;
+}
     // Only treat taps as henge taps if they hit a real slot hotspot
     for (const s of slots) {
       if (isInsideCircle(x, y, s.x, s.y, ctx.keyRadius)) {

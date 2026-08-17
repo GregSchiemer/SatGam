@@ -30,18 +30,12 @@ gkAmpDbfs chnexport "ampDbfs", 1
 gkBend1   chnexport "bend1",   1
 gkBend2   chnexport "bend2",   1
 
-//instr 900
-//  chnset cpspch(8.00), "baseCps"
-//  chnset -18,          "ampDbfs"
-//  chnset 100/99,       "bend1"
-//  chnset 99/98,        "bend2"
-//endin
-
 instr 900
   chnset cpspch(8.00), "baseCps"
   chnset -18,          "ampDbfs"
   chnset 100/99,       "bend1"
   chnset 99/98,        "bend2"
+  chnset 0, "previewNoteGeneration"
 endin
 
 
@@ -100,18 +94,21 @@ instr 110
   outch  1, asigL, 2, asigR
 endin
 
-
 ; ------------------------------------------
 ; PREVIEW melodic voice
-; Single chorused voice used for melodic
-; exploration of the 25-note scale.
+;
+; One chorused melodic voice.
+; When a newer Preview note begins, this
+; voice fades while the new voice enters.
 ;
 ; p4 = formalOct
 ; p5 = degree 0..24
+; p6 = Preview note generation
 ; ------------------------------------------
 instr 111
-  iOct   = p4
-  iDeg   = p5
+  iOct        = p4
+  iDeg        = p5
+  iGeneration = p6
 
   iBase  = chnget:i("baseCps")
   iAmp   = ampdbfs(chnget:i("ampDbfs"))
@@ -144,7 +141,32 @@ instr 111
   asigL  = a0 + a1 + a4
   asigR  = a0 + a2 + a3
 
-  outch  1, asigL, 2, asigR
+  ; New-note replacement only.
+  ; Tune this by ear between about 0.5 and 1.2 seconds.
+  iReplaceFade = 0.8
+
+  kCurrentGeneration chnget "previewNoteGeneration"
+
+  kReplacing    init 0
+  kReplaceStart init 0
+  kReplaceGain  init 1
+
+  kNow timeinsts
+
+  if (kReplacing == 0 && kCurrentGeneration != iGeneration) then
+    kReplacing = 1
+    kReplaceStart = kNow
+  endif
+
+  if (kReplacing == 1) then
+    kReplaceGain = 1 - ((kNow - kReplaceStart) / iReplaceFade)
+
+    if (kReplaceGain <= 0) then
+      turnoff
+    endif
+  endif
+
+  outch 1, asigL * kReplaceGain, 2, asigR * kReplaceGain
 endin
 
 
@@ -246,8 +268,9 @@ endin
 ; ------------------------------------------
 ; PREVIEW scheduler
 ;
-; One Phonehenge tap schedules one PREVIEW
-; voice at the selected degree.
+; Each tap advances the Preview note
+; generation and starts exactly one
+; melodic instr 111.
 ;
 ; p4 = voiceDur
 ; p5 = baseOct
@@ -258,11 +281,13 @@ instr 211
   iBaseOct  = p5
   iBaseDeg  = p6
 
-  schedule 111, 0, iVoiceDur, iBaseOct, iBaseDeg
+  iGeneration = chnget:i("previewNoteGeneration") + 1
+  chnset iGeneration, "previewNoteGeneration"
+
+  schedule 111, 0, iVoiceDur, iBaseOct, iBaseDeg, iGeneration
 
   turnoff
 endin
-
 
 ; ------------------------------------------
 ; CONCERT scheduler
