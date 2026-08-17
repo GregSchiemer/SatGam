@@ -227,6 +227,16 @@ function getAudioError() {
   return lastError;
 }
 
+async function releasePreviewNote() {
+  const msg = 'i 212 0 0.01';
+
+  console.log('[audioEngine.releasePreviewNote]', {
+    msg,
+  });
+
+  await requireCsound().inputMessage(msg);
+}
+
 async function startConcertAudio({
   beep = false,
 } = {}) {
@@ -269,6 +279,7 @@ const AUDIO_ENGINE = {
   isReady,
   getAudioStage,
   getAudioError,
+  releasePreviewNote,
   startConcertAudio,
   beepReadyTone,
   resetAudioEngineForDebug,

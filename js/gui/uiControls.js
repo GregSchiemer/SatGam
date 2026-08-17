@@ -501,6 +501,7 @@ function installCsoundHandler(ctx, canvas, status, audio) {
 		}
 	
 		status.previewSoundActive = false;
+		audio.releasePreviewNote();
 		refresh();
 	
 		return;

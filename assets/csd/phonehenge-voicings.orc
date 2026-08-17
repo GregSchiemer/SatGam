@@ -289,6 +289,24 @@ instr 211
   turnoff
 endin
 
+
+; ------------------------------------------
+; PREVIEW release control
+;
+; Advances the Preview note generation
+; without starting a new note.
+;
+; The current instr 111 therefore enters
+; the same fade used for note replacement.
+; ------------------------------------------
+instr 212
+  iGeneration = chnget:i("previewNoteGeneration") + 1
+  chnset iGeneration, "previewNoteGeneration"
+
+  turnoff
+endin
+
+
 ; ------------------------------------------
 ; CONCERT scheduler
 ; Temporary copy of instr 210.
