@@ -8,7 +8,7 @@
 // - pre-render a complete warm score strip
 // - draw the pale strip at a state-derived position
 // - superimpose the current warm column
-// - draw a thicker outline around the fixed current column
+// - draw one white outline around the fixed current column
 //
 // This module has no clock, WebSocket, status, or concert-mode dependency.
 
@@ -21,7 +21,7 @@ const DEFAULT_GEOMETRY = Object.freeze({
   rowGap: 0,
   cornerRadius: 4,
   outlineWidth: 1,
-  currentOutlineWidth: 2,
+  currentOutlineWidth: 1,
 });
 
 function rgbaString(value, label = 'colour') {
@@ -247,40 +247,70 @@ function drawCurrentColumnOutline(
   const {
     x,
     topY,
-    rowCount,
     cellWidth,
-    cellHeight,
-    rowAdvance,
+    stripHeight,
     cornerRadius,
     outlineStyle,
     outlineWidth,
   } = options;
+
+  if (
+    !Number.isFinite(x) ||
+    !Number.isFinite(topY) ||
+    !Number.isFinite(cellWidth) ||
+    !Number.isFinite(stripHeight) ||
+    !Number.isFinite(cornerRadius) ||
+    !Number.isFinite(outlineWidth)
+  ) {
+    throw new Error(
+      'graphicScore.drawCurrentColumnOutline: invalid geometry'
+    );
+  }
+
+  if (cellWidth <= 0 || stripHeight <= 0) {
+    throw new Error(
+      'graphicScore.drawCurrentColumnOutline: ' +
+      'cellWidth and stripHeight must be greater than zero'
+    );
+  }
+
+  if (outlineWidth < 0) {
+    throw new Error(
+      'graphicScore.drawCurrentColumnOutline: ' +
+      'outlineWidth must not be negative'
+    );
+  }
+
+  const inset = outlineWidth * 0.5;
+
+  const frameWidth =
+    cellWidth - outlineWidth;
+
+  const frameHeight =
+    stripHeight - outlineWidth;
+
+  if (frameWidth <= 0 || frameHeight <= 0) {
+    throw new Error(
+      'graphicScore.drawCurrentColumnOutline: ' +
+      'outlineWidth is too large for the current-column frame'
+    );
+  }
 
   ctx.save();
 
   ctx.strokeStyle = outlineStyle;
   ctx.lineWidth = outlineWidth;
 
-  for (
-    let rowIndex = 0;
-    rowIndex < rowCount;
-    rowIndex += 1
-  ) {
-    const y =
-      topY +
-      rowIndex * rowAdvance;
+  roundedRectPath(
+    ctx,
+    x + inset,
+    topY + inset,
+    frameWidth,
+    frameHeight,
+    Math.max(0, cornerRadius - inset)
+  );
 
-    roundedRectPath(
-      ctx,
-      x,
-      y,
-      cellWidth,
-      cellHeight,
-      cornerRadius
-    );
-
-    ctx.stroke();
-  }
+  ctx.stroke();
 
   ctx.restore();
 }
@@ -361,6 +391,7 @@ export function createGraphicScore(
     dpr = window.devicePixelRatio || 1,
     neutralColor = COLOR_MAP.transparent,
     outlineColor = COLOR_MAP.silver,
+    highlightOutline = COLOR_MAP.white,
     geometry = {},
   } = options;
 
@@ -476,6 +507,11 @@ export function createGraphicScore(
   const outlineStyle = rgbaString(
     outlineColor,
     'outlineColor'
+  );
+
+  const highlightOutlineStyle = rgbaString(
+    highlightOutline,
+    'highlightOutline'
   );
 
   const columnAdvance =
@@ -632,17 +668,15 @@ export function createGraphicScore(
       stripHeight
     );
 
-    // Draw the thicker white outlines around the five cells
-    // in the fixed current column.
+    // Draw one portrait-oriented white frame around the
+    // complete five-cell current column.
     drawCurrentColumnOutline(ctx, {
       x: currentColumnX,
       topY: scoreGeometry.topY,
-      rowCount: 5,
       cellWidth,
-      cellHeight,
-      rowAdvance,
+      stripHeight,
       cornerRadius,
-      outlineStyle,
+      outlineStyle: highlightOutlineStyle,
       outlineWidth: currentOutlineWidth,
     });
 
