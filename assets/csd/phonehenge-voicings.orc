@@ -50,49 +50,6 @@ instr 902
   turnoff
 endin
 
-; ------------------------------------------
-; Shared cpsxpch reference voice
-; Existing voice retained unchanged.
-; p4 = formalOct
-; p5 = degree 0..24
-; ------------------------------------------
-instr 110
-  iOct   = p4
-  iDeg   = p5
-
-  iBase  = chnget:i("baseCps")
-  iAmp   = ampdbfs(chnget:i("ampDbfs"))
-  ibend1 = chnget:i("bend1")
-  ibend2 = chnget:i("bend2")
-
-  ipch   = iOct + (iDeg * 0.01)
-  ifreq  cpsxpch ipch, 25, 5, iBase
-  kfreq  = ifreq
-
-  kover  linseg  0, p3*0.05, iAmp, p3*0.95, 0, 0.05, 0
-
-  k0     linen   kover, 0.01, p3, p3*0.9
-  k1     linen   kover, 0.02, p3, p3*0.8
-  k2     linen   kover, 0.03, p3, p3*0.7
-  k3     linen   kover, 0.04, p3, p3*0.6
-  k4     linen   kover, 0.05, p3, p3*0.5
-
-  k5     linseg  ifreq, p3*0.5, (ifreq)*ibend1,     p3*0.4, ifreq
-  k6     linseg  ifreq, p3*0.4, (ifreq)*ibend2,     p3*0.5, ifreq
-  k7     linseg  ifreq, p3*0.3, (ifreq)*(2-ibend1), p3*0.6, ifreq
-  k8     linseg  ifreq, p3*0.2, (ifreq)*(2-ibend2), p3*0.7, ifreq
-
-  a0     oscil   k0, kfreq, giSine
-  a1     oscil   k1, k5,    giSine
-  a2     oscil   k2, k6,    giSine
-  a3     oscil   k3, k7,    giSine
-  a4     oscil   k4, k8,    giSine
-
-  asigL  = a0 + a1 + a4
-  asigR  = a0 + a2 + a3
-
-  outch  1, asigL, 2, asigR
-endin
 
 ; ------------------------------------------
 ; PREVIEW melodic voice
@@ -216,54 +173,6 @@ instr 115
 endin
 
 
-; ------------------------------------------
-; Reference chord scheduler
-; Existing instr 210 retained unchanged.
-;
-; p4 = voiceDur
-; p5 = baseOct
-; p6 = baseDeg
-; p7 = nNotes (1..5)
-; p8 = mode (0 chord offsets, 1 formal-oct doubling)
-; ------------------------------------------
-instr 210
-  iVoiceDur = p4
-  iBaseOct  = p5
-  iBaseDeg  = p6
-
-  iN = int(p7)
-  if (iN <= 0) then
-    iN = 5
-  endif
-
-  if (iN > 5) then
-    iN = 5
-  endif
-
-  iMode = int(p8)
-
-  if (iMode == 1) then
-    schedule 110, 0, iVoiceDur, iBaseOct,     iBaseDeg
-    schedule 110, 0, iVoiceDur, iBaseOct + 1, iBaseDeg
-  else
-    iIdx = 0
-
-    while (iIdx < iN) do
-      iOff   tablei iIdx, giChordOff
-      iSum   = iBaseDeg + iOff
-      iCarry = int(iSum / 25)
-      iDeg   = iSum - (iCarry * 25)
-      iOct   = iBaseOct + iCarry
-
-      schedule 110, 0, iVoiceDur, iOct, iDeg
-
-      iIdx += 1
-    od
-  endif
-
-  turnoff
-endin
-
 
 ; ------------------------------------------
 ; PREVIEW scheduler
@@ -309,9 +218,8 @@ endin
 
 ; ------------------------------------------
 ; CONCERT scheduler
-; Temporary copy of instr 210.
-; Schedules CONCERT voice instr 115.
-;
+; Schedules CONCERT voice instr 115
+
 ; p4 = voiceDur
 ; p5 = baseOct
 ; p6 = baseDeg
