@@ -262,7 +262,7 @@ Once the certificate is downloaded, installed and trusted, a secure server is la
   <img src="assets/qr-images/qr-consort.png" width="250" alt="Phonehenge image 1">
 </p>
 
-##📱 Security
+## Security
 
 **No internet connection** is reported when a phone first connects to the Vercoe network —— cause for both celebration and caution. The Wi-Fi router lets a consort of players connect to the Vercoe network and share the Satellite Gamelan concert app on their phones without connecting to the internet. Whileever the phone has no internet connection the owner's personal data will not fall prey to klepto-hyenas that lurk on the dark web.
 
