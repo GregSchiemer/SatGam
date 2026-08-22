@@ -33,27 +33,31 @@ const __dirname = path.dirname(__filename);
 
 const rawArg = process.argv[2];
 
+let stateNumber = null;
 let stateIndex = null;
 
 if (rawArg !== undefined) {
-  stateIndex = Number(rawArg);
+  stateNumber = Number(rawArg);
 
   if (
-    !Number.isInteger(stateIndex) ||
-    stateIndex <= 0 ||
-    stateIndex >= 31
+    !Number.isInteger(stateNumber) ||
+    stateNumber < 1 ||
+    stateNumber > 31
   ) {
     console.error(
       'Usage: node --experimental-default-type=module ' +
-      'tools/exportGraphicScore.mjs [stateIndex]'
+      'tools/exportGraphicScore.mjs [stateNumber]'
     );
 
     console.error(
-      'stateIndex is optional and, when supplied, must be an integer from 1 to 30.'
+      'stateNumber is optional and, when supplied, ' +
+      'must be an integer from 1 to 31.'
     );
 
     process.exit(1);
   }
+
+  stateIndex = stateNumber - 1;
 }
 
 // ------------------------------------------------------------
@@ -151,16 +155,18 @@ function rgba(value) {
 function makeCell({
   x,
   y,
-  fill,
-  stroke,
-  strokeWidth,
+  width = cellWidth,
+  height = cellHeight,
+  fill = "none",
+  stroke = "none",
+  strokeWidth = 0,
 }) {
   return `
     <rect
       x="${x}"
       y="${y}"
-      width="${cellWidth}"
-      height="${cellHeight}"
+      width="${width}"
+      height="${height}"
       rx="${cornerRadius}"
       ry="${cornerRadius}"
       fill="${fill}"
@@ -206,33 +212,43 @@ sequence.forEach(
 );
 
 // ------------------------------------------------------------
-// Optional warm five-row current column
+// Optional warm cells in current column
 // ------------------------------------------------------------
 
 const warmCells = [];
 
 if (stateIndex !== null) {
-  const currentX =
-    stateIndex * columnAdvance;
+  const currentX = stateIndex * columnAdvance;
+  const mask = sequence[stateIndex];
 
-  for (
-    let rowIndex = 0;
-    rowIndex < 5;
-    rowIndex += 1
-  ) {
-    const y =
-      rowIndex * rowAdvance;
+  for (let rowIndex = 0; rowIndex < 5; rowIndex += 1) {
+    if (mask[rowIndex] !== 1) {
+      continue;
+    }
+
+    const y = rowIndex * rowAdvance;
 
     warmCells.push(
       makeCell({
         x: currentX,
         y,
         fill: rgba(WARM_COLORS[rowIndex]),
-        stroke: rgba(CURRENT_OUTLINE),
-        strokeWidth: currentOutlineWidth,
       })
     );
   }
+
+  // Single white outline around the complete current column
+  warmCells.push(
+    makeCell({
+      x: currentX,
+      y: 0,
+      width: cellWidth,
+      height: (4 * rowAdvance) + cellHeight,
+      fill: "none",
+      stroke: rgba(CURRENT_OUTLINE),
+      strokeWidth: currentOutlineWidth,
+    })
+  );
 }
 
 // ------------------------------------------------------------
@@ -277,7 +293,7 @@ const outputFile =
       )
     : path.join(
         outputDirectory,
-        `graphicScore-state-${stateIndex}.png`
+		`graphicScore-state${stateNumber}.png`
       );
 
 await sharp(
@@ -289,6 +305,7 @@ await sharp(
 console.log(
   '[graphicScore export]',
   {
+    stateNumber,
     stateIndex,
     size: [
       scoreWidth,
@@ -296,4 +313,5 @@ console.log(
     ],
     outputFile,
   }
-);
+); // }
+//);
