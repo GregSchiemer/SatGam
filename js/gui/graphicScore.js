@@ -1,299 +1,1071 @@
-// tools/exportGraphicScore.mjs
+// js/gui/graphicScore.js
 //
-// Usage:
+// Pre-rendered 31-state, 5-row space-time graphic score.
 //
-//   Pale score only:
-//   node --experimental-default-type=module tools/exportGraphicScore.mjs
+// Responsibilities:
+// - validate sequence data
+// - pre-render a complete pale score strip
+// - pre-render a complete warm score strip
+// - pre-render state-number labels
+// - draw the pale strip at a state-derived position
+// - superimpose the current warm column
+// - draw one white outline around the fixed current column
 //
-//   Pale score + warm current column:
-//   node --experimental-default-type=module tools/exportGraphicScore.mjs 18
-//
-// Valid optional stateIndex:
-//   1..30
-//
-// Output:
-//   assets/md-images/graphicScore.png
-//   or
-//   assets/md-images/graphicScore-state-18.png
+// This module has no clock, WebSocket, status, or
+// concert-mode dependency.
 
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import sharp from 'sharp';
+import { COLOR_MAP } from './color.js';
 
-import { sequence } from '../js/gui/sequence.js';
-import { COLOR_MAP } from '../js/gui/color.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // ------------------------------------------------------------
-// Optional current-column argument
+// Geometry
 // ------------------------------------------------------------
 
-const rawArg = process.argv[2];
-
-let stateIndex = null;
-
-if (rawArg !== undefined) {
-  stateIndex = Number(rawArg);
-
-  if (
-    !Number.isInteger(stateIndex) ||
-    stateIndex <= 0 ||
-    stateIndex >= 31
-  ) {
-    console.error(
-      'Usage: node --experimental-default-type=module ' +
-      'tools/exportGraphicScore.mjs [stateIndex]'
-    );
-
-    console.error(
-      'stateIndex is optional and, when supplied, must be an integer from 1 to 30.'
-    );
-
-    process.exit(1);
-  }
-}
-
-// ------------------------------------------------------------
-// Geometry — match graphicScore.js
-// ------------------------------------------------------------
-
-const GEOMETRY = Object.freeze({
+const DEFAULT_GEOMETRY = Object.freeze({
   cellWidth: 22,
   cellHeight: 11,
   columnGap: 0,
   rowGap: 0,
   cornerRadius: 4,
   outlineWidth: 1,
-  currentOutlineWidth: 1,
+  currentOutlineWidth: 2,
+
+  // State-number labels above the five score rows.
+  labelRowHeight: 12,
+  labelGap: 1,
+  labelFontSize: 9,
 });
 
-const {
-  cellWidth,
-  cellHeight,
-  columnGap,
-  rowGap,
-  cornerRadius,
-  outlineWidth,
-  currentOutlineWidth,
-} = GEOMETRY;
 
-const columnAdvance =
-  cellWidth + columnGap;
+// ------------------------------------------------------------
+// Colour conversion
+// ------------------------------------------------------------
 
-const rowAdvance =
-  cellHeight + rowGap;
-
-const scoreWidth =
-  sequence.length * columnAdvance -
-  columnGap;
-
-const scoreHeight =
-  5 * rowAdvance -
-  rowGap;
-
-if (
-  scoreWidth !== 682 ||
-  scoreHeight !== 55
+function rgbaString(
+  value,
+  label = 'colour'
 ) {
-  throw new Error(
-    `Unexpected score size: ${scoreWidth} × ${scoreHeight}`
-  );
-}
-
-// ------------------------------------------------------------
-// Colours
-// ------------------------------------------------------------
-
-const PALE_COLORS = [
-  COLOR_MAP.paleY,
-  COLOR_MAP.paleR,
-  COLOR_MAP.paleG,
-  COLOR_MAP.paleB,
-  COLOR_MAP.paleM,
-];
-
-const WARM_COLORS = [
-  COLOR_MAP.warmY,
-  COLOR_MAP.warmR,
-  COLOR_MAP.warmG,
-  COLOR_MAP.warmB,
-  COLOR_MAP.warmM,
-];
-
-const PALE_OUTLINE =
-  COLOR_MAP.silver;
-
-const CURRENT_OUTLINE =
-  COLOR_MAP.white;
-
-function rgba(value) {
   if (
     !Array.isArray(value) ||
     value.length !== 4
   ) {
     throw new Error(
-      `Invalid RGBA colour: ${value}`
+      `graphicScore: ${label} must be an ` +
+      `RGBA array of length 4`
     );
   }
 
   const [r, g, b, a] = value;
 
-  return `rgba(${r},${g},${b},${a})`;
+  if (
+    !Number.isFinite(r) ||
+    !Number.isFinite(g) ||
+    !Number.isFinite(b) ||
+    !Number.isFinite(a)
+  ) {
+    throw new Error(
+      `graphicScore: ${label} contains a ` +
+      `non-numeric RGBA value`
+    );
+  }
+
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
-// ------------------------------------------------------------
-// SVG cell
-// ------------------------------------------------------------
-
-function makeCell({
-  x,
-  y,
-  fill,
-  stroke,
-  strokeWidth,
-}) {
-  return `
-    <rect
-      x="${x}"
-      y="${y}"
-      width="${cellWidth}"
-      height="${cellHeight}"
-      rx="${cornerRadius}"
-      ry="${cornerRadius}"
-      fill="${fill}"
-      stroke="${stroke}"
-      stroke-width="${strokeWidth}"
-    />
-  `;
-}
 
 // ------------------------------------------------------------
-// Draw complete pale score from sequence.js
+// Sequence validation
 // ------------------------------------------------------------
 
-const paleCells = [];
+function validateSequence(sequence) {
+  if (!Array.isArray(sequence)) {
+    throw new Error(
+      'graphicScore: sequence must be an array'
+    );
+  }
 
-sequence.forEach(
-  (state, columnIndex) => {
-    state.forEach(
-      (bit, rowIndex) => {
-        const x =
-          columnIndex * columnAdvance;
+  if (sequence.length !== 31) {
+    throw new Error(
+      `graphicScore: expected 31 states; ` +
+      `received ${sequence.length}`
+    );
+  }
 
-        const y =
-          rowIndex * rowAdvance;
-
-        const fill =
-          bit === 1
-            ? rgba(PALE_COLORS[rowIndex])
-            : 'none';
-
-        paleCells.push(
-          makeCell({
-            x,
-            y,
-            fill,
-            stroke: rgba(PALE_OUTLINE),
-            strokeWidth: outlineWidth,
-          })
+  sequence.forEach(
+    (state, stateIndex) => {
+      if (
+        !Array.isArray(state) ||
+        state.length !== 5
+      ) {
+        throw new Error(
+          `graphicScore: state ${stateIndex + 1} ` +
+          `must contain exactly 5 bits`
         );
       }
-    );
-  }
-);
 
-// ------------------------------------------------------------
-// Optional warm five-row current column
-// ------------------------------------------------------------
-
-const warmCells = [];
-
-if (stateIndex !== null) {
-  const currentX =
-    stateIndex * columnAdvance;
-
-  for (
-    let rowIndex = 0;
-    rowIndex < 5;
-    rowIndex += 1
-  ) {
-    const y =
-      rowIndex * rowAdvance;
-
-    warmCells.push(
-      makeCell({
-        x: currentX,
-        y,
-        fill: rgba(WARM_COLORS[rowIndex]),
-        stroke: rgba(CURRENT_OUTLINE),
-        strokeWidth: currentOutlineWidth,
-      })
-    );
-  }
+      state.forEach(
+        (bit, rowIndex) => {
+          if (
+            bit !== 0 &&
+            bit !== 1
+          ) {
+            throw new Error(
+              `graphicScore: invalid bit at ` +
+              `state ${stateIndex + 1}, ` +
+              `row ${rowIndex + 1}: ${bit}`
+            );
+          }
+        }
+      );
+    }
+  );
 }
 
-// ------------------------------------------------------------
-// Complete SVG
-// ------------------------------------------------------------
-
-const svg = `
-<svg
-  xmlns="http://www.w3.org/2000/svg"
-  width="${scoreWidth}"
-  height="${scoreHeight}"
-  viewBox="0 0 ${scoreWidth} ${scoreHeight}"
-  shape-rendering="geometricPrecision"
->
-  ${paleCells.join('\n')}
-  ${warmCells.join('\n')}
-</svg>
-`;
 
 // ------------------------------------------------------------
-// Output
+// Hi-DPI off-screen canvas
 // ------------------------------------------------------------
 
-const outputDirectory =
-  path.resolve(
-    __dirname,
-    '../assets/md-images'
+function createHiDPICanvas(
+  logicalWidth,
+  logicalHeight,
+  dpr
+) {
+  if (
+    !Number.isFinite(logicalWidth) ||
+    !Number.isFinite(logicalHeight) ||
+    logicalWidth <= 0 ||
+    logicalHeight <= 0
+  ) {
+    throw new Error(
+      `graphicScore: invalid off-screen size ` +
+      `${logicalWidth} × ${logicalHeight}`
+    );
+  }
+
+  if (
+    !Number.isFinite(dpr) ||
+    dpr <= 0
+  ) {
+    throw new Error(
+      `graphicScore: invalid DPR ${dpr}`
+    );
+  }
+
+  const canvas =
+    document.createElement('canvas');
+
+  canvas.width =
+    Math.ceil(logicalWidth * dpr);
+
+  canvas.height =
+    Math.ceil(logicalHeight * dpr);
+
+  const ctx =
+    canvas.getContext('2d');
+
+  if (!ctx) {
+    throw new Error(
+      'graphicScore: off-screen 2D context ' +
+      'not available'
+    );
+  }
+
+  ctx.setTransform(
+    dpr,
+    0,
+    0,
+    dpr,
+    0,
+    0
   );
 
-fs.mkdirSync(
-  outputDirectory,
-  {
-    recursive: true,
-  }
-);
+  return {
+    canvas,
+    ctx,
+    logicalWidth,
+    logicalHeight,
+    dpr,
+  };
+}
 
-const outputFile =
-  stateIndex === null
-    ? path.join(
-        outputDirectory,
-        'graphicScore.png'
-      )
-    : path.join(
-        outputDirectory,
-        `graphicScore-state-${stateIndex}.png`
+
+// ------------------------------------------------------------
+// Rounded rectangle
+// ------------------------------------------------------------
+
+function roundedRectPath(
+  ctx,
+  x,
+  y,
+  width,
+  height,
+  radius
+) {
+  const r = Math.max(
+    0,
+    Math.min(
+      radius,
+      width * 0.5,
+      height * 0.5
+    )
+  );
+
+  ctx.beginPath();
+
+  ctx.moveTo(
+    x + r,
+    y
+  );
+
+  ctx.lineTo(
+    x + width - r,
+    y
+  );
+
+  ctx.quadraticCurveTo(
+    x + width,
+    y,
+    x + width,
+    y + r
+  );
+
+  ctx.lineTo(
+    x + width,
+    y + height - r
+  );
+
+  ctx.quadraticCurveTo(
+    x + width,
+    y + height,
+    x + width - r,
+    y + height
+  );
+
+  ctx.lineTo(
+    x + r,
+    y + height
+  );
+
+  ctx.quadraticCurveTo(
+    x,
+    y + height,
+    x,
+    y + height - r
+  );
+
+  ctx.lineTo(
+    x,
+    y + r
+  );
+
+  ctx.quadraticCurveTo(
+    x,
+    y,
+    x + r,
+    y
+  );
+
+  ctx.closePath();
+}
+
+
+// ------------------------------------------------------------
+// Draw one score cell
+// ------------------------------------------------------------
+
+function drawCell(
+  ctx,
+  options = {}
+) {
+  const {
+    x,
+    y,
+    width,
+    height,
+    radius,
+    fillStyle,
+    outlineStyle,
+    outlineWidth,
+  } = options;
+
+  roundedRectPath(
+    ctx,
+    x,
+    y,
+    width,
+    height,
+    radius
+  );
+
+  ctx.fillStyle = 
+    fillStyle;
+
+  ctx.fill();
+
+  ctx.strokeStyle = COLOR_MAP.silver; 
+//    outlineStyle;
+
+  ctx.lineWidth =
+    outlineWidth;
+
+  ctx.stroke();
+}
+
+
+// ------------------------------------------------------------
+// Draw one white outline around the complete current column
+// ------------------------------------------------------------
+
+function drawCurrentColumnOutline(
+  ctx,
+  options = {}
+) {
+  const {
+    x,
+    topY,
+    cellWidth,
+    stripHeight,
+    cornerRadius,
+    outlineStyle,
+    outlineWidth,
+  } = options;
+
+  ctx.save();
+
+  ctx.strokeStyle = 
+    outlineStyle;
+
+  ctx.lineWidth =
+    outlineWidth;
+
+  roundedRectPath(
+    ctx,
+    x,
+    topY,
+    cellWidth,
+    stripHeight,
+    cornerRadius
+  );
+
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+
+// ------------------------------------------------------------
+// Pre-render pale or warm 31-state score strip
+// ------------------------------------------------------------
+
+function renderStrip(
+  options = {}
+) {
+  const {
+    sequence,
+    surface,
+    rowColors,
+    neutralStyle,
+    outlineStyle,
+    geometry,
+    useWarmColors,
+  } = options;
+
+  const {
+    cellWidth,
+    cellHeight,
+    columnGap,
+    rowGap,
+    cornerRadius,
+    outlineWidth,
+  } = geometry;
+
+  const columnAdvance =
+    cellWidth + columnGap;
+
+  const rowAdvance =
+    cellHeight + rowGap;
+
+  const ctx =
+    surface.ctx;
+
+  ctx.clearRect(
+    0,
+    0,
+    surface.logicalWidth,
+    surface.logicalHeight
+  );
+
+  sequence.forEach(
+    (state, columnIndex) => {
+      const x =
+        columnIndex * columnAdvance;
+
+      state.forEach(
+        (bit, rowIndex) => {
+          const y =
+            rowIndex * rowAdvance;
+
+          const fillStyle =
+            bit === 0
+              ? neutralStyle
+              : useWarmColors
+                ? rowColors[rowIndex].warm
+                : rowColors[rowIndex].pale;
+
+          drawCell(
+            ctx,
+            {
+              x,
+              y,
+              width: cellWidth,
+              height: cellHeight,
+              radius: cornerRadius,
+              fillStyle,
+              outlineStyle,
+              outlineWidth,
+            }
+          );
+        }
       );
+    }
+  );
+}
 
-await sharp(
-  Buffer.from(svg)
-)
-  .png()
-  .toFile(outputFile);
+
+// ------------------------------------------------------------
+// Draw state numbers using the score-column geometry
+// ------------------------------------------------------------
+
+function drawStateNumbers(
+  ctx,
+  options = {}
+) {
+  const {
+    stateCount,
+    stripX,
+    columnAdvance,
+    cellWidth,
+    labelTopY,
+    labelRowHeight,
+    labelFontSize,
+    labelColor,
+  } = options;
+
+  ctx.save();
+
+  ctx.fontColor = labelColor;
+
+  ctx.font =
+	'10px "Helvetica Neue", Helvetica, Arial, sans-serif';
+
+  ctx.textAlign =
+    'center';
+
+  ctx.textBaseline =
+    'middle';
+
+  const y =
+    labelTopY +
+    labelRowHeight * 0.5;
+
+  for (
+    let columnIndex = 0;
+    columnIndex < stateCount;
+    columnIndex += 1
+  ) {
+    const x =
+      stripX +
+      columnIndex * columnAdvance +
+      cellWidth * 0.5;
+
+    const stateNumber =
+      columnIndex + 1;
+
+    ctx.fillText(
+      String(stateNumber),
+      x,
+      y
+    );
+  }
+
+  ctx.restore();
+}
+
+
+// ------------------------------------------------------------
+// Create graphic score
+// ------------------------------------------------------------
+
+export function createGraphicScore(
+  options = {}
+) {
+  const {
+    sequence,
+
+    dpr =
+      window.devicePixelRatio || 1,
+
+    neutralColor =
+      COLOR_MAP.transparent,
+
+    gridColor = 
+      COLOR_MAP.silver,
+
+    highlightOutline =
+      COLOR_MAP.white,
+
+    textColor =
+      COLOR_MAP.silver,
+
+    geometry = {},
+  } = options;
+
+  validateSequence(sequence);
+
+
+  // ----------------------------------------------------------
+  // Resolve geometry
+  // ----------------------------------------------------------
+
+  const resolvedGeometry = {
+    ...DEFAULT_GEOMETRY,
+    ...geometry,
+  };
+
+  const {
+    cellWidth,
+    cellHeight,
+    columnGap,
+    rowGap,
+    cornerRadius,
+    outlineWidth,
+    currentOutlineWidth,
+    labelRowHeight,
+    labelGap,
+    labelFontSize,
+  } = resolvedGeometry;
+
+  const numericGeometry = {
+    cellWidth,
+    cellHeight,
+    columnGap,
+    rowGap,
+    cornerRadius,
+    outlineWidth,
+    currentOutlineWidth,
+    labelRowHeight,
+    labelGap,
+    labelFontSize,
+  };
+
+  Object.entries(
+    numericGeometry
+  ).forEach(
+    ([name, value]) => {
+      if (
+        !Number.isFinite(value) ||
+        value < 0
+      ) {
+        throw new Error(
+          `graphicScore: invalid geometry value ` +
+          `${name}=${value}`
+        );
+      }
+    }
+  );
+
+  if (
+    cellWidth <= 0 ||
+    cellHeight <= 0
+  ) {
+    throw new Error(
+      'graphicScore: cellWidth and cellHeight ' +
+      'must be greater than zero'
+    );
+  }
+
+  if (
+    labelRowHeight <= 0 ||
+    labelFontSize <= 0
+  ) {
+    throw new Error(
+      'graphicScore: labelRowHeight and ' +
+      'labelFontSize must be greater than zero'
+    );
+  }
+
+
+  // ----------------------------------------------------------
+  // Row colours
+  // ----------------------------------------------------------
+
+  const rowColors = [
+    {
+      pale: rgbaString(
+        COLOR_MAP.paleY,
+        'paleY'
+      ),
+
+      warm: rgbaString(
+        COLOR_MAP.warmY,
+        'warmY'
+      ),
+    },
+
+    {
+      pale: rgbaString(
+        COLOR_MAP.paleR,
+        'paleR'
+      ),
+
+      warm: rgbaString(
+        COLOR_MAP.warmR,
+        'warmR'
+      ),
+    },
+
+    {
+      pale: rgbaString(
+        COLOR_MAP.paleG,
+        'paleG'
+      ),
+
+      warm: rgbaString(
+        COLOR_MAP.warmG,
+        'warmG'
+      ),
+    },
+
+    {
+      pale: rgbaString(
+        COLOR_MAP.paleB,
+        'paleB'
+      ),
+
+      warm: rgbaString(
+        COLOR_MAP.warmB,
+        'warmB'
+      ),
+    },
+
+    {
+      pale: rgbaString(
+        COLOR_MAP.paleM,
+        'paleM'
+      ),
+
+      warm: rgbaString(
+        COLOR_MAP.warmM,
+        'warmM'
+      ),
+    },
+  ];
+
+
+  // ----------------------------------------------------------
+  // Styles
+  // ----------------------------------------------------------
+
+  const neutralStyle =
+    rgbaString(
+      neutralColor,
+      'neutralColor'
+    );
+
+  const outlineStyle =
+    rgbaString(
+      gridColor,
+      'gridColor'
+    );
+
+  const highlightOutlineStyle =
+    rgbaString(
+      highlightOutline,
+      'highlightOutline'
+    );
+
+  const labelColor =
+    rgbaString(
+      textColor,
+      'textColor'
+    );
+
+
+  // ----------------------------------------------------------
+  // Strip geometry
+  // ----------------------------------------------------------
+
+  const columnAdvance =
+    cellWidth + columnGap;
+
+  const rowAdvance =
+    cellHeight + rowGap;
+
+  const stripWidth =
+    sequence.length * columnAdvance -
+    columnGap;
+
+  const stripHeight =
+    5 * rowAdvance -
+    rowGap;
+
+
+  // ----------------------------------------------------------
+  // Pre-render surfaces
+  // ----------------------------------------------------------
+
+  const paleSurface =
+    createHiDPICanvas(
+      stripWidth,
+      stripHeight,
+      dpr
+    );
+
+  const warmSurface =
+    createHiDPICanvas(
+      stripWidth,
+      stripHeight,
+      dpr
+    );
+
+
+
+  // ----------------------------------------------------------
+  // Render pale score
+  // ----------------------------------------------------------
+
+  renderStrip({
+    sequence,
+    surface: paleSurface,
+    rowColors,
+    neutralStyle,
+    outlineStyle,
+    geometry: resolvedGeometry,
+    useWarmColors: false,
+  });
+
+
+  // ----------------------------------------------------------
+  // Render warm score
+  // ----------------------------------------------------------
+
+  renderStrip({
+    sequence,
+    surface: warmSurface,
+    rowColors,
+    neutralStyle,
+    outlineStyle,
+    geometry: resolvedGeometry,
+    useWarmColors: true,
+  });
+
+
+  // ----------------------------------------------------------
+  // Draw score into visible canvas
+  // ----------------------------------------------------------
+
+  function draw(
+    ctx,
+    drawOptions = {}
+  ) {
+    if (!ctx) {
+      throw new Error(
+        'graphicScore.draw: visible context is required'
+      );
+    }
+
+    const {
+      stateIndex,
+
+      scoreGeometry =
+        ctx.score,
+
+      clipLeft = 0,
+
+      clipRight =
+        ctx.designW,
+    } = drawOptions;
+
+
+    // --------------------------------------------------------
+    // Validate draw arguments
+    // --------------------------------------------------------
+
+    if (
+      !Number.isInteger(stateIndex)
+    ) {
+      throw new Error(
+        `graphicScore.draw: stateIndex must be ` +
+        `an integer; received ${stateIndex}`
+      );
+    }
+
+    if (
+      stateIndex < 0 ||
+      stateIndex >= sequence.length
+    ) {
+      throw new Error(
+        `graphicScore.draw: stateIndex ${stateIndex} ` +
+        `is outside 0–${sequence.length - 1}`
+      );
+    }
+
+    if (
+      !scoreGeometry ||
+      !Number.isFinite(
+        scoreGeometry.currentX
+      ) ||
+      !Number.isFinite(
+        scoreGeometry.topY
+      ) ||
+      !Number.isFinite(
+        scoreGeometry.height
+      )
+    ) {
+      throw new Error(
+        'graphicScore.draw: invalid score geometry'
+      );
+    }
+
+    if (
+      !Number.isFinite(clipLeft) ||
+      !Number.isFinite(clipRight) ||
+      clipRight <= clipLeft
+    ) {
+      throw new Error(
+        `graphicScore.draw: invalid clip range ` +
+        `${clipLeft}–${clipRight}`
+      );
+    }
+
+
+    // --------------------------------------------------------
+    // Horizontal score position
+    // --------------------------------------------------------
+
+    const stripX =
+      scoreGeometry.currentX -
+      stateIndex * columnAdvance -
+      cellWidth * 0.5;
+
+    const currentColumnX =
+      scoreGeometry.currentX -
+      cellWidth * 0.5;
+
+    const sourceColumnX =
+      stateIndex * columnAdvance;
+
+
+    // --------------------------------------------------------
+    // Label position
+    // --------------------------------------------------------
+
+    const labelTopY =
+      scoreGeometry.topY -
+      labelGap -
+      labelRowHeight;
+
+    // --------------------------------------------------------
+    // Compact diagnostic: once per state only
+    // --------------------------------------------------------
+
+    if (
+      draw._lastLoggedState !==
+      stateIndex
+    ) {
+      draw._lastLoggedState =
+        stateIndex;
+
+	console.log(
+	  `[graphicScore]` +
+	  ` state=${stateIndex + 1}` +
+	  ` scoreY=${scoreGeometry.topY}` +
+	  ` labelY=${labelTopY}` +
+	  ` scoreH=${scoreGeometry.height}` +
+	  ` labelH=${labelRowHeight}` +
+	  ` gap=${labelGap}` +
+	  ` canvasH=${ctx.designH}` +
+	  ` stripX=${stripX}` +
+	  ` currentX=${currentColumnX}`
+	);
+}
+
+
+    // --------------------------------------------------------
+    // Clip score + label region
+    // --------------------------------------------------------
+
+    ctx.save();
+
+    ctx.beginPath();
+
+    ctx.rect(
+      clipLeft,
+      labelTopY,
+      clipRight - clipLeft,
+      scoreGeometry.height +
+        labelGap +
+        labelRowHeight
+    );
+
+    ctx.clip();
+
+
+    // --------------------------------------------------------
+    // State numbers
+    // --------------------------------------------------------
+    
+    drawStateNumbers(
+      ctx,
+      {
+        stateCount:
+          sequence.length,
+    
+        stripX,
+    
+        columnAdvance,
+        cellWidth,
+    
+        labelTopY,
+        labelRowHeight,
+        labelFontSize,
+        labelColor,
+      }
+    );
+
+    // --------------------------------------------------------
+    // Complete pale score strip
+    // --------------------------------------------------------
+
+    ctx.drawImage(
+      paleSurface.canvas,
+      0,
+      0,
+      paleSurface.canvas.width,
+      paleSurface.canvas.height,
+      stripX,
+      scoreGeometry.topY,
+      stripWidth,
+      stripHeight
+    );
+
+
+    // --------------------------------------------------------
+    // Current warm column
+    // --------------------------------------------------------
+
+    ctx.drawImage(
+      warmSurface.canvas,
+      Math.round(
+        sourceColumnX * dpr
+      ),
+      0,
+      Math.round(
+        cellWidth * dpr
+      ),
+      warmSurface.canvas.height,
+      currentColumnX,
+      scoreGeometry.topY,
+      cellWidth,
+      stripHeight
+    );
+
+
+// --------------------------------------------------------
+// Single white outline around current five-row column
+// --------------------------------------------------------
+
+    drawCurrentColumnOutline(
+      ctx,
+      {
+        x: currentColumnX,
+        topY: scoreGeometry.topY,
+        cellWidth,
+        stripHeight,
+        cornerRadius,
+        outlineStyle: highlightOutlineStyle,
+        outlineWidth: currentOutlineWidth,
+      }
+    );
+
+    ctx.restore();    
+  }
+
+
+// ----------------------------------------------------------
+// Creation diagnostic
+// ----------------------------------------------------------
 
 console.log(
-  '[graphicScore export]',
+  '[graphicScore] created',
   {
-    stateIndex,
-    size: [
-      scoreWidth,
-      scoreHeight,
+    states:
+      sequence.length,
+
+    rows:
+      5,
+
+    stripSize: [
+      stripWidth,
+      stripHeight,
     ],
-    outputFile,
+
+    labels: {
+      rowHeight:
+        labelRowHeight,
+
+      gap:
+        labelGap,
+
+      fontSize:
+        labelFontSize,
+    },
+
+    backingSize: {
+      pale: [
+        paleSurface.canvas.width,
+        paleSurface.canvas.height,
+      ],
+
+      warm: [
+        warmSurface.canvas.width,
+        warmSurface.canvas.height,
+      ],
+    },
+
+    geometry:
+      resolvedGeometry,
+
+    dpr,
   }
 );
+
+  // ----------------------------------------------------------
+  // Public interface
+  // ----------------------------------------------------------
+
+  return {
+    draw,
+
+    stateCount:
+      sequence.length,
+
+    rowCount:
+      5,
+
+    stripWidth,
+    stripHeight,
+    columnAdvance,
+
+    geometry: {
+      ...resolvedGeometry,
+    },
+
+    paleCanvas:
+      paleSurface.canvas,
+
+    warmCanvas:
+      warmSurface.canvas,
+  };
+}

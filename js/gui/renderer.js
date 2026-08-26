@@ -3,7 +3,7 @@
 import { 
   arrP, 
   arrB, 
-  arrF, 
+  arrF,
   arrS, 
   arrT, 
   getSlots 
