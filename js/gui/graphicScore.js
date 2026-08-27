@@ -506,17 +506,17 @@ export function createGraphicScore(
     dpr =
       window.devicePixelRatio || 1,
 
-    neutralColor =
-      COLOR_MAP.transparent,
+  neutralRGBA =
+    COLOR_MAP.transparent,
 
-    gridColor = 
-      COLOR_MAP.silver,
+  gridRGBA =
+    COLOR_MAP.silver,
 
-    highlightOutline =
-      COLOR_MAP.white,
+  highlightRGBA =
+    COLOR_MAP.white,
 
-    textColor =
-      COLOR_MAP.silver,
+  textRGBA =
+    COLOR_MAP.silver,
 
     geometry = {},
   } = options;
@@ -663,34 +663,33 @@ export function createGraphicScore(
   ];
 
 
-  // ----------------------------------------------------------
-  // Styles
-  // ----------------------------------------------------------
+// ----------------------------------------------------------
+// Colours
+// ----------------------------------------------------------
 
-  const neutralStyle =
-    rgbaString(
-      neutralColor,
-      'neutralColor'
-    );
+const neutralFillColor =
+  rgbaString(
+    neutralRGBA,
+    'neutralRGBA'
+  );
 
-  const outlineStyle =
-    rgbaString(
-      gridColor,
-      'gridColor'
-    );
+const gridOutlineColor =
+  rgbaString(
+    gridRGBA,
+    'gridRGBA'
+  );
 
-  const highlightOutlineStyle =
-    rgbaString(
-      highlightOutline,
-      'highlightOutline'
-    );
+const highlightOutlineColor =
+  rgbaString(
+    highlightRGBA,
+    'highlightRGBA'
+  );
 
-  const labelColor =
-    rgbaString(
-      textColor,
-      'textColor'
-    );
-
+const stateNumberColor =
+  rgbaString(
+    textRGBA,
+    'textRGBA'
+  );
 
   // ----------------------------------------------------------
   // Strip geometry
