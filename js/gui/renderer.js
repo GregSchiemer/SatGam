@@ -260,17 +260,28 @@ if (isConcertMode(status)) {
     return;
   }
 
+if (view === VIEW_RUN) {
 
-  if (view === VIEW_RUN) {
+  console.log(
+    '[PREVIEW view] RUN — fade to black'
+  );
 
-    console.log(
-      '[PREVIEW view] RUN'
-    );
+  status.stopAfterFade = false;
 
-    return;
-  }
+  beginBackgroundCrossfade(
+    status,
+    ctxB,
+    ColorFamily.BLACK,
+    5000
+  );
 
+  status.bgFamily =
+    ColorFamily.BLACK;
 
+  return;
+}
+
+/*
   if (view === VIEW_END) {
 
     console.log(
@@ -279,6 +290,22 @@ if (isConcertMode(status)) {
 
     return;
   }
+  */
+  
+  if (view === VIEW_END) {
+
+  console.log(
+    '[PREVIEW view] END — fade to neutral'
+  );
+
+  startHouseLightsUpOnce(
+    status,
+    ctxB
+  );
+
+  return;
+  }
+  
 }
 
 
