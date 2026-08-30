@@ -190,97 +190,33 @@ function startHouseLightsUpOnce(status, ctxB) {
 }
 
 // 4) Run entry actions when we arrive at a new view
-// 4) Run entry actions when we arrive at a new view
-
-// 4) Run entry actions when we arrive at a new view
-
 function onEnterView(status, view, ctxB) {
-
-  if (view === VIEW_ENTRY) {
-
-    status.lightsDownDone = false;
-    status.lightsUpDone = false;
-    status.stopAfterFade = false;
-
-    status.bgFamily = ColorFamily.NONE;
-    status.bgFamilyTarget = ColorFamily.NONE;
-
-    return;
-  }
-
-
-  // ==========================================================
-  // CONCERT MODE
-  // Existing behaviour — leave unchanged.
-  // ==========================================================
-
-if (isConcertMode(status)) {
-
-  if (view === VIEW_START) {
-
-    startHouseLightsDownOnce(
-      status,
-      ctxB
-    );
-
-    return;
-  }
-
-  if (view === VIEW_RUN) {
-
-    status.stopAfterFade = false;
-
-    return;
-  }
-
-  if (view === VIEW_END) {
-
-    startHouseLightsUpOnce(
-      status,
-      ctxB
-    );
-
-    return;
-  }
-
+if (view === VIEW_ENTRY) {
+  status.lightsDownDone = false;
+  status.lightsUpDone   = false;
+  status.stopAfterFade  = false;
+  status.bgFamily = ColorFamily.NONE;
+  status.bgFamilyTarget = ColorFamily.NONE;
   return;
 }
 
-  // ==========================================================
-  // PREVIEW MODE
-  // Structurally real, behaviourally inert.
-  // ==========================================================
+  // ✅ Auto fades only in CONCERT mode
+  if (!isConcertMode(status)) return;
 
   if (view === VIEW_START) {
-
-    console.log(
-      '[PREVIEW view] START'
-    );
-
+    startHouseLightsDownOnce(status, ctxB);
     return;
   }
-
 
   if (view === VIEW_RUN) {
-
-    console.log(
-      '[PREVIEW view] RUN'
-    );
-
-    return;
+	status.stopAfterFade = false;
+	return;
   }
-
 
   if (view === VIEW_END) {
-
-    console.log(
-      '[PREVIEW view] END'
-    );
-
+    startHouseLightsUpOnce(status, ctxB);
     return;
   }
-}
-
 
 // ===========================
 // —— Entry View ——

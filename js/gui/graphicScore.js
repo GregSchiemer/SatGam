@@ -284,8 +284,8 @@ function drawCell(
     width,
     height,
     radius,
-    fillStyle,
-    outlineStyle,
+    fillColor,
+    outlineColor,
     outlineWidth,
   } = options;
 
@@ -299,12 +299,12 @@ function drawCell(
   );
 
   ctx.fillStyle = 
-    fillStyle;
+    fillColor;
 
   ctx.fill();
 
-  ctx.strokeStyle = COLOR_MAP.silver; 
-//    outlineStyle;
+  ctx.strokeStyle =
+	outlineColor;
 
   ctx.lineWidth =
     outlineWidth;
@@ -421,8 +421,8 @@ function renderStrip(
               width: cellWidth,
               height: cellHeight,
               radius: cornerRadius,
-              fillStyle,
-              outlineStyle,
+              fillColor: fillStyle,
+              outlineColor: outlineStyle,
               outlineWidth,
             }
           );
@@ -454,7 +454,7 @@ function drawStateNumbers(
 
   ctx.save();
 
-  ctx.fontColor = labelColor;
+  ctx.fillStyle = labelColor;
 
   ctx.font =
 	'10px "Helvetica Neue", Helvetica, Arial, sans-serif';
@@ -691,6 +691,14 @@ const stateNumberColor =
     'textRGBA'
   );
 
+console.log(
+  '[graphicScore text colour]',
+  {
+    textRGBA,
+    stateNumberColor,
+  }
+);
+
   // ----------------------------------------------------------
   // Strip geometry
   // ----------------------------------------------------------
@@ -738,8 +746,8 @@ const stateNumberColor =
     sequence,
     surface: paleSurface,
     rowColors,
-    neutralStyle,
-    outlineStyle,
+    neutralStyle: neutralFillColor,
+    outlineStyle: gridOutlineColor,
     geometry: resolvedGeometry,
     useWarmColors: false,
   });
@@ -753,8 +761,8 @@ const stateNumberColor =
     sequence,
     surface: warmSurface,
     rowColors,
-    neutralStyle,
-    outlineStyle,
+    neutralStyle: neutralFillColor,
+    outlineStyle: gridOutlineColor,
     geometry: resolvedGeometry,
     useWarmColors: true,
   });
@@ -929,7 +937,7 @@ const stateNumberColor =
         labelTopY,
         labelRowHeight,
         labelFontSize,
-        labelColor,
+        labelColor: stateNumberColor,
       }
     );
 
@@ -983,7 +991,7 @@ const stateNumberColor =
         cellWidth,
         stripHeight,
         cornerRadius,
-        outlineStyle: highlightOutlineStyle,
+        outlineStyle: highlightOutlineColor,
         outlineWidth: currentOutlineWidth,
       }
     );
