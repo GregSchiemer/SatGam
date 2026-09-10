@@ -1,9 +1,9 @@
 // js/gui/satgamPing.js
 // A) matches the Lazzarini Ping README exactly:
-const CSOUND_URL = "https://www.unpkg.com/@csound/browser@6.18.7/dist/csound.js";
+//const CSOUND_URL = "https://www.unpkg.com/@csound/browser@6.18.7/dist/csound.js";
 
 // B) newer Csound 7 beta:
-// const CSOUND_URL = "https://cdn.jsdelivr.net/npm/@csound/browser@7.0.0-beta13/dist/csound.js";
+const CSOUND_URL = "https://cdn.jsdelivr.net/npm/@csound/browser@7.0.0-beta13/dist/csound.js";
 
 let csound = null;
 

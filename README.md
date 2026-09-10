@@ -119,8 +119,9 @@ This overview of **[Stockhausen's Scale](assets/docs/stockhausen_25root5.pdf)** 
 Players download the app to their phone from a local server via a Wi-Fi Router. The app is launched by scanning 1 of 2 QR codes depending on their role in the performance : one QR code launches leader.html, the other launches consort.html
 
 <p>
-  <img src="assets/md-images/ph1.PNG" width="250" alt="Phonehenge image 1">
-  <img src="assets/md-images/ph2.PNG" width="250" alt="Phonehenge image 2">
+  <img src="assets/md-images/ph-lead-entry.PNG" width="250" alt="Phonehenge image 1">
+  <img src="assets/md-images/ph-cons-entry.PNG" width="250" alt="Phonehenge image 2">
+  <img src="assets/md-images/ph-lead-start.PNG" width="250" alt="Phonehenge image 3">
 </p>
 
 - **Lead player** (`leader.html`) lead player taps the digital clock readout to start an animation sequence that drives the performance
