@@ -147,3 +147,5 @@ assets/python/server-backup*.py
 
 .DS_Store
 .DS_Store
+
+assets/backup/PhD-Thesis.pdf
