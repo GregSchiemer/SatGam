@@ -1,0 +1,80 @@
+{
+  "image": "assets/md-images/phonehenge-icon.png",
+  "image_size": [
+    1100,
+    1100
+  ],
+  "sprockets": [
+    1,
+    6,
+    11,
+    16,
+    21
+  ],
+  "angular_spacing_degrees": 72.0,
+  "centre": {
+    "x": 550.6930029438785,
+    "y": 546.6440652640223
+  },
+  "first_axis_degrees": -81.07855780043154,
+  "rms_line_residual_px": 7.995155260002795,
+  "mean_sprocket_centre_radius_px": 426.671010479149,
+  "radius_spread_px": 1.2642573507137,
+  "measurements": [
+    {
+      "sprocket": 1,
+      "clicked_midpoint": [
+        624.5,
+        127.0974025974026
+      ],
+      "measured_axis_degrees": -80.80119134566263,
+      "corrected_axis_degrees": -81.07855780043154,
+      "line_residual_px": 7.850731335625753,
+      "radius_px": 425.98928973524755
+    },
+    {
+      "sprocket": 6,
+      "clicked_midpoint": [
+        973.8506493506494,
+        486.8376623376623
+      ],
+      "measured_axis_degrees": -9.08111838836948,
+      "corrected_axis_degrees": -9.078557800431534,
+      "line_residual_px": 7.712219038359031,
+      "radius_px": 427.3630769539033
+    },
+    {
+      "sprocket": 11,
+      "clicked_midpoint": [
+        738.1115892139987,
+        932.010996366418
+      ],
+      "measured_axis_degrees": 64.49306191115096,
+      "corrected_axis_degrees": 62.92144219956847,
+      "line_residual_px": 8.549180299118746,
+      "radius_px": 428.52467614685753
+    },
+    {
+      "sprocket": 16,
+      "clicked_midpoint": [
+        244.2313061770892,
+        843.5619621342513
+      ],
+      "measured_axis_degrees": -46.42026554639905,
+      "corrected_axis_degrees": -45.07855780043153,
+      "line_residual_px": 7.333460829209258,
+      "radius_px": 426.70717016124706
+    },
+    {
+      "sprocket": 21,
+      "clicked_midpoint": [
+        175.86259323006306,
+        346.81306177089306
+      ],
+      "measured_axis_degrees": 26.41700039673367,
+      "corrected_axis_degrees": 26.921442199568464,
+      "line_residual_px": 8.463574991548285,
+      "radius_px": 424.77083939848995
+    }
+  ]
+}
