@@ -12,6 +12,44 @@ let msgUnsub = null;
 let csoundSource = 'none';
 let csoundVersion = 'unknown';
 
+
+// ------------------------------------------------------------
+// CSOUND TEST CONFIGURATION
+//
+// Select ONE setup by commenting out the other.
+//
+// Csound 7:
+//   engine    js/synth/csound7/csound.js
+//   orchestra assets/csd/phonehenge-voicings-cs7.orc
+//
+// Csound 6:
+//   engine    js/synth/csound6/csound.js
+//   orchestra assets/csd/phonehenge-voicings.orc
+// ------------------------------------------------------------
+
+const CSOUND6_SETUP = Object.freeze({
+  source: 'local6',
+  fallback: 'cdn6',
+  orcName: 'phonehenge-voicings.orc',
+  initMessage: 'i 900 0 0.01',
+});
+
+const CSOUND7_SETUP = Object.freeze({
+  source: 'local7',
+  fallback: 'cdn7',
+  orcName: 'phonehenge-voicings-cs7.orc',
+  initMessage: 'i "InitSettings" 0 0.01',
+});
+
+
+// ------------------------------------------------------------
+// SELECT ACTIVE VERSION HERE
+// ------------------------------------------------------------
+
+const ACTIVE_SETUP = CSOUND7_SETUP;
+// const ACTIVE_SETUP = CSOUND6_SETUP;
+
+
 // One permanent handler.
 // Do not set this function to null during reset.
 const onMsg = (msg) => {
@@ -28,18 +66,20 @@ const onMsg = (msg) => {
     if (match) {
       csoundVersion = match[1].trim();
 
-      // console.log(
-      //   '[csoundIni-t 1] engine:',
-      //   {
-      //     csoundSource,
-      //     csoundVersion,
-      //   }
-      // );
+      console.log(
+        '[csoundInit] engine detected:',
+        {
+          csoundSource,
+          csoundVersion,
+          orcName: ACTIVE_SETUP.orcName,
+        }
+      );
     }
   }
 
   console.log('[csound]', s);
 };
+
 
 const SOURCES = Object.freeze({
   local6: '../synth/csound6/csound.js',
@@ -54,18 +94,12 @@ const SOURCES = Object.freeze({
     '@csound/browser@7.0.0-beta13/dist/csound.js',
 });
 
-const qs = new URLSearchParams(
-  globalThis.location?.search || ''
-);
 
-const choice =
-  qs.get('csound') ||
-  'local6';
+const TRY_ORDER = [
+  ACTIVE_SETUP.source,
+  ACTIVE_SETUP.fallback,
+];
 
-const TRY_ORDER =
-  choice.startsWith('local')
-    ? [choice, 'cdn6']
-    : [choice];
 
 async function importCsoundModule() {
   let lastErr = null;
@@ -78,15 +112,35 @@ async function importCsoundModule() {
     }
 
     try {
+      console.log(
+        '[csoundInit] trying engine:',
+        {
+          key,
+          url,
+        }
+      );
+
       const module = await import(url);
 
       if (typeof module.Csound === 'function') {
         csoundSource = `${key}:${url}`;
+
+        console.log(
+          '[csoundInit] loaded engine:',
+          csoundSource
+        );
+
         return module;
       }
 
       if (typeof module.default === 'function') {
-        csoundSource = `${key}-default:${url}`;
+        csoundSource =
+          `${key}-default:${url}`;
+
+        console.log(
+          '[csoundInit] loaded engine:',
+          csoundSource
+        );
 
         return {
           Csound: module.default,
@@ -99,6 +153,15 @@ async function importCsoundModule() {
       );
     } catch (error) {
       lastErr = error;
+
+      console.warn(
+        '[csoundInit] engine load failed:',
+        {
+          key,
+          url,
+          error,
+        }
+      );
     }
   }
 
@@ -110,10 +173,11 @@ async function importCsoundModule() {
   );
 }
 
+
 // Csound orchestra code is intentionally not embedded in this module.
-// The active orchestra is edited using the CsoundQt IDE and fetched
-// from assets/csd in enableCsound().
+// The active orchestra is fetched from assets/csd in enableCsound().
 const ORC = null;
+
 
 export async function primeAudioContext() {
   const AudioContextConstructor =
@@ -128,7 +192,8 @@ export async function primeAudioContext() {
   }
 
   if (!audioCtx) {
-    audioCtx = new AudioContextConstructor();
+    audioCtx =
+      new AudioContextConstructor();
   }
 
   if (audioCtx.state !== 'running') {
@@ -137,6 +202,7 @@ export async function primeAudioContext() {
 
   return audioCtx;
 }
+
 
 export async function enableCsound() {
   if (csound) {
@@ -148,8 +214,16 @@ export async function enableCsound() {
   }
 
   initPromise = (async () => {
-    const ac = await primeAudioContext();
-    const { Csound } = await importCsoundModule();
+    console.log(
+      '[csoundInit] selected setup:',
+      ACTIVE_SETUP
+    );
+
+    const ac =
+      await primeAudioContext();
+
+    const { Csound } =
+      await importCsoundModule();
 
     csound = await Csound({
       audioContext: ac,
@@ -170,24 +244,14 @@ export async function enableCsound() {
 
     await csound.setOption('-odac');
 
+
     // --------------------------------------------------------
-    // Load the active orchestra from assets/csd.
-    //
-    // By default:
-    //   assets/csd/phonehenge-voicings.orc
-    //
-    // A different orchestra can be selected with the existing
-    // ?orc=<filename> URL parameter.
+    // Load the orchestra selected in ACTIVE_SETUP.
     // --------------------------------------------------------
-    const params =
-      new URLSearchParams(
-        window.location.search
-      );
 
     const orcName =
-      params.get('orc') ??
-      'phonehenge-voicings.orc';
-      
+      ACTIVE_SETUP.orcName;
+
     // Resolve relative to:
     // js/gui/csoundInit.js
     //
@@ -224,22 +288,45 @@ export async function enableCsound() {
     console.log(
       '[csound] compiling external ORC',
       {
+        csoundSource,
         orcName,
         orcURL,
         chars: orcText.length,
       }
     );
 
-    // The fetched external orchestra is the sole active source.
-    await csound.compileOrc(orcText);
+    // The fetched external orchestra is
+    // the sole active orchestra source.
+    await csound.compileOrc(
+      orcText
+    );
+
+    console.log(
+      '[csoundInit] orchestra compiled:',
+      orcName
+    );
 
     await csound.start();
 
-    // Initialise shared defaults once so baseCps,
-    // ampDbfs, bend1 and bend2 are non-zero.
-    await csound.inputMessage(
-      'i 900 0 0.01'
+    console.log(
+      '[csoundInit] engine started'
     );
+
+
+    // --------------------------------------------------------
+    // Initialise shared defaults.
+    //
+    // Csound 6:
+    //   i 900 0 0.01
+    //
+    // Csound 7:
+    //   i "InitSettings" 0 0.01
+    // --------------------------------------------------------
+
+    await csound.inputMessage(
+      ACTIVE_SETUP.initMessage
+    );
+
 
     console.log(
       '✅ Csound engine ready',
@@ -247,6 +334,8 @@ export async function enableCsound() {
         csoundSource,
         csoundVersion,
         orcName,
+        initMessage:
+          ACTIVE_SETUP.initMessage,
       }
     );
 
@@ -256,13 +345,16 @@ export async function enableCsound() {
   return initPromise;
 }
 
+
 export async function playTestTone({
   dur = 0.2,
 } = {}) {
-  const cs = await enableCsound();
+  const cs =
+    await enableCsound();
 
-  // Report baseCps from JavaScript when the selected
-  // @csound/browser build exposes getControlChannel().
+  // Report baseCps from JavaScript when
+  // the selected @csound/browser build
+  // exposes getControlChannel().
   try {
     const base =
       await cs.getControlChannel?.(
@@ -277,25 +369,45 @@ export async function playTestTone({
       );
     }
   } catch (_) {
-    // Ignore this diagnostic when the API is unavailable.
+    // Ignore this diagnostic when
+    // the API is unavailable.
   }
 
-  // The external ORC must define instr 902.
-  await cs.inputMessage(
-    `i 902 0 ${dur}`
-  );
+
+  // --------------------------------------------------------
+  // Legacy Csound 6 diagnostic only.
+  //
+  // phonehenge-voicings.orc defines instr 902.
+  // The Csound 7 orchestra deliberately does not.
+  // --------------------------------------------------------
+
+  if (ACTIVE_SETUP === CSOUND6_SETUP) {
+    await cs.inputMessage(
+      `i 902 0 ${dur}`
+    );
+  } else {
+    console.log(
+      '[csound] playTestTone: ' +
+      'legacy instr 902 is not used by ' +
+      'the Csound 7 orchestra'
+    );
+  }
 }
+
 
 export function getCsound() {
   return csound;
 }
+
 
 export async function resetCsound() {
   try {
     // Detach the message handler.
     try {
       if (csound) {
-        if (typeof msgUnsub === 'function') {
+        if (
+          typeof msgUnsub === 'function'
+        ) {
           msgUnsub();
         } else if (
           typeof csound.off === 'function'

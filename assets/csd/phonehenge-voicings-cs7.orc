@@ -1,5 +1,4 @@
 ; Phonehenge / Stockhausen (Studie II) tuning + chorused 5-osc voice
-; Updates vs the previous schedule version:
 ;   - Adds "formal octave" transposition (period = 5) via p4 in the shared voice
 ;   - Keeps ONE shared tuning table + ONE shared synth voice as the source of truth
 ;   - Adds optional "chord per phone" wrapper instruments (101..125)
@@ -9,9 +8,9 @@ ksmps  = 32
 nchnls = 2
 0dbfs  = 1
 
-; voice polyphony (i.e. overlapping voices) for instr 111 and 115
-maxalloc 111, 40
-maxalloc 115, 40
+; voice polyphony (i.e. overlapping voices) for instr MelodicVoicing and SpectralVoicing
+maxalloc "MelodicVoicing", 4
+maxalloc "SpectralVoicing", 40
 
 giSine  ftgen 100, 0, 16384, 10, 1
 
@@ -39,7 +38,7 @@ gkBend2   chnexport "bend2",   1
 ; JavaScript can subsequently modify them.
 ; ------------------------------------------
 
-instr 900
+instr InitSettings
 
   chnset cpspch(8.00), "baseCps"
   chnset -18,          "ampDbfs"
@@ -60,7 +59,7 @@ endin
 ; p5 = degree 0..24
 ; p6 = Preview note generation
 ; ------------------------------------------
-instr 111
+instr MelodicVoicing
   iOct        = p4
   iDeg        = p5
   iGeneration = p6
@@ -133,7 +132,7 @@ endin
 ; p4 = formalOct
 ; p5 = degree 0..24
 ; ------------------------------------------
-instr 115
+instr SpectralVoicing
   iOct   = p4
   iDeg   = p5
 
@@ -178,7 +177,7 @@ endin
 ;
 ; Each tap advances the Preview note
 ; generation and starts exactly one
-; melodic instr 111.
+; melodic instr MelodicVoicing.
 ;
 ; p4 = voiceDur
 ; p5 = baseOct
@@ -192,7 +191,7 @@ instr 211
   iGeneration = chnget:i("previewNoteGeneration") + 1
   chnset iGeneration, "previewNoteGeneration"
 
-  schedule 111, 0, iVoiceDur, iBaseOct, iBaseDeg, iGeneration
+  schedule MelodicVoicing, 0, iVoiceDur, iBaseOct, iBaseDeg, iGeneration
 
   turnoff
 endin
@@ -204,7 +203,7 @@ endin
 ; Advances the Preview note generation
 ; without starting a new note.
 ;
-; The current instr 111 therefore enters
+; The current instr MelodicVoicing therefore enters
 ; the same fade used for note replacement.
 ; ------------------------------------------
 instr 212
@@ -217,20 +216,21 @@ endin
 
 ; ------------------------------------------
 ; CONCERT scheduler
-; Schedules CONCERT voice instr 115
+; Schedules instr SpectralVoicing
 
 ; p4 = voiceDur
 ; p5 = baseOct
 ; p6 = baseDeg
 ; p7 = nNotes (1..5)
-; p8 = mode (0 chord offsets, 1 formal-oct doubling)
 ; ------------------------------------------
 instr 215
+
   iVoiceDur = p4
   iBaseOct  = p5
   iBaseDeg  = p6
 
   iN = int(p7)
+
   if (iN <= 0) then
     iN = 5
   endif
@@ -239,28 +239,24 @@ instr 215
     iN = 5
   endif
 
-  iMode = int(p8)
+  iIdx = 0
 
-  if (iMode == 1) then
-    schedule 115, 0, iVoiceDur, iBaseOct,     iBaseDeg
-    schedule 115, 0, iVoiceDur, iBaseOct + 1, iBaseDeg
-  else
-    iIdx = 0
+  while (iIdx < iN) do
 
-    while (iIdx < iN) do
-      iOff   tablei iIdx, giChordOff
-      iSum   = iBaseDeg + iOff
-      iCarry = int(iSum / 25)
-      iDeg   = iSum - (iCarry * 25)
-      iOct   = iBaseOct + iCarry
+    iOff   tablei iIdx, giChordOff
+    iSum   = iBaseDeg + iOff
+    iCarry = int(iSum / 25)
+    iDeg   = iSum - (iCarry * 25)
+    iOct   = iBaseOct + iCarry
 
-      schedule 115, 0, iVoiceDur, iOct, iDeg
+    schedule SpectralVoicing, 0, iVoiceDur, iOct, iDeg
 
-      iIdx += 1
-    od
-  endif
+    iIdx += 1
+
+  od
 
   turnoff
+
 endin
 
 

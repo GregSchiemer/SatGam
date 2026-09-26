@@ -7,7 +7,6 @@ nchnls = 2
 0dbfs  = 1
 
 ; voice polyphony (how many overlapping voices instr 110 can play)
-maxalloc 110, 40
 maxalloc 111, 40
 maxalloc 115, 40
 
