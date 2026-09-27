@@ -24,13 +24,13 @@ let csoundVersion = 'unknown';
 //
 // Csound 6:
 //   engine    js/synth/csound6/csound.js
-//   orchestra assets/csd/phonehenge-voicings.orc
+//   orchestra assets/csd/phonehenge-voicings-cs6.orc
 // ------------------------------------------------------------
 
 const CSOUND6_SETUP = Object.freeze({
   source: 'local6',
   fallback: 'cdn6',
-  orcName: 'phonehenge-voicings.orc',
+  orcName: 'phonehenge-voicings-cs6.orc',
   initMessage: 'i 900 0 0.01',
 });
 

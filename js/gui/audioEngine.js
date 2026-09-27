@@ -228,7 +228,7 @@ function getAudioError() {
 }
 
 async function releasePreviewNote() {
-  const msg = 'i 212 0 0.01';
+  const msg = 'i PreviewRelease 0 0.01';
 
   console.log('[audioEngine.releasePreviewNote]', {
     msg,
