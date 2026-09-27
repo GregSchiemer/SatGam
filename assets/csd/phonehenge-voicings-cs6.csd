@@ -1,14 +1,22 @@
-; Phonehenge / Stockhausen (Studie II) — cpsxpch version (for web app)
-; copy of phonehenge.orc > phonehenge-09082026.orc > phonehenge-voicings.orc
+<CsoundSynthesizer>
+<CsOptions>
+-odac -d
+</CsOptions>
+
+<CsInstruments>
+; Phonehenge / Stockhausen (Studie II) tuning + chorused 5-osc voices
+;   - Uses formal-octave transposition with period ratio 5
+;   - Uses one shared 25-step tuning table
+;   - Separates Preview melodic scheduling from Concert spectral scheduling
 
 sr     = 44100
 ksmps  = 32
 nchnls = 2
 0dbfs  = 1
 
-; voice polyphony (how many overlapping voices instr 110 can play)
-maxalloc 111, 40
-maxalloc 115, 40
+; voice polyphony (i.e. overlapping voices) for instr MelodicVoicing and SpectralVoicing
+maxalloc "MelodicVoicing", 4
+maxalloc "SpectralVoicing", 40
 
 giSine  ftgen 100, 0, 16384, 10, 1
 
@@ -29,39 +37,33 @@ gkAmpDbfs chnexport "ampDbfs", 1
 gkBend1   chnexport "bend1",   1
 gkBend2   chnexport "bend2",   1
 
-instr 900
+; ------------------------------------------
+; INITIAL SETTINGS
+;
+; Establishes default shared channel values.
+; JavaScript can subsequently modify them.
+; ------------------------------------------
+
+instr InitSettings
+
   chnset cpspch(8.00), "baseCps"
   chnset -18,          "ampDbfs"
   chnset 100/99,       "bend1"
   chnset 99/98,        "bend2"
-  chnset 0, "previewNoteGeneration"
+  chnset 0,            "previewNoteGeneration"
+
 endin
-
-
-instr 901
-  chnset p4, "baseCps"
-endin
-
-instr 902
-  iBase = chnget:i("baseCps")
-  printf_i "baseCps = %f Hz\n", 1, iBase
-  schedule 110, 0, p3, 0, 0
-  turnoff
-endin
-
 
 ; ------------------------------------------
-; PREVIEW melodic voice
+; PREVIEW scheduler
 ;
-; One chorused melodic voice.
-; When a newer Preview note begins, this
-; voice fades while the new voice enters.
+; Each tap starts a new melodic note.
 ;
-; p4 = formalOct
-; p5 = degree 0..24
-; p6 = Preview note generation
+; p4 = voiceDur
+; p5 = baseOct
+; p6 = baseDeg
 ; ------------------------------------------
-instr 111
+instr MelodicVoicing
   iOct        = p4
   iDeg        = p5
   iGeneration = p6
@@ -127,13 +129,14 @@ endin
 
 
 ; ------------------------------------------
-; CONCERT voice
-; Temporary copy of instr 110.
-; Audible behaviour intentionally unchanged.
+; CONCERT spectral voice
+;
+; Changing timbre.
+;
 ; p4 = formalOct
 ; p5 = degree 0..24
 ; ------------------------------------------
-instr 115
+instr SpectralVoicing
   iOct   = p4
   iDeg   = p5
 
@@ -178,13 +181,13 @@ endin
 ;
 ; Each tap advances the Preview note
 ; generation and starts exactly one
-; melodic instr 111.
+; melodic instr MelodicVoicing.
 ;
 ; p4 = voiceDur
 ; p5 = baseOct
 ; p6 = baseDeg
 ; ------------------------------------------
-instr 211
+instr MelodicScheduler
   iVoiceDur = p4
   iBaseOct  = p5
   iBaseDeg  = p6
@@ -192,7 +195,7 @@ instr 211
   iGeneration = chnget:i("previewNoteGeneration") + 1
   chnset iGeneration, "previewNoteGeneration"
 
-  schedule 111, 0, iVoiceDur, iBaseOct, iBaseDeg, iGeneration
+  schedule "MelodicVoicing", 0, iVoiceDur, iBaseOct, iBaseDeg, iGeneration
 
   turnoff
 endin
@@ -204,10 +207,10 @@ endin
 ; Advances the Preview note generation
 ; without starting a new note.
 ;
-; The current instr 111 therefore enters
+; The current instr MelodicVoicing therefore enters
 ; the same fade used for note replacement.
 ; ------------------------------------------
-instr 212
+instr PreviewRelease
   iGeneration = chnget:i("previewNoteGeneration") + 1
   chnset iGeneration, "previewNoteGeneration"
 
@@ -217,20 +220,21 @@ endin
 
 ; ------------------------------------------
 ; CONCERT scheduler
-; Schedules CONCERT voice instr 115
+; Schedules instr SpectralVoicing
 
 ; p4 = voiceDur
 ; p5 = baseOct
 ; p6 = baseDeg
 ; p7 = nNotes (1..5)
-; p8 = mode (0 chord offsets, 1 formal-oct doubling)
 ; ------------------------------------------
-instr 215
+instr SpectralScheduler
+
   iVoiceDur = p4
   iBaseOct  = p5
   iBaseDeg  = p6
 
   iN = int(p7)
+
   if (iN <= 0) then
     iN = 5
   endif
@@ -239,28 +243,24 @@ instr 215
     iN = 5
   endif
 
-  iMode = int(p8)
+  iIdx = 0
 
-  if (iMode == 1) then
-    schedule 115, 0, iVoiceDur, iBaseOct,     iBaseDeg
-    schedule 115, 0, iVoiceDur, iBaseOct + 1, iBaseDeg
-  else
-    iIdx = 0
+  while (iIdx < iN) do
 
-    while (iIdx < iN) do
-      iOff   tablei iIdx, giChordOff
-      iSum   = iBaseDeg + iOff
-      iCarry = int(iSum / 25)
-      iDeg   = iSum - (iCarry * 25)
-      iOct   = iBaseOct + iCarry
+    iOff   tablei iIdx, giChordOff
+    iSum   = iBaseDeg + iOff
+    iCarry = int(iSum / 25)
+    iDeg   = iSum - (iCarry * 25)
+    iOct   = iBaseOct + iCarry
 
-      schedule 115, 0, iVoiceDur, iOct, iDeg
+    schedule "SpectralVoicing", 0, iVoiceDur, iOct, iDeg
 
-      iIdx += 1
-    od
-  endif
+    iIdx += 1
+
+  od
 
   turnoff
+
 endin
 
 
@@ -276,8 +276,8 @@ endin
 ; p6 = chordMode
 ; p7 = appMode
 ;
-; appMode 1 = PREVIEW -> instr 211
-; appMode 5 = CONCERT -> instr 215
+; appMode 1 = PREVIEW -> instr MelodicScheduler
+; appMode 5 = CONCERT -> instr SpectralScheduler
 ; ------------------------------------------
 
 instr 1   ; degree 0
@@ -288,9 +288,9 @@ instr 1   ; degree 0
   iAppMode  = int(p7)
 
   if (iAppMode == 1) then
-    schedule 211, 0, 0.01, iVoiceDur, iBaseOct, 0, iNNotes, iMode
+    schedule "MelodicScheduler", 0, 0.01, iVoiceDur, iBaseOct, 0, iNNotes, iMode
   elseif (iAppMode == 5) then
-    schedule 215, 0, 0.01, iVoiceDur, iBaseOct, 0, iNNotes, iMode
+    schedule "SpectralScheduler", 0, 0.01, iVoiceDur, iBaseOct, 0, iNNotes, iMode
   else
     printf_i "ERROR: instr 1 unexpected appMode %d\n", 1, iAppMode
   endif
@@ -307,9 +307,9 @@ instr 2   ; degree 1
   iAppMode  = int(p7)
 
   if (iAppMode == 1) then
-    schedule 211, 0, 0.01, iVoiceDur, iBaseOct, 1, iNNotes, iMode
+    schedule "MelodicScheduler", 0, 0.01, iVoiceDur, iBaseOct, 1, iNNotes, iMode
   elseif (iAppMode == 5) then
-    schedule 215, 0, 0.01, iVoiceDur, iBaseOct, 1, iNNotes, iMode
+    schedule "SpectralScheduler", 0, 0.01, iVoiceDur, iBaseOct, 1, iNNotes, iMode
   else
     printf_i "ERROR: instr 2 unexpected appMode %d\n", 1, iAppMode
   endif
@@ -326,9 +326,9 @@ instr 3   ; degree 2
   iAppMode  = int(p7)
 
   if (iAppMode == 1) then
-    schedule 211, 0, 0.01, iVoiceDur, iBaseOct, 2, iNNotes, iMode
+    schedule "MelodicScheduler", 0, 0.01, iVoiceDur, iBaseOct, 2, iNNotes, iMode
   elseif (iAppMode == 5) then
-    schedule 215, 0, 0.01, iVoiceDur, iBaseOct, 2, iNNotes, iMode
+    schedule "SpectralScheduler", 0, 0.01, iVoiceDur, iBaseOct, 2, iNNotes, iMode
   else
     printf_i "ERROR: instr 3 unexpected appMode %d\n", 1, iAppMode
   endif
@@ -345,9 +345,9 @@ instr 4   ; degree 3
   iAppMode  = int(p7)
 
   if (iAppMode == 1) then
-    schedule 211, 0, 0.01, iVoiceDur, iBaseOct, 3, iNNotes, iMode
+    schedule "MelodicScheduler", 0, 0.01, iVoiceDur, iBaseOct, 3, iNNotes, iMode
   elseif (iAppMode == 5) then
-    schedule 215, 0, 0.01, iVoiceDur, iBaseOct, 3, iNNotes, iMode
+    schedule "SpectralScheduler", 0, 0.01, iVoiceDur, iBaseOct, 3, iNNotes, iMode
   else
     printf_i "ERROR: instr 4 unexpected appMode %d\n", 1, iAppMode
   endif
@@ -364,9 +364,9 @@ instr 5   ; degree 4
   iAppMode  = int(p7)
 
   if (iAppMode == 1) then
-    schedule 211, 0, 0.01, iVoiceDur, iBaseOct, 4, iNNotes, iMode
+    schedule "MelodicScheduler", 0, 0.01, iVoiceDur, iBaseOct, 4, iNNotes, iMode
   elseif (iAppMode == 5) then
-    schedule 215, 0, 0.01, iVoiceDur, iBaseOct, 4, iNNotes, iMode
+    schedule "SpectralScheduler", 0, 0.01, iVoiceDur, iBaseOct, 4, iNNotes, iMode
   else
     printf_i "ERROR: instr 5 unexpected appMode %d\n", 1, iAppMode
   endif
@@ -383,9 +383,9 @@ instr 6   ; degree 5
   iAppMode  = int(p7)
 
   if (iAppMode == 1) then
-    schedule 211, 0, 0.01, iVoiceDur, iBaseOct, 5, iNNotes, iMode
+    schedule "MelodicScheduler", 0, 0.01, iVoiceDur, iBaseOct, 5, iNNotes, iMode
   elseif (iAppMode == 5) then
-    schedule 215, 0, 0.01, iVoiceDur, iBaseOct, 5, iNNotes, iMode
+    schedule "SpectralScheduler", 0, 0.01, iVoiceDur, iBaseOct, 5, iNNotes, iMode
   else
     printf_i "ERROR: instr 6 unexpected appMode %d\n", 1, iAppMode
   endif
@@ -402,9 +402,9 @@ instr 7   ; degree 6
   iAppMode  = int(p7)
 
   if (iAppMode == 1) then
-    schedule 211, 0, 0.01, iVoiceDur, iBaseOct, 6, iNNotes, iMode
+    schedule "MelodicScheduler", 0, 0.01, iVoiceDur, iBaseOct, 6, iNNotes, iMode
   elseif (iAppMode == 5) then
-    schedule 215, 0, 0.01, iVoiceDur, iBaseOct, 6, iNNotes, iMode
+    schedule "SpectralScheduler", 0, 0.01, iVoiceDur, iBaseOct, 6, iNNotes, iMode
   else
     printf_i "ERROR: instr 7 unexpected appMode %d\n", 1, iAppMode
   endif
@@ -421,9 +421,9 @@ instr 8   ; degree 7
   iAppMode  = int(p7)
 
   if (iAppMode == 1) then
-    schedule 211, 0, 0.01, iVoiceDur, iBaseOct, 7, iNNotes, iMode
+    schedule "MelodicScheduler", 0, 0.01, iVoiceDur, iBaseOct, 7, iNNotes, iMode
   elseif (iAppMode == 5) then
-    schedule 215, 0, 0.01, iVoiceDur, iBaseOct, 7, iNNotes, iMode
+    schedule "SpectralScheduler", 0, 0.01, iVoiceDur, iBaseOct, 7, iNNotes, iMode
   else
     printf_i "ERROR: instr 8 unexpected appMode %d\n", 1, iAppMode
   endif
@@ -440,9 +440,9 @@ instr 9   ; degree 8
   iAppMode  = int(p7)
 
   if (iAppMode == 1) then
-    schedule 211, 0, 0.01, iVoiceDur, iBaseOct, 8, iNNotes, iMode
+    schedule "MelodicScheduler", 0, 0.01, iVoiceDur, iBaseOct, 8, iNNotes, iMode
   elseif (iAppMode == 5) then
-    schedule 215, 0, 0.01, iVoiceDur, iBaseOct, 8, iNNotes, iMode
+    schedule "SpectralScheduler", 0, 0.01, iVoiceDur, iBaseOct, 8, iNNotes, iMode
   else
     printf_i "ERROR: instr 9 unexpected appMode %d\n", 1, iAppMode
   endif
@@ -459,9 +459,9 @@ instr 10  ; degree 9
   iAppMode  = int(p7)
 
   if (iAppMode == 1) then
-    schedule 211, 0, 0.01, iVoiceDur, iBaseOct, 9, iNNotes, iMode
+    schedule "MelodicScheduler", 0, 0.01, iVoiceDur, iBaseOct, 9, iNNotes, iMode
   elseif (iAppMode == 5) then
-    schedule 215, 0, 0.01, iVoiceDur, iBaseOct, 9, iNNotes, iMode
+    schedule "SpectralScheduler", 0, 0.01, iVoiceDur, iBaseOct, 9, iNNotes, iMode
   else
     printf_i "ERROR: instr 10 unexpected appMode %d\n", 1, iAppMode
   endif
@@ -478,9 +478,9 @@ instr 11  ; degree 10
   iAppMode  = int(p7)
 
   if (iAppMode == 1) then
-    schedule 211, 0, 0.01, iVoiceDur, iBaseOct, 10, iNNotes, iMode
+    schedule "MelodicScheduler", 0, 0.01, iVoiceDur, iBaseOct, 10, iNNotes, iMode
   elseif (iAppMode == 5) then
-    schedule 215, 0, 0.01, iVoiceDur, iBaseOct, 10, iNNotes, iMode
+    schedule "SpectralScheduler", 0, 0.01, iVoiceDur, iBaseOct, 10, iNNotes, iMode
   else
     printf_i "ERROR: instr 11 unexpected appMode %d\n", 1, iAppMode
   endif
@@ -497,9 +497,9 @@ instr 12  ; degree 11
   iAppMode  = int(p7)
 
   if (iAppMode == 1) then
-    schedule 211, 0, 0.01, iVoiceDur, iBaseOct, 11, iNNotes, iMode
+    schedule "MelodicScheduler", 0, 0.01, iVoiceDur, iBaseOct, 11, iNNotes, iMode
   elseif (iAppMode == 5) then
-    schedule 215, 0, 0.01, iVoiceDur, iBaseOct, 11, iNNotes, iMode
+    schedule "SpectralScheduler", 0, 0.01, iVoiceDur, iBaseOct, 11, iNNotes, iMode
   else
     printf_i "ERROR: instr 12 unexpected appMode %d\n", 1, iAppMode
   endif
@@ -516,9 +516,9 @@ instr 13  ; degree 12
   iAppMode  = int(p7)
 
   if (iAppMode == 1) then
-    schedule 211, 0, 0.01, iVoiceDur, iBaseOct, 12, iNNotes, iMode
+    schedule "MelodicScheduler", 0, 0.01, iVoiceDur, iBaseOct, 12, iNNotes, iMode
   elseif (iAppMode == 5) then
-    schedule 215, 0, 0.01, iVoiceDur, iBaseOct, 12, iNNotes, iMode
+    schedule "SpectralScheduler", 0, 0.01, iVoiceDur, iBaseOct, 12, iNNotes, iMode
   else
     printf_i "ERROR: instr 13 unexpected appMode %d\n", 1, iAppMode
   endif
@@ -535,9 +535,9 @@ instr 14  ; degree 13
   iAppMode  = int(p7)
 
   if (iAppMode == 1) then
-    schedule 211, 0, 0.01, iVoiceDur, iBaseOct, 13, iNNotes, iMode
+    schedule "MelodicScheduler", 0, 0.01, iVoiceDur, iBaseOct, 13, iNNotes, iMode
   elseif (iAppMode == 5) then
-    schedule 215, 0, 0.01, iVoiceDur, iBaseOct, 13, iNNotes, iMode
+    schedule "SpectralScheduler", 0, 0.01, iVoiceDur, iBaseOct, 13, iNNotes, iMode
   else
     printf_i "ERROR: instr 14 unexpected appMode %d\n", 1, iAppMode
   endif
@@ -554,9 +554,9 @@ instr 15  ; degree 14
   iAppMode  = int(p7)
 
   if (iAppMode == 1) then
-    schedule 211, 0, 0.01, iVoiceDur, iBaseOct, 14, iNNotes, iMode
+    schedule "MelodicScheduler", 0, 0.01, iVoiceDur, iBaseOct, 14, iNNotes, iMode
   elseif (iAppMode == 5) then
-    schedule 215, 0, 0.01, iVoiceDur, iBaseOct, 14, iNNotes, iMode
+    schedule "SpectralScheduler", 0, 0.01, iVoiceDur, iBaseOct, 14, iNNotes, iMode
   else
     printf_i "ERROR: instr 15 unexpected appMode %d\n", 1, iAppMode
   endif
@@ -573,9 +573,9 @@ instr 16  ; degree 15
   iAppMode  = int(p7)
 
   if (iAppMode == 1) then
-    schedule 211, 0, 0.01, iVoiceDur, iBaseOct, 15, iNNotes, iMode
+    schedule "MelodicScheduler", 0, 0.01, iVoiceDur, iBaseOct, 15, iNNotes, iMode
   elseif (iAppMode == 5) then
-    schedule 215, 0, 0.01, iVoiceDur, iBaseOct, 15, iNNotes, iMode
+    schedule "SpectralScheduler", 0, 0.01, iVoiceDur, iBaseOct, 15, iNNotes, iMode
   else
     printf_i "ERROR: instr 16 unexpected appMode %d\n", 1, iAppMode
   endif
@@ -592,9 +592,9 @@ instr 17  ; degree 16
   iAppMode  = int(p7)
 
   if (iAppMode == 1) then
-    schedule 211, 0, 0.01, iVoiceDur, iBaseOct, 16, iNNotes, iMode
+    schedule "MelodicScheduler", 0, 0.01, iVoiceDur, iBaseOct, 16, iNNotes, iMode
   elseif (iAppMode == 5) then
-    schedule 215, 0, 0.01, iVoiceDur, iBaseOct, 16, iNNotes, iMode
+    schedule "SpectralScheduler", 0, 0.01, iVoiceDur, iBaseOct, 16, iNNotes, iMode
   else
     printf_i "ERROR: instr 17 unexpected appMode %d\n", 1, iAppMode
   endif
@@ -611,9 +611,9 @@ instr 18  ; degree 17
   iAppMode  = int(p7)
 
   if (iAppMode == 1) then
-    schedule 211, 0, 0.01, iVoiceDur, iBaseOct, 17, iNNotes, iMode
+    schedule "MelodicScheduler", 0, 0.01, iVoiceDur, iBaseOct, 17, iNNotes, iMode
   elseif (iAppMode == 5) then
-    schedule 215, 0, 0.01, iVoiceDur, iBaseOct, 17, iNNotes, iMode
+    schedule "SpectralScheduler", 0, 0.01, iVoiceDur, iBaseOct, 17, iNNotes, iMode
   else
     printf_i "ERROR: instr 18 unexpected appMode %d\n", 1, iAppMode
   endif
@@ -630,9 +630,9 @@ instr 19  ; degree 18
   iAppMode  = int(p7)
 
   if (iAppMode == 1) then
-    schedule 211, 0, 0.01, iVoiceDur, iBaseOct, 18, iNNotes, iMode
+    schedule "MelodicScheduler", 0, 0.01, iVoiceDur, iBaseOct, 18, iNNotes, iMode
   elseif (iAppMode == 5) then
-    schedule 215, 0, 0.01, iVoiceDur, iBaseOct, 18, iNNotes, iMode
+    schedule "SpectralScheduler", 0, 0.01, iVoiceDur, iBaseOct, 18, iNNotes, iMode
   else
     printf_i "ERROR: instr 19 unexpected appMode %d\n", 1, iAppMode
   endif
@@ -649,9 +649,9 @@ instr 20  ; degree 19
   iAppMode  = int(p7)
 
   if (iAppMode == 1) then
-    schedule 211, 0, 0.01, iVoiceDur, iBaseOct, 19, iNNotes, iMode
+    schedule "MelodicScheduler", 0, 0.01, iVoiceDur, iBaseOct, 19, iNNotes, iMode
   elseif (iAppMode == 5) then
-    schedule 215, 0, 0.01, iVoiceDur, iBaseOct, 19, iNNotes, iMode
+    schedule "SpectralScheduler", 0, 0.01, iVoiceDur, iBaseOct, 19, iNNotes, iMode
   else
     printf_i "ERROR: instr 20 unexpected appMode %d\n", 1, iAppMode
   endif
@@ -668,9 +668,9 @@ instr 21  ; degree 20
   iAppMode  = int(p7)
 
   if (iAppMode == 1) then
-    schedule 211, 0, 0.01, iVoiceDur, iBaseOct, 20, iNNotes, iMode
+    schedule "MelodicScheduler", 0, 0.01, iVoiceDur, iBaseOct, 20, iNNotes, iMode
   elseif (iAppMode == 5) then
-    schedule 215, 0, 0.01, iVoiceDur, iBaseOct, 20, iNNotes, iMode
+    schedule "SpectralScheduler", 0, 0.01, iVoiceDur, iBaseOct, 20, iNNotes, iMode
   else
     printf_i "ERROR: instr 21 unexpected appMode %d\n", 1, iAppMode
   endif
@@ -687,9 +687,9 @@ instr 22  ; degree 21
   iAppMode  = int(p7)
 
   if (iAppMode == 1) then
-    schedule 211, 0, 0.01, iVoiceDur, iBaseOct, 21, iNNotes, iMode
+    schedule "MelodicScheduler", 0, 0.01, iVoiceDur, iBaseOct, 21, iNNotes, iMode
   elseif (iAppMode == 5) then
-    schedule 215, 0, 0.01, iVoiceDur, iBaseOct, 21, iNNotes, iMode
+    schedule "SpectralScheduler", 0, 0.01, iVoiceDur, iBaseOct, 21, iNNotes, iMode
   else
     printf_i "ERROR: instr 22 unexpected appMode %d\n", 1, iAppMode
   endif
@@ -706,9 +706,9 @@ instr 23  ; degree 22
   iAppMode  = int(p7)
 
   if (iAppMode == 1) then
-    schedule 211, 0, 0.01, iVoiceDur, iBaseOct, 22, iNNotes, iMode
+    schedule "MelodicScheduler", 0, 0.01, iVoiceDur, iBaseOct, 22, iNNotes, iMode
   elseif (iAppMode == 5) then
-    schedule 215, 0, 0.01, iVoiceDur, iBaseOct, 22, iNNotes, iMode
+    schedule "SpectralScheduler", 0, 0.01, iVoiceDur, iBaseOct, 22, iNNotes, iMode
   else
     printf_i "ERROR: instr 23 unexpected appMode %d\n", 1, iAppMode
   endif
@@ -725,9 +725,9 @@ instr 24  ; degree 23
   iAppMode  = int(p7)
 
   if (iAppMode == 1) then
-    schedule 211, 0, 0.01, iVoiceDur, iBaseOct, 23, iNNotes, iMode
+    schedule "MelodicScheduler", 0, 0.01, iVoiceDur, iBaseOct, 23, iNNotes, iMode
   elseif (iAppMode == 5) then
-    schedule 215, 0, 0.01, iVoiceDur, iBaseOct, 23, iNNotes, iMode
+    schedule "SpectralScheduler", 0, 0.01, iVoiceDur, iBaseOct, 23, iNNotes, iMode
   else
     printf_i "ERROR: instr 24 unexpected appMode %d\n", 1, iAppMode
   endif
@@ -744,12 +744,16 @@ instr 25  ; degree 24
   iAppMode  = int(p7)
 
   if (iAppMode == 1) then
-    schedule 211, 0, 0.01, iVoiceDur, iBaseOct, 24, iNNotes, iMode
+    schedule "MelodicScheduler", 0, 0.01, iVoiceDur, iBaseOct, 24, iNNotes, iMode
   elseif (iAppMode == 5) then
-    schedule 215, 0, 0.01, iVoiceDur, iBaseOct, 24, iNNotes, iMode
+    schedule "SpectralScheduler", 0, 0.01, iVoiceDur, iBaseOct, 24, iNNotes, iMode
   else
     printf_i "ERROR: instr 25 unexpected appMode %d\n", 1, iAppMode
   endif
 
   turnoff
 endin
+
+</CsInstruments>
+<CsScore>
+</CsScore>
