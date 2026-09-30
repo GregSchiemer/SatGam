@@ -37,6 +37,7 @@ const CSOUND6_SETUP = Object.freeze({
 const CSOUND7_SETUP = Object.freeze({
   source: 'local7',
   fallback: 'cdn7',
+//  orcName: 'phonehenge-voicings-beta-cs7.orc',
   orcName: 'phonehenge-voicings-cs7.orc',
   initMessage: 'i "InitSettings" 0 0.01',
 });

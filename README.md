@@ -225,34 +225,20 @@ Before the app is launched for the first time, a [certificate](https://github.co
 
 ## Certificates
 
-Before the Satellite Gamelan app is launched for the first time, phones need reassurance that it is a trusted app that runs Csound as an audio synthesiser inside a mobile web browser. The certificate provides that reassurance, allowing the Satellite Gamelan to launch without raising security alerts and alarming the phones' owners. 
+Before the Satellite Gamelan app is launched for the first time, phones need reassurance that it is a trusted app that runs Csound as an audio synthesiser inside a mobile web browser. The certificate provides that reassurance, allowing the Satellite Gamelan to launch without raising false security alerts. 
 
 A local http server 'server.py' is used to download, install and trust the Satellite Gamelan root certificate. To do that laptop and phones must connect to the local area network to download the certificate from the laptop. Phones are already secure because the Wi-Fi Router is not connected to the internet. In a **terminal** window, type the following :
 
 ```text
-	    cd /Users/gs/Developer/SG/SatGam
-		python3 assets/python/server.py --root . --http-port 8000 --ws-port 8010
-```
-When `server.py` launches, the following appears in the console window :
+		cd Developer/SG/SatGam         
+		gs@MacBook-Pro-2 SatGam % python3 assets/python/server.py
+		[http] ✅ Serving /Users/gs/Developer/SG/SatGam
+		[http] Listening on http://0.0.0.0:8000
+		[http] Registration page: http://<LAN-host>:8000/registration.html
+		Press Ctrl-C to stop.
+		```
 
-```text
-		——— Preflight ———
-		✅ no auto-start in main.js
-		✅ robust wsPort parsing present (qsPort)
-		⚠️ leader.html did not show a direct import during preflight (static check). If you see [ws] connections later, WS is wired at runtime.
-		⚠️ consort.html did not show a direct import during preflight (static check). If you see [ws] connections later, WS is wired at runtime.
-		———— End preflight ————
-		[diag] log_http=True log_ws=True log_user_agent=False log_assets=True log_client_status=True
-		[ws] Listening on ws://0.0.0.0:8010
-		[http] Serving /Users/gs/Developer/SG/SatGam on http://0.0.0.0:8000
-```
-	In a second **terminal** window, launch **registration.html** :
-		
-```text
-		open registration.html
-```
-
-The registration page opens displays a QR code that players scan with their phone. This launches the registration page on the phone where the root certificate can be downloaded, installed and trusted on either an Android phone or iPhone.
+The `server.py` launches and automatically opens the registration page with a QR code that players scan with their phone. This launches the registration page on the phone where the root certificate can be downloaded, installed and trusted on either an Android phone or iPhone.
 <p>
   <img src="assets/qr-images/qr-registration.png" width="250" alt="Phonehenge image 1">
 </p>
