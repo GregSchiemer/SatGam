@@ -238,7 +238,7 @@ A local http server 'server.py' is used to download, install and trust the Satel
 		Press Ctrl-C to stop.
 ```
 
-The `server.py` launches and automatically opens the registration page. Players scan the QR code with their phone. This allows the root certificate to be downloaded, installed and trusted on either an Android phone or iPhone.
+The `server.py` launches and automatically opens the registration page with QR code displayed. Players scan this with their phone allowing the root certificate to be downloaded, installed and trusted on either Android phone or iPhone.
 
 <p>
   <img src="assets/qr-images/qr-registration.png" width="250" alt="Phonehenge image 1">
