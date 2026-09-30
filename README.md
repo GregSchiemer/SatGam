@@ -236,9 +236,10 @@ A local http server 'server.py' is used to download, install and trust the Satel
 		[http] Listening on http://0.0.0.0:8000
 		[http] Registration page: http://<LAN-host>:8000/registration.html
 		Press Ctrl-C to stop.
-		```
+```
 
 The `server.py` launches and automatically opens the registration page with a QR code that players scan with their phone. This launches the registration page on the phone where the root certificate can be downloaded, installed and trusted on either an Android phone or iPhone.
+
 <p>
   <img src="assets/qr-images/qr-registration.png" width="250" alt="Phonehenge image 1">
 </p>
@@ -255,10 +256,10 @@ Once the certificate is downloaded, installed and trusted, a secure server is la
 
 However once the concert is finished and the phone returns to normal use, players are advised to remove the certificate from their phone. This will prevent a hypothetical scenario whereby an internet scammer might use the certificate to launch a malicious application and steal personal information that was protected while the Satellite Gamelan app was in use. The steps that follow will prevent such a scenario from ever happening.
 
-**⚙️ To remove the certificate from an iPhone**
+** To remove the certificate from an iPhone**
 
 	Go to 
-	- Settings 
+	- ⚙️Settings 
 	- General 
 	- VPN & Device Management 
 	- Configuration Profile
@@ -267,10 +268,10 @@ However once the concert is finished and the phone returns to normal use, player
 
 If 'Satellite Gamelan Root Certificate' is not found under **Configuration**, it is already removed.
 
-**⚙️ To Remove the certificate from an Android phone**
+** To Remove the certificate from an Android phone**
 
 	Go to 
-	- Setting 
+	- ⚙️Settings
 	- Security & privacy 
 	- Encryption & credentials
 	- Trusted credentials 
