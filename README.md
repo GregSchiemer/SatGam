@@ -225,9 +225,7 @@ Before the app is launched for the first time, a [certificate](https://github.co
 
 ## Certificates
 
-Before the Satellite Gamelan app is launched for the first time, phones need reassurance that it is a trusted app that is allowed to run Csound inside a mobile web browser. The certificate provides that reassurance, allowing the app to launch without raising false security alerts. All devices are already secure. They do not connect to the internet. They use a Wi-Fi Router to join a local area network.
-
-Players then download the certificate from the laptop then install and trust the certificate. In a **terminal** window, type the following :
+Before the Satellite Gamelan app is launched for the first time, phones need reassurance that it is a trusted app that is allowed to run Csound inside a mobile web browser. The certificate offers that reassurance, allowing the app to launch without raising false security alerts. All devices are secure. They do not connect to the internet but join a local area network using a Wi-Fi Router. Players download the certificate from the laptop to their phone then install and trust the certificate. In a **terminal** window, type the following :
 
 ```text
 		cd Developer/SG/SatGam         
