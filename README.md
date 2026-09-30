@@ -244,7 +244,7 @@ This automatically opens the registration page on the laptop with a QR code disp
   <img src="assets/qr-images/qr-registration.png" width="250" alt="Phonehenge image 1">
 </p>
 
-Once the certificate is downloaded, installed and trusted, a secure server is launched creating a secure pathway for players to download and launch the Satellite Gamelan app on the phone. All players in the consort, except the leader, scan the following QR code :
+Once the certificate is downloaded, installed and trusted, a secure server is launched creating a secure pathway for players to download and launch the Satellite Gamelan app on the phone. Except for the leader, all players in the consort, scan the following QR code :
 
 <p>
   <img src="assets/qr-images/qr-consort.png" width="250" alt="Phonehenge image 1">
