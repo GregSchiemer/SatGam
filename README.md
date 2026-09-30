@@ -227,7 +227,7 @@ Before the app is launched for the first time, a [certificate](https://github.co
 
 Before the Satellite Gamelan app is first launched, phones need reassurance it is a trusted app that can run Csound in a mobile web browser. The certificate offers that reassurance, allowing the app to launch without raising false security alerts. All devices remain secure never connecting to the internet but joining a local area network via the Wi-Fi Router. Players download the certificate from the laptop to their phone then install and trust the certificate. 
 
-To start the registration process, type the following in a **terminal** window :
+To start the registration process, open a **terminal** window and enter the following:
 
 ```text
 		cd Developer/SG/SatGam         
@@ -244,7 +244,7 @@ This automatically opens the registration page on the laptop with a QR code disp
   <img src="assets/qr-images/qr-registration.png" width="250" alt="Phonehenge image 1">
 </p>
 
-Once the certificate is downloaded, installed and trusted, a secure server is launched creating a secure pathway for players to download and launch the Satellite Gamelan app on the phone. Except for the leader, all players in the consort, scan the following QR code :
+Once the certificate has been downloaded, installed and trusted, a secure server can be launched creating a secure pathway for players to download and launch the Satellite Gamelan app on the phone. Except for the leader, all players in the consort, scan the following QR code :
 
 <p>
   <img src="assets/qr-images/qr-consort.png" width="250" alt="Phonehenge image 1">
