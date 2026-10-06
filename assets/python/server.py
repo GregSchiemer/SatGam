@@ -3,8 +3,16 @@
 SatGam certificate-registration HTTP server.
 
 Purpose:
-  Serve registration.html and the files needed to download/install
-  the SatGam root certificate on phones connected to the same LAN.
+  Start the HTTP registration service before players begin the
+  three-stage Satellite Gamelan connection procedure:
+
+    1. Join the Vercoe Wi-Fi network.
+    2. Register the Csound WASM certificate.
+    3. Run Satellite Gamelan as Leader or Consort.
+
+  The server provides registration.html and the files required
+  to download/install the SatGam root certificate on phones
+  connected to the same LAN.
 
 This server is intentionally plain HTTP only:
   - no HTTPS / TLS
@@ -12,24 +20,32 @@ This server is intentionally plain HTTP only:
   - no leader/consort relay
   - no application preflight checks
 
-Default URL:
-  http://<host>:8000/registration.html
+Default registration URL:
+  http://<LAN-host>:8000/registration.html
 
-Examples:
+Performance preparation:
 
   From the SatGam repository root:
 
     python3 assets/python/server.py
 
-  Explicit root:
+  Leave this process running while players complete:
+
+    QR 1  Join Vercoe Network
+    QR 2  Register WASM Certificate
+    QR 3  Play as Leader / Consort
+
+Other examples:
+
+  Explicit static root:
 
     python3 assets/python/server.py --root .
 
-  Open registration.html automatically on the Mac running the server:
+  Open registration.html on the Mac for testing:
 
     python3 assets/python/server.py --open-registration
 
-  Bind to a different interface if needed:
+  Bind to a specific interface if required:
 
     python3 assets/python/server.py --host 127.0.0.1
 """
@@ -104,14 +120,22 @@ def main():
         default=DEFAULT_PORT,
         help=f"HTTP port (default: {DEFAULT_PORT})",
     )
-
+    
+    """
     parser.add_argument(
         "--open-registration",
         action=argparse.BooleanOptionalAction,
         default=True,
         help="Open registration.html in the local browser after startup",
     )
+    """
     
+    parser.add_argument(
+        "--open-registration",
+        action="store_true",
+        help="Open registration.html on the host Mac after startup",
+    )
+      
     args = parser.parse_args()
 
     root = os.path.abspath(args.root)

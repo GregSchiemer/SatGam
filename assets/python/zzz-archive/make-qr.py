@@ -316,7 +316,7 @@ Examples:
 
         leader_card = add_label(
             leader_qr,
-            "Satellite Gamelan - Leader",
+            "3 of 3 : Play as Leader",
             palette={
                 "bg": WHITE,
                 "banner_bg": WHITE,
@@ -353,7 +353,7 @@ Examples:
 
         consort_card = add_label(
             consort_qr,
-            "Satellite Gamelan - Consort",
+            "3 of 3 : Play as Consort",
             palette={
                 "bg": WHITE,
                 "banner_bg": WHITE,
@@ -382,11 +382,16 @@ Examples:
         "all",
     ):
         # Registration
+
         registration_url = (
             f"{registration_base}"
             "/registration.html"
         )
-
+        """
+        registration_url = (
+            f"http://192.168.1.10:8000/registration.html"
+        )
+        """
         registration_qr = mk_qr(
             registration_url,
             fill=BLACK,
@@ -395,7 +400,7 @@ Examples:
 
         registration_card = add_label(
             registration_qr,
-            "Csound WASM Certificate Registration",
+            "2 of 3 : Register WASM Certificate",
             palette={
                 "bg": WHITE,
                 "banner_bg": WHITE,

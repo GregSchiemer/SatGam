@@ -258,26 +258,26 @@ However once the concert is finished and the phone returns to normal use, player
 
 **To remove the certificate from an iPhone**
 
-	Go to 
-	- ⚙️Settings 
-	- General 
-	- VPN & Device Management 
-	- Configuration Profile
-	- select 'Satellite Gamelan Root Certificate'
-	- tap 'Remove Profile'
+		Go to 
+		- ⚙️Settings 
+		- General 
+		- VPN & Device Management 
+		- Configuration Profile
+		- select 'Satellite Gamelan Root Certificate'
+		- tap 'Remove Profile'
 
 If 'Satellite Gamelan Root Certificate' is not found under **Configuration**, it is already removed.
 
 **To Remove the certificate from an Android phone**
 
-	Go to 
-	- ⚙️Settings
-	- Security & privacy 
-	- Encryption & credentials
-	- Trusted credentials 
-	- User
-	- select 'mkcert development CA' 
-	- tap 'UNINSTALL'
+		Go to 
+		- ⚙️Settings
+		- Security & privacy 
+		- Encryption & credentials
+		- Trusted credentials 
+		- User
+		- select 'mkcert development CA' 
+		- tap 'UNINSTALL'
 
 If 'mkcert development CA' is not found under **User**, it is already removed.
 
