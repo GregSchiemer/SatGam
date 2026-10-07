@@ -86,7 +86,7 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
 def registration_url(host, port):
     """Return a browser-friendly local registration URL."""
     browser_host = "localhost" if host in ("0.0.0.0", "::") else host
-    return f"http://{browser_host}:{port}/registration.html"
+    return f"http://{browser_host}:{port}/certify.html"
 
 
 def open_registration_page(host, port):
@@ -160,10 +160,12 @@ def main():
 
     print(f"[http] ✅ Serving {root}")
     print(f"[http] Listening on http://{args.host}:{args.port}")
+    print(f"[http] QR 1 of 3 is supplied externally")
     print(
-        "[http] Registration page: "
-        f"http://<LAN-host>:{args.port}/registration.html"
+        "[http] QR 2 of 3 and QR 3 of 3 appear on "
+        f"http://<LAN-host>:{args.port}/certify.html"
     )
+    print(f"[http] Open a new terminal window and launch aio_server.py")
     print("Press Ctrl-C to stop.")
 
     if args.open_registration:
