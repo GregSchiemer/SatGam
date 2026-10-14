@@ -501,7 +501,14 @@ function installCsoundHandler(ctx, canvas, status, audio) {
 		}
 	
 		status.previewSoundActive = false;
-		audio.releasePreviewNote();
+		// https://chatgpt.com/s/t_6acf1d70d8ac819182076bb1860df8cd
+		//audio.releasePreviewNote(); GS 14/10/2026 
+		audio.releasePreviewNote().catch((error) => {
+		  console.error(
+		    '❌ PreviewRelease failed:',
+		    error
+		  );
+		});
 		refresh();
 	
 		return;

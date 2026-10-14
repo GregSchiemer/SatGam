@@ -227,6 +227,7 @@ function getAudioError() {
   return lastError;
 }
 
+/*
 async function releasePreviewNote() {
   const msg = 'i PreviewRelease 0 0.01';
 
@@ -235,6 +236,59 @@ async function releasePreviewNote() {
   });
 
   await requireCsound().inputMessage(msg);
+}
+*/
+
+async function releasePreviewNote() {
+  const msg = 'i "PreviewRelease" 0 0.01';
+
+  console.log('[PREVIEW RELEASE] requested', {
+    msg,
+    csoundReady: !!csound,
+    stage,
+  });
+
+  try {
+    const cs = requireCsound();
+
+	try {
+	  console.log(
+		'[PREVIEW] generation BEFORE:',
+		await cs.getControlChannel('previewNoteGeneration')
+	  );
+	} catch (error) {
+	  console.warn('[PREVIEW] channel read unavailable:', error);
+	}
+
+    console.log('[PREVIEW RELEASE] sending to Csound');
+
+    const result = await cs.inputMessage(msg);
+
+	try {
+	  await new Promise(resolve => setTimeout(resolve, 100));
+	
+	  console.log(
+		'[PREVIEW] generation AFTER:',
+		await cs.getControlChannel('previewNoteGeneration')
+	  );
+	} catch (error) {
+	  console.warn('[PREVIEW] channel read unavailable:', error);
+	}
+
+    console.log('[PREVIEW RELEASE] submitted', {
+      result,
+    });
+
+    return result;
+
+  } catch (error) {
+    console.error(
+      '[PREVIEW RELEASE] ERROR',
+      error
+    );
+
+    throw error;
+  }
 }
 
 async function startConcertAudio({
