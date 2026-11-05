@@ -15,7 +15,7 @@ URL = (
 )
 
 LABEL = (
-    "3 of 3 : Play as Leader"
+    "post-trapani - 3 of 3 : Play as Leader"
 )
 
 OUTPUT = (

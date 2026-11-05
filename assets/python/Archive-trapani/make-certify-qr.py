@@ -8,16 +8,16 @@ PORT = 8000
 
 URL = (
     f"http://{HOST}:{PORT}"
-    "/registration.html"
+    "/certify.html"
 )
 
 LABEL = (
-    "2 of 3 : Register WASM Certificate"
+    "2 of 3 : Certify Csound"
 )
 
 OUTPUT = (
     "assets/qr-images/"
-    "qr-registration.png"
+    "qr-certify.png"
 )
 
 
@@ -29,7 +29,7 @@ def main():
     )
 
     print(
-        f"Registration {path} -> {URL}"
+        f"Certify {path} -> {URL}"
     )
 
 

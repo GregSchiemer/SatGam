@@ -265,7 +265,7 @@ def main() -> None:
         hidden=args.hidden,
     )
 
-    title = f"1 of 3 : Join {args.ssid} Network"
+    title = f"post-trapani - 1 of 3 : Join {args.ssid} Network"
 
     image = make_labelled_qr(
         payload=payload,

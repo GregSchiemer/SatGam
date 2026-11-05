@@ -247,8 +247,8 @@ def main() -> None:
 
     ap.add_argument(
         "--output",
-        default="assets/qr-images/qr-wifi.png",
-        help="Output PNG path (default: assets/qr-images/qr-wifi.png)",
+        default="assets/qr-images/qr-connect.png",
+        help="Output PNG path (default: assets/qr-images/qr-connect.png)",
     )
 
     args = ap.parse_args()

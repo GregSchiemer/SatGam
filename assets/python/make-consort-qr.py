@@ -15,7 +15,7 @@ URL = (
 )
 
 LABEL = (
-    "3 of 3 : Play as Consort"
+    "post-trapani - 3 of 3 : Play as Consort"
 )
 
 OUTPUT = (

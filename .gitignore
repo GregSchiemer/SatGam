@@ -145,10 +145,12 @@ assets/certs/*-key.pem
 assets/certs-archive/
 assets/python/server-backup*.py
 
-.DS_Store
-.DS_Store
-
 assets/backup/PhD-Thesis.pdf
+
+assets/ssl/
+
+.DS_Store
+.DS_Store
 
 __pycache__/
 *.pyc
